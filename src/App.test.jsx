@@ -12,3 +12,8 @@ test('keeps JETSI as an external journal destination', () => {
   render(<MemoryRouter initialEntries={['/journals']}><App /></MemoryRouter>);
   expect(screen.getByRole('link', { name: /visit jetsi/i })).toHaveAttribute('href', 'https://nordeoscholar.com/jetsi');
 });
+
+test('keeps Jurnal Pengmas inside Nordeo', () => {
+  render(<MemoryRouter initialEntries={['/journals']}><App /></MemoryRouter>);
+  expect(screen.getAllByRole('link', { name: /visit jurnal pengmas/i }).at(-1)).toHaveAttribute('href', '/journals/jurnalpengmas');
+});
