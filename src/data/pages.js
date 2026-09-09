@@ -1,0 +1,16 @@
+export const pages = {
+  '/about': ['About Nordeo Scholar', 'Nordeo Scholar is an academic ecosystem that connects research, education, publication, and meaningful collaboration.'],
+  '/books': ['Books', 'Discover books and learning resources created for curious scholars and practitioners.'],
+  '/services': ['Services', 'Publication, research, training, and academic support services for institutions and individuals.'],
+  '/news': ['News', 'Updates, stories, and ideas from the Nordeo Scholar community.'],
+  '/research': ['Research', 'Supporting research that is rigorous, relevant, and ready to create impact.'],
+  '/education': ['Education', 'Learning programs designed to make knowledge practical and accessible.'],
+  '/community-service': ['Community Service', 'Turning expertise into work that strengthens communities.'],
+  '/innovation': ['Innovation', 'Ideas, experiments, and solutions for a changing world.'],
+  '/academic-events': ['Academic Events', 'Conferences, workshops, and conversations for the academic community.'],
+  '/collaboration': ['Collaboration', 'Partner with Nordeo Scholar on research, programs, and publications.'],
+  '/contact': ['Contact', 'Let’s start a thoughtful academic collaboration.'],
+  '/privacy-policy': ['Privacy Policy', 'How we handle information and respect your privacy.'],
+  '/terms-of-use': ['Terms of Use', 'The terms that guide the use of Nordeo Scholar services.'],
+  '/publication-ethics': ['Publication Ethics', 'Our commitment to transparent, responsible scholarly publishing.'],
+};
