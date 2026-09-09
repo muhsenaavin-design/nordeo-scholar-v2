@@ -10,5 +10,6 @@ export default defineConfig({
     pool: 'threads',
     maxWorkers: 1,
     isolate: false,
+    exclude: ['**/.worktrees/**', '**/node_modules/**'],
   },
 });
