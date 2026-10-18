@@ -9,7 +9,7 @@ export default defineConfig({
     setupFiles: './src/test/setup.js',
     pool: 'threads',
     maxWorkers: 1,
-    isolate: false,
+    isolate: true,
     exclude: ['**/.worktrees/**', '**/node_modules/**'],
   },
 });

@@ -18,7 +18,7 @@ export const journals = [
       ['Artikel', '3 paper (in press)'],
       ['Tinjauan', 'Double-blind review'],
     ],
-    indexing: ['Google Scholar', 'GARUDA', 'Crossref', 'ResearchGate', 'Dimensions', 'Neliti'],
+    indexing: ['GARUDA'],
     url: 'https://nordeoscholar.com/journal/jetsi',
     display: 'nordeoscholar.com/journal/jetsi',
     preview: '/assets/journal-jetsi-preview.webp',
@@ -40,7 +40,7 @@ export const journals = [
       'Interdisciplinary Perspectives',
     ],
     facts: [
-      ['e-ISSN', 'Dalam proses'],
+      ['e-ISSN', 'Lihat platform jurnal'],
       ['Jadwal terbit', 'Juni & Desember'],
       ['Tinjauan', 'Double-blind review'],
       ['Akses', 'Open access'],

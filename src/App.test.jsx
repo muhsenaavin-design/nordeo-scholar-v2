@@ -1,7 +1,10 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import App from './App';
+
+// The vendor marquee needs real layout measurements; scripts/check-discovery.js tests it in Chromium.
+vi.mock('./components/vendor/LogoLoop', () => ({ default: ({ logos }) => <div>{logos.map(logo => <a key={logo.href} href={logo.href} aria-label={logo.ariaLabel}>{logo.node}</a>)}</div> }));
 
 test('renders the Nordeo Scholar site header', () => {
   render(<MemoryRouter><App /></MemoryRouter>);
@@ -40,4 +43,27 @@ test('mobile navigation exposes its state and closes with Escape', () => {
   expect(toggle).toHaveAttribute('aria-expanded', 'true');
   fireEvent.keyDown(document, { key: 'Escape' });
   expect(toggle).toHaveAttribute('aria-expanded', 'false');
+});
+
+test('header sections return from a detail page to the landing while keeping the catalog CTA', () => {
+  render(<MemoryRouter initialEntries={['/books']}><App /></MemoryRouter>);
+  const nav = within(screen.getByRole('navigation', { name: /navigasi utama/i }));
+  for (const name of ['About', 'Ecosystem', 'Journals', 'Contact']) {
+    expect(nav.getByRole('link', { name, exact: true })).toHaveAttribute('href', `/#${name.toLowerCase()}`);
+  }
+  expect(nav.getByRole('link', { name: /explore journals/i })).toHaveAttribute('href', '/journals');
+  fireEvent.click(nav.getByRole('link', { name: 'About', exact: true }));
+  expect(screen.getByRole('heading', { level: 1, name: /advancing knowledge/i })).toBeInTheDocument();
+  expect(nav.getByRole('link', { name: 'About', exact: true })).toHaveAttribute('aria-current', 'location');
+});
+
+test('separates verified journal indexing from discovery resources and links official social accounts', () => {
+  render(<MemoryRouter><App /></MemoryRouter>);
+  expect(screen.getByRole('link', { name: /lihat entri garuda/i })).toHaveAttribute('href', 'https://garuda.kemdiktisaintek.go.id/journal/view/48487');
+  expect(screen.getByRole('link', { name: /instagram @nordeoscholar/i })).toHaveAttribute('href', 'https://www.instagram.com/nordeoscholar/');
+  expect(screen.queryByText(/platform indeksasi/i)).not.toBeInTheDocument();
+  expect(screen.queryByText(/status indeksasi berbeda/i)).not.toBeInTheDocument();
+  expect(screen.queryByText(/Data GARUDA: 19 Oktober 2026/i)).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /jeda animasi/i })).not.toBeInTheDocument();
+  expect(within(screen.getByRole('contentinfo')).queryByRole('button', { name: /animasi/i })).not.toBeInTheDocument();
 });

@@ -13,6 +13,17 @@ npm run dev
 
 `npm run test:run` runs the UI checks and `npm run build` produces the production site.
 
+To review the production build locally:
+
+```bash
+npm run build
+npx vite preview --host 127.0.0.1 --port 5180 --strictPort
+```
+
+Open `http://127.0.0.1:5180`. The same browser check can verify this build: open that address in a Playwright CLI session, then run `scripts/check-landing.js` in that session. The check uses the current page's origin.
+
+Generated editorial images live in `public/assets/generated/`. Their subjects are illustrative; actual journal previews and covers remain separate. Fonts load from Google Fonts and Fontshare, with local fallback families.
+
 `py -3 scripts/prepare-assets.py` regenerates transparent logos and optimized WebP images from the preserved originals (requires Pillow).
 
 For browser checks, start `npm run dev -- --host 127.0.0.1 --port 5177`, then:
