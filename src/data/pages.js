@@ -1,8 +1,8 @@
 export const pages = {
   '/about': ['About Nordeo Scholar', 'Nordeo Scholar is an academic ecosystem that connects research, education, publication, and meaningful collaboration.'],
-  '/books': ['Books', 'Discover books and learning resources created for curious scholars and practitioners.'],
-  '/services': ['Services', 'Publication, research, training, and academic support services for institutions and individuals.'],
-  '/news': ['News', 'Updates, stories, and ideas from the Nordeo Scholar community.'],
+  '/books': ['Books Publishing — Coming Soon', 'Ekosistem penerbitan buku akademik Nordeo sedang dikembangkan. Katalog dan informasi penerbitan akan tersedia setelah layanan diluncurkan. Untuk pertanyaan pengembangan atau kolaborasi, hubungi info@nordeoscholar.com.'],
+  '/services': ['Academic Training — Coming Soon', 'Program pelatihan akademik Nordeo sedang dikembangkan. Jadwal, materi, dan pendaftaran belum tersedia. Untuk pertanyaan atau peluang kolaborasi, hubungi info@nordeoscholar.com.'],
+  '/news': ['Media & News Publishing — Coming Soon', 'Kanal media dan berita akademik Nordeo sedang dikembangkan. Artikel dan pembaruan akan ditampilkan setelah kanal diluncurkan.'],
   '/research': ['Research', 'Supporting research that is rigorous, relevant, and ready to create impact.'],
   '/education': ['Education', 'Learning programs designed to make knowledge practical and accessible.'],
   '/community-service': ['Community Service', 'Turning expertise into work that strengthens communities.'],
@@ -10,7 +10,7 @@ export const pages = {
   '/academic-events': ['Academic Events', 'Conferences, workshops, and conversations for the academic community.'],
   '/collaboration': ['Collaboration', 'Partner with Nordeo Scholar on research, programs, and publications.'],
   '/contact': ['Contact', 'Let’s start a thoughtful academic collaboration.'],
-  '/privacy-policy': ['Privacy Policy', 'How we handle information and respect your privacy.'],
-  '/terms-of-use': ['Terms of Use', 'The terms that guide the use of Nordeo Scholar services.'],
-  '/publication-ethics': ['Publication Ethics', 'Our commitment to transparent, responsible scholarly publishing.'],
+  '/privacy-policy': ['Privasi Website', 'Website ini menyediakan informasi publik dan tautan ke platform jurnal. Font dimuat melalui Google Fonts; penyedia font dapat menerima informasi teknis koneksi. Saat Anda mengikuti tautan eksternal, kebijakan privasi platform tujuan berlaku. Bila Anda mengirim email kepada Nordeo, alamat dan isi pesan diterima tim untuk menanggapi pertanyaan Anda. Pertanyaan mengenai privasi website dapat disampaikan ke info@nordeoscholar.com.'],
+  '/terms-of-use': ['Penggunaan Website', 'Website ini membantu Anda menemukan informasi perusahaan, ekosistem, dan platform jurnal Nordeo. Layanan berlabel Coming Soon masih dalam pengembangan. Persyaratan akun, pengiriman naskah, biaya, dan proses editorial mengikuti ketentuan pada platform jurnal yang Anda pilih. Sebelum mengirim naskah, baca panduan dan kebijakan jurnal tujuan. Untuk klarifikasi informasi atau melaporkan tautan yang bermasalah, hubungi info@nordeoscholar.com.'],
+  '/publication-ethics': ['Panduan Etika Publikasi', 'Persyaratan etika, kepenulisan, penelaahan, dan pengiriman naskah mengikuti kebijakan masing-masing jurnal. Halaman ini membantu Anda menemukan sumber kebijakan; bukan pengganti dokumen kebijakan jurnal.'],
 };

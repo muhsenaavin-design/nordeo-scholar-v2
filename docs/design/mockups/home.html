@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nordeo Scholar Publishing — Redesign Mockup (Homepage)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600;7..72,700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --nordeo:#24586e; --nordeo-dark:#1f4b5e; --nordeo-deep:#173d4d; --nordeo-soft:#3f6b7e;
+    --gold:#ffd21a; --gold-dark:#e7b900; --ink:#17313c; --muted:#667984;
+    --paper:#f7f8f7; --line:#dfe7ea; --live:#1a7f5a; --soon:#b07d00;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"Inter",system-ui,sans-serif;color:var(--ink);background:#fff;line-height:1.7;-webkit-font-smoothing:antialiased}
+  .wrap{width:min(92%,1180px);margin:0 auto}
+  h1,h2,h3,.serif{font-family:"Literata",Georgia,serif}
+  a{text-decoration:none;color:inherit}
+  img{display:block;max-width:100%}
+
+  /* ---------- header ---------- */
+  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .hrow{display:flex;align-items:center;justify-content:space-between;height:78px;gap:24px}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.02em}
+  .brand .mark{width:38px;height:38px;border-radius:9px;background:var(--nordeo-deep);display:grid;place-items:center;color:var(--gold);font-family:"Literata",serif;font-size:20px;font-weight:700}
+  .brand .txt{font-size:13px;line-height:1.25}
+  .brand .txt small{display:block;font-weight:600;font-size:9.5px;letter-spacing:.24em;color:var(--nordeo-soft)}
+  nav{display:flex;gap:24px;font-size:13px;font-weight:700}
+  nav a{color:var(--ink);display:flex;align-items:center;gap:5px}
+  nav a:hover{color:var(--nordeo)}
+  nav .caret{width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);margin-top:-3px}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:14px;border-radius:8px;padding:13px 21px;border:0;cursor:pointer;transition:.18s}
+  .btn.gold{background:var(--gold);color:var(--nordeo-deep)}
+  .btn.gold:hover{background:#ffe05b;transform:translateY(-2px)}
+  .btn.line-light{border:1px solid rgba(255,255,255,.4);color:#fff;background:transparent}
+  .btn.line-light:hover{background:rgba(255,255,255,.1)}
+  .btn.line{border:1px solid var(--nordeo);color:var(--nordeo);background:transparent}
+  .btn.line:hover{background:var(--nordeo);color:#fff}
+  .btn.small{padding:9px 16px;font-size:12.5px}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;background:var(--nordeo-deep);color:#fff;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(900px 420px at 85% 15%, rgba(255,210,26,.12), transparent 60%),
+      radial-gradient(700px 500px at 10% 90%, rgba(63,107,126,.5), transparent 65%),
+      repeating-linear-gradient(115deg, rgba(255,255,255,.035) 0 1px, transparent 1px 12px),
+      repeating-linear-gradient(25deg, rgba(255,255,255,.025) 0 1px, transparent 1px 14px);
+  }
+  .hero .wrap{position:relative;display:grid;grid-template-columns:1.3fr .7fr;gap:56px;align-items:center;padding:96px 0 88px}
+  .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.26em;color:var(--gold);text-transform:uppercase;margin-bottom:18px}
+  .hero h1{font-size:clamp(36px,3.9vw,56px);line-height:1.1;font-weight:700;letter-spacing:-.01em}
+  .hero h1 em{font-style:normal;color:var(--gold)}
+  .hero p.lead{margin-top:22px;max-width:560px;color:rgba(255,255,255,.82);font-size:17px}
+  .hero .cta{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap}
+  .hero .visual{position:relative}
+  .hero .visual .photo{width:100%;height:440px;border-radius:16px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.35);position:relative}
+  .photo .ph-bg{position:absolute;inset:0;background:
+    linear-gradient(160deg,#0e2c38 0%,#1c4a5d 45%,#2b6a80 100%);
+  }
+  .photo .ph-grain{position:absolute;inset:0;background:
+    radial-gradient(420px 260px at 30% 72%, rgba(255,210,26,.16), transparent 60%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 2px, transparent 2px 46px);
+    mix-blend-mode:screen}
+  .photo .ph-caption{position:absolute;left:0;right:0;bottom:0;padding:44px 26px 20px;background:linear-gradient(transparent, rgba(10,25,32,.85));font-size:12px;color:rgba(255,255,255,.8)}
+  .photo .ph-caption b{font-family:"Literata",serif;font-size:15px;display:block;color:#fff;font-weight:600}
+  .floating-badge{position:absolute;right:-18px;top:30px;background:#fff;color:var(--ink);border-radius:12px;padding:14px 18px;box-shadow:0 18px 40px rgba(0,0,0,.28);display:flex;gap:12px;align-items:center}
+  .floating-badge .dot{width:34px;height:34px;border-radius:50%;background:rgba(26,127,90,.12);display:grid;place-items:center;color:var(--live);font-weight:800;font-size:15px}
+  .floating-badge small{display:block;font-size:10.5px;color:var(--muted);font-weight:600}
+  .floating-badge b{font-size:12.5px}
+
+  /* ---------- audience strip ---------- */
+  .audience{border-bottom:1px solid var(--line);background:#fff}
+  .audience .wrap{display:flex;align-items:center;gap:18px;padding:20px 0;flex-wrap:wrap}
+  .audience .lbl{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .chip{border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--nordeo);transition:.15s;background:#fff}
+  .chip:hover{border-color:var(--nordeo);background:var(--paper)}
+
+  /* ---------- sections ---------- */
+  section{padding:92px 0}
+  .sec-head{max-width:760px;margin:0 auto 52px;text-align:center}
+  .sec-head .kicker{font-size:12px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--nordeo-soft)}
+  .sec-head h2{font-size:clamp(30px,3.6vw,44px);font-weight:700;letter-spacing:-.01em;line-height:1.2;margin-top:10px}
+  .sec-head p{margin-top:14px;color:var(--muted)}
+
+  /* ecosystem */
+  .eco{background:var(--paper)}
+  .eco-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  .eco-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:26px 24px 22px;display:flex;flex-direction:column;gap:12px;transition:.2s;position:relative}
+  .eco-card:hover{transform:translateY(-4px);box-shadow:0 16px 45px rgba(23,61,77,.12);border-color:rgba(36,88,110,.35)}
+  .eco-icon{width:44px;height:44px;border-radius:10px;background:rgba(36,88,110,.08);display:grid;place-items:center;color:var(--nordeo)}
+  .eco-card h3{font-size:19px;font-weight:600}
+  .eco-card p{font-size:13.5px;color:var(--muted);flex:1}
+  .eco-card .go{font-size:12.5px;font-weight:800;color:var(--nordeo)}
+  .badge{position:absolute;top:18px;right:18px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:4px 10px}
+  .badge.live{background:rgba(26,127,90,.12);color:var(--live)}
+  .badge.soon{background:rgba(176,125,0,.12);color:var(--soon)}
+
+  /* featured journal */
+  .featured .panel{display:grid;grid-template-columns:340px 1fr;gap:44px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:40px;align-items:center}
+  .cover{height:380px;border-radius:12px;background:linear-gradient(165deg,var(--nordeo-deep),var(--nordeo) 60%,var(--nordeo-soft));position:relative;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:26px}
+  .cover::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 9px);mix-blend-mode:screen}
+  .cover .j-top{font-size:10px;letter-spacing:.22em;font-weight:800;color:var(--gold)}
+  .cover .j-name{font-family:"Literata",serif;font-size:44px;font-weight:700;line-height:1;position:relative;z-index:1}
+  .cover .j-sub{font-size:11px;color:rgba(255,255,255,.75);position:relative;z-index:1}
+  .meta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .meta{font-size:11.5px;font-weight:600;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:5px 10px}
+  .idx-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+  .idx{font-size:10.5px;font-weight:700;letter-spacing:.05em;color:#5b6b74;border:1px dashed #c6d2d8;border-radius:999px;padding:4px 12px;background:#fbfcfc}
+  .ext-hint{font-size:11px;color:var(--muted);margin-top:10px;display:flex;align-items:center;gap:6px}
+
+  /* roadmap */
+  .roadmap{background:var(--nordeo-deep);color:#fff}
+  .roadmap .sec-head p{color:rgba(255,255,255,.7)}
+  .roadmap .sec-head .kicker{color:var(--gold)}
+  .timeline{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
+  .timeline::before{content:"";position:absolute;left:2%;right:2%;top:11px;height:2px;background:linear-gradient(90deg,var(--gold),rgba(255,255,255,.25))}
+  .milestone{text-align:center;position:relative;padding-top:34px}
+  .milestone .dot{position:absolute;top:3px;left:50%;transform:translateX(-50%);width:18px;height:18px;border-radius:50%;background:var(--nordeo-deep);border:3px solid var(--gold)}
+  .milestone.done .dot{background:var(--gold)}
+  .milestone small{display:block;font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--gold);text-transform:uppercase}
+  .milestone b{font-size:14px;font-weight:600;font-family:"Literata",serif}
+  .milestone span{display:block;font-size:11.5px;color:rgba(255,255,255,.6);margin-top:2px}
+
+  /* publications */
+  .pubs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  .pub{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;transition:.2s}
+  .pub:hover{transform:translateY(-5px);box-shadow:0 16px 45px rgba(23,61,77,.12)}
+  .pub .cap{height:130px;background:linear-gradient(140deg,var(--nordeo) 0%, var(--nordeo-deep) 100%);display:grid;place-items:center;color:#fff}
+  .pub:nth-child(2) .cap{background:linear-gradient(140deg,#2b6a80 0%, #1c4a5d 100%)}
+  .pub:nth-child(3) .cap{background:linear-gradient(140deg,#3f6b7e 0%, #24586e 100%)}
+  .pub .body{padding:24px}
+  .pub h3{font-size:20px;font-weight:600}
+  .pub p{font-size:13.5px;color:var(--muted);margin:8px 0 14px}
+  .pub .go{font-size:12.5px;font-weight:800;color:var(--nordeo)}
+
+  /* cta */
+  .cta-band{background:linear-gradient(120deg,var(--nordeo) 0%, var(--nordeo-deep) 100%);color:#fff;text-align:center}
+  .cta-band h2{font-size:clamp(30px,3.6vw,44px);font-weight:700;letter-spacing:-.01em}
+  .cta-band p{margin:14px auto 28px;max-width:640px;color:rgba(255,255,255,.78)}
+
+  /* footer */
+  footer{background:#123745;color:#fff;padding:58px 0 22px;font-size:13.5px}
+  .fgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:36px;padding-bottom:40px}
+  .fgrid h4{font-size:14.5px;margin-bottom:14px;font-weight:700}
+  .fgrid ul{list-style:none}
+  .fgrid li{margin:7px 0}
+  .fgrid a{color:rgba(255,255,255,.6)}
+  .fgrid a:hover{color:var(--gold)}
+  .fgrid p{color:rgba(255,255,255,.55);max-width:330px;font-size:12.5px;margin-top:14px}
+  .fbrand{display:flex;align-items:center;gap:12px;font-weight:800}
+  .fbrand .mark{width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.08);display:grid;place-items:center;color:var(--gold);font-family:"Literata",serif;font-size:19px;font-weight:700}
+  .fbottom{display:flex;justify-content:space-between;gap:16px;border-top:1px solid rgba(255,255,255,.1);padding-top:18px;font-size:11.5px;color:rgba(255,255,255,.45);flex-wrap:wrap}
+  .socials{display:flex;gap:10px;margin-top:16px}
+  .socials span{width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.18);display:grid;place-items:center;color:rgba(255,255,255,.7);font-size:11px;font-weight:700}
+
+  @media (max-width:1024px){
+    .hero .wrap{grid-template-columns:1fr;padding:72px 0}
+    .eco-grid{grid-template-columns:repeat(2,1fr)}
+    .featured .panel{grid-template-columns:1fr;padding:28px}
+    .pubs-grid{grid-template-columns:1fr 1fr}
+    .fgrid{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:640px){
+    nav{display:none}
+    .eco-grid,.pubs-grid,.fgrid{grid-template-columns:1fr}
+    .timeline{grid-template-columns:1fr 1fr;row-gap:26px}
+    .timeline::before{display:none}
+    .floating-badge{right:12px;left:auto}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hrow">
+    <a class="brand" href="#">
+      <span class="mark">N</span>
+      <span class="txt">NORDEO<small>SCHOLAR PUBLISHING</small></span>
+    </a>
+    <nav>
+      <a href="#">About <span class="caret"></span></a>
+      <a href="#">Our Journals <span class="caret"></span></a>
+      <a href="#">Books Publishing</a>
+      <a href="#">Services</a>
+      <a href="#">News</a>
+      <a href="#">Contact</a>
+    </nav>
+    <a class="btn gold small" href="#">Submit Manuscript</a>
+  </div>
+</header>
+
+<section class="hero" style="padding:0">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Academic Publishing &amp; Research Support</p>
+      <h1>Advancing Knowledge.<br /><em>Creating Global Impact.</em></h1>
+      <p class="lead">Nordeo Scholar Publishing is an academic publishing and research support company — scholarly publishing, research consulting, academic training, and knowledge dissemination in one integrated ecosystem.</p>
+      <div class="cta">
+        <a class="btn gold" href="#">Explore Our Ecosystem →</a>
+        <a class="btn line-light" href="#">Our Story</a>
+      </div>
+    </div>
+    <div class="visual">
+      <div class="photo">
+        <div class="ph-bg"></div>
+        <div class="ph-grain"></div>
+        <div class="ph-caption"><b>Where rigorous research meets global reach</b>Editorial guidance · Peer review · Open knowledge</div>
+      </div>
+      <div class="floating-badge">
+        <span class="dot">✓</span>
+        <span><small>JOURNALS ECOSYSTEM</small><b>JETSI Vol. 1 No. 1 — Live</b></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="audience">
+  <div class="wrap">
+    <span class="lbl">I am a…</span>
+    <a class="chip" href="#">Author</a>
+    <a class="chip" href="#">Reviewer</a>
+    <a class="chip" href="#">Reader</a>
+    <a class="chip" href="#">Institution</a>
+    <a class="chip" href="#">Partner</a>
+  </div>
+</div>
+
+<section class="eco">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">Our Ecosystem</p>
+      <h2>Publishing Knowledge. Creating Impact.</h2>
+      <p>Four business ecosystems, one integrated gateway — connecting corporate information, publications, services, and platforms.</p>
+    </div>
+    <div class="eco-grid">
+      <article class="eco-card">
+        <span class="badge live">Live</span>
+        <span class="eco-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5V6a2 2 0 0 1 2-2h13v15.5M4 19.5A2.5 2.5 0 0 1 6.5 17H19v2.5H6.5A2.5 2.5 0 0 0 4 22M8 8h7M8 11.5h5"/></svg></span>
+        <h3>Journals Publishing</h3>
+        <p>Scholarly journals supporting the dissemination of high-quality academic research.</p>
+        <a class="go" href="#">Explore Journals →</a>
+      </article>
+      <article class="eco-card">
+        <span class="badge soon">Coming Soon</span>
+        <span class="eco-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/><path d="M12 7v6M9.5 9.5H15"/></svg></span>
+        <h3>Books Publishing</h3>
+        <p>Academic books, monographs, textbooks, and research-based publications.</p>
+        <a class="go" href="#">Explore Books →</a>
+      </article>
+      <article class="eco-card">
+        <span class="badge soon">Coming Soon</span>
+        <span class="eco-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h13v12H6a2 2 0 0 1-2-2zM17 9h3v9h-3"/><path d="M8 10h5M8 13h3"/></svg></span>
+        <h3>Media &amp; News</h3>
+        <p>Knowledge dissemination through research, education, innovation, and academic events.</p>
+        <a class="go" href="#">Explore News →</a>
+      </article>
+      <article class="eco-card">
+        <span class="badge soon">Coming Soon</span>
+        <span class="eco-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 4 2 9l10 5 10-5zM6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg></span>
+        <h3>Academic Training</h3>
+        <p>Research and academic development programs for researchers and institutions.</p>
+        <a class="go" href="#">Explore Services →</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="featured">
+  <div class="wrap">
+    <div class="sec-head" style="margin-bottom:40px">
+      <p class="kicker">Featured Journal</p>
+      <h2>JETSI</h2>
+      <p>Journal of Engineering, Technology and Science Integration — open for submissions.</p>
+    </div>
+    <div class="panel">
+      <div class="cover">
+        <p class="j-top">NORDEO SCHOLAR JOURNAL</p>
+        <div>
+          <p class="j-name">JETSI</p>
+          <p class="j-sub">Journal of Engineering, Technology and Science Integration · Vol. 1 No. 1, 2026</p>
+        </div>
+      </div>
+      <div>
+        <h3 class="serif" style="font-size:26px;font-weight:600">Publish rigorous engineering &amp; science research with us</h3>
+        <p style="color:var(--muted);margin-top:10px">Peer-reviewed, open access, and supported by editorial guidance — from manuscript screening to global dissemination.</p>
+        <div class="meta-row">
+          <span class="meta">e-ISSN 0000-0000</span>
+          <span class="meta">p-ISSN 0000-0000</span>
+          <span class="meta">DOI ready</span>
+          <span class="meta">Open Access</span>
+        </div>
+        <div class="idx-row">
+          <span class="idx">Google Scholar</span>
+          <span class="idx">Garuda</span>
+          <span class="idx">SINTA</span>
+          <span class="idx">Scopus — roadmap</span>
+        </div>
+        <div style="margin-top:26px;display:flex;gap:12px;flex-wrap:wrap">
+          <a class="btn gold" href="#">Submit via OJS platform ↗</a>
+          <a class="btn line" href="#">Journal Profile</a>
+        </div>
+        <p class="ext-hint">↗ Opens the journal's OJS platform in a new tab</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="roadmap">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">Indexing Roadmap</p>
+      <h2>From local credibility to global reach</h2>
+      <p>Our publication and indexing journey toward becoming a trusted academic publisher.</p>
+    </div>
+    <div class="timeline">
+      <div class="milestone done"><span class="dot"></span><small>2026</small><b>ISSN &amp; Google Scholar</b><span>Metadata completion</span></div>
+      <div class="milestone"><span class="dot"></span><small>2027</small><b>Garuda</b><span>National repository</span></div>
+      <div class="milestone"><span class="dot"></span><small>2028</small><b>SINTA</b><span>Accreditation target</span></div>
+      <div class="milestone"><span class="dot"></span><small>2032+</small><b>DOI &amp; Reputable Index</b><span>Crossref, DOAJ</span></div>
+      <div class="milestone"><span class="dot"></span><small>2045</small><b>Scopus</b><span>Global recognition</span></div>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--paper)">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">Our Publications</p>
+      <h2>Scholarly Knowledge Portfolio</h2>
+      <p>An integrated publication ecosystem designed to support researchers and academic communities.</p>
+    </div>
+    <div class="pubs-grid">
+      <article class="pub">
+        <div class="cap"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 19.5V6a2 2 0 0 1 2-2h13v15.5M4 19.5A2.5 2.5 0 0 1 6.5 17H19v2.5H6.5A2.5 2.5 0 0 0 4 22"/></svg></div>
+        <div class="body">
+          <h3 class="serif">Academic Journals</h3>
+          <p>Peer-reviewed journals in engineering, technology, social impact, and interdisciplinary studies.</p>
+          <a class="go" href="#">View Journal Portfolio →</a>
+        </div>
+      </article>
+      <article class="pub">
+        <div class="cap"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/></svg></div>
+        <div class="body">
+          <h3 class="serif">Nordeo Scholar Books</h3>
+          <p>Academic books, monographs, textbooks, and research-based publications.</p>
+          <a class="go" href="#">Explore Books →</a>
+        </div>
+      </article>
+      <article class="pub">
+        <div class="cap"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 4 2 9l10 5 10-5zM6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg></div>
+        <div class="body">
+          <h3 class="serif">Research &amp; Academic Services</h3>
+          <p>Research consulting, academic training, community service, and innovation support.</p>
+          <a class="go" href="#">Explore Services →</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap">
+    <h2>Let's Advance Knowledge Together</h2>
+    <p>Partner with Nordeo Scholar Publishing to publish, develop, and disseminate high-quality scholarly knowledge.</p>
+    <a class="btn gold" href="#">Start a Collaboration →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div>
+        <div class="fbrand"><span class="mark">N</span> NORDEO SCHOLAR</div>
+        <p>Academic Publishing &amp; Research Support. Advancing knowledge through scholarly publishing, research, education, and collaboration.</p>
+        <div class="socials"><span>f</span><span>ig</span><span>tt</span></div>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Nordeo</a></li>
+          <li><a href="#">Services</a></li>
+          <li><a href="#">News</a></li>
+          <li><a href="#">Collaboration</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Publications</h4>
+        <ul>
+          <li><a href="#">Journals</a></li>
+          <li><a href="#">Books</a></li>
+          <li><a href="#">JETSI</a></li>
+          <li><a href="#">Pengmas Journal</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Policies</h4>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Publication Ethics</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="fbottom">
+      <span>© 2026 Nordeo Scholar Publishing. All rights reserved.</span>
+      <span>Academic Publishing • Research Support • Knowledge Dissemination</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

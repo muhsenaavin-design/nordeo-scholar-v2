@@ -8,3 +8,8 @@ __MACOSX/
 /nordeo-scholar-v2/
 .superpowers/
 .worktrees/
+.vercel
+output/
+.playwright-cli/
+.commandcode/
+app/
