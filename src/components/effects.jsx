@@ -76,8 +76,8 @@ export function HeroImage({ src, alt, width, height }) {
   const ref = useRef(null);
   const { reduced } = useAnimationPreference();
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 70]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1.04, 1.16]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, 24]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1.04, 1.1]);
   return <motion.img ref={ref} className="hero-image" src={src} alt={alt} width={width} height={height} fetchPriority="high" style={reduced ? undefined : { y, scale }} />;
 }
 

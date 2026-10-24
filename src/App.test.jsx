@@ -67,3 +67,20 @@ test('separates verified journal indexing from discovery resources and links off
   expect(screen.queryByRole('button', { name: /jeda animasi/i })).not.toBeInTheDocument();
   expect(within(screen.getByRole('contentinfo')).queryByRole('button', { name: /animasi/i })).not.toBeInTheDocument();
 });
+
+test('journal finder filters audited JETSI articles and handles the JIEL call for papers', () => {
+  render(<MemoryRouter><App /></MemoryRouter>);
+  const search = screen.getByRole('searchbox', { name: /cari nama jurnal/i });
+  fireEvent.change(search, { target: { value: 'Shopee' } });
+  expect(screen.getByText('1 jurnal · 2 artikel')).toBeInTheDocument();
+  expect(screen.getAllByRole('link', { name: /shopee/i })).toHaveLength(2);
+  fireEvent.click(screen.getByRole('button', { name: /Hapus/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^JIEL/ }));
+  expect(screen.getByRole('heading', { name: /jiel membuka ruang untuk naskah pertama/i })).toBeInTheDocument();
+});
+
+test('journal finder exposes every audited JETSI article on the journals page', () => {
+  render(<MemoryRouter initialEntries={['/journals']}><App /></MemoryRouter>);
+  expect(screen.getByText('14 artikel · JETSI')).toBeInTheDocument();
+  expect(screen.getAllByRole('heading', { level: 4 })).toHaveLength(14);
+});

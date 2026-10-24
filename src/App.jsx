@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router';
 import { externalLinks } from './config/links';
 import { pages } from './data/pages';
-import { journals } from './data/journals';
 import { officialSocial } from './data/discovery';
 import Discovery from './components/Discovery';
+import JournalFinder from './components/JournalFinder';
 import { MotionNotice, MotionPreferenceProvider } from './components/motion-preference';
-import { BlurText, CountUp, HeroImage, Magnet, PageFade, Parallax, ScrollProgress, SpotlightCard, useSectionNavigation } from './components/effects';
+import { BlurText, CountUp, HeroImage, Magnet, PageFade, Parallax, ScrollProgress, useSectionNavigation } from './components/effects';
 
 function Arrow({ diagonal = false }) {
   return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className={diagonal ? 'arrow arrow-diagonal' : 'arrow'}><path d={diagonal ? 'M6 18 18 6M6 6h12v12' : 'M4 12h15m-6-6 6 6-6 6'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
@@ -79,49 +79,28 @@ function Layout({ children }) {
   </>;
 }
 
-function JournalCard({ journal, delay = 0 }) {
-  return (
-    <SpotlightCard className="journal-card" data-reveal style={{ '--reveal-delay': `${delay}ms` }}>
-      <div className="journal-frame">
-        <span className="frame-bar" aria-hidden="true"><i /><i /><i /><b>{journal.display}</b></span>
-        <img src={journal.preview} alt={journal.previewAlt} width="1200" height="900" loading="lazy" />
-        {journal.cover && <img className="journal-cover" src={journal.cover} alt={journal.coverAlt} width="180" height="255" loading="lazy" />}
-      </div>
-      <div className="journal-card-body">
-        <p className="journal-badge" lang="en">{journal.short}</p>
-        <p className="card-category" lang="en">{journal.field}</p>
-        <h3 lang="en">{journal.name}</h3>
-        <p className="journal-summary">{journal.summary}</p>
-        <ul className="chip-list">{journal.scope.map((item) => <li key={item} lang="en">{item}</li>)}</ul>
-        <dl className="journal-facts">{journal.facts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
-        {journal.indexing.length > 0 && <p className="journal-indexing">Terindeks: {journal.indexing.join(' · ')}</p>}
-        <div className="journal-actions">
-          <a className="button button-gold" href={journal.url}>Visit {journal.short} <Arrow diagonal /></a>
-          <span className="journal-note">Terbuka di platform jurnal (OJS).</span>
-        </div>
-      </div>
-    </SpotlightCard>
-  );
-}
-
 function Home() {
   return <>
     <section className="hero" aria-labelledby="hero-heading">
-      <div className="hero-copy">
-        <p className="eyebrow"><span className="gold-line" />NORDEO SCHOLAR PUBLISHING</p>
-        <MotionNotice /><h1 id="hero-heading" lang="en"><span className="hero-line"><span>Advancing</span></span>{' '}<span className="hero-line"><span>knowledge.</span></span>{' '}<em className="hero-line"><span>Connecting research.</span></em></h1>
-        <p className="hero-description"><BlurText text="Dua jurnal peer-review, satu ekosistem akademik. Jelajahi JETSI dan JIEL, temukan ruang publikasi Anda, dan tumbuh bersama komunitas Nordeo." /></p>
-        <div className="hero-actions"><Magnet><Link to="/journals" className="button button-gold">Explore Journals <span className="button-arrow"><Arrow diagonal /></span></Link></Magnet><Link to="/#ecosystem" className="text-link">Jelajahi Ekosistem <Arrow /></Link></div>
-        <div className="hero-facts"><div><strong>02</strong><span>Academic journals</span></div><div><strong>04</strong><span>Connected ecosystems</span></div><div><strong lang="en">Open</strong><span>Access to knowledge</span></div></div>
-      </div>
       <div className="hero-visual">
-        <figure className="hero-photo"><HeroImage src="/assets/generated/hero-editorial-v1.webp" alt="Ilustrasi buku terbuka dengan lembar kertas melayang, simbol berbagi pengetahuan" width="1600" height="1195" /><span className="photo-topline">KNOWLEDGE, IN MOTION.</span><figcaption className="hero-caption"><span className="eyebrow">RESEARCH / PUBLISHING / CONNECTION</span><p lang="en">Ideas deserve<br /><em>a wider world.</em></p><Link to="/about" className="text-link">Discover Nordeo <Arrow diagonal /></Link></figcaption></figure>
-        <span className="hero-art-label" aria-hidden="true">KNOWLEDGE GROWS WHEN SHARED</span>
+        <HeroImage src="/assets/generated/hero-library-v2.webp" alt="Perpustakaan megah bernuansa teal dengan buku terbuka dan lembaran melayang dalam cahaya keemasan" width="1672" height="940" />
+      </div>
+      <div className="hero-copy container">
+        <p className="eyebrow" lang="en">Academic Publishing &amp; Research Support</p>
+        <MotionNotice /><h1 id="hero-heading" lang="en"><span>Advancing Knowledge.</span>{' '}<span className="hero-heading-accent">Creating Global Impact.</span></h1>
+        <p className="hero-description" lang="en"><BlurText text="Nordeo Scholar Publishing is an academic publishing and research support company dedicated to advancing scientific knowledge through scholarly publishing, research consulting, academic training, and knowledge dissemination." /></p>
+        <div className="hero-actions"><Magnet><Link to="/journals" className="button button-gold">Explore Journals <span className="button-arrow"><Arrow diagonal /></span></Link></Magnet><Link to="/#ecosystem" className="text-link">Jelajahi Ekosistem <Arrow /></Link></div>
+      </div>
+      <div className="hero-footer container">
+        <p className="hero-signature" lang="en">Knowledge grows<br /><em>when shared.</em></p>
+        <div className="hero-facts"><div><strong>02</strong><span>Academic journals</span></div><div><strong>04</strong><span>Connected ecosystems</span></div><div><strong lang="en">Open</strong><span>Access to knowledge</span></div></div>
       </div>
     </section>
     <nav className="quick-access container" aria-label="Jalur cepat"><div className="quick-intro" data-reveal><span className="eyebrow">START EXPLORING</span><p>Apa yang ingin<br />{' '}Anda temukan?</p></div>{[['01', 'Cari Jurnal', 'Temukan ruang untuk riset Anda', '/journals'], ['02', 'Panduan Penulis', 'Kenali langkah publikasi', '/author-guide'], ['03', 'Kerja Sama', 'Mulai percakapan yang berarti', '/contact']].map(([number, title, copy, to], index) => <Link to={to} key={title} data-reveal style={{ '--reveal-delay': `${index * 70}ms` }}><span className="quick-number">{number}</span><div><strong>{title}</strong><span>{copy}</span></div><Arrow diagonal /></Link>)}</nav>
     <Discovery />
-    <section className="journals-section section-space container" id="journals" aria-labelledby="journals-heading"><div className="section-heading" data-reveal><div><p className="eyebrow">01 / OUR JOURNALS</p><h2 id="journals-heading" lang="en">Two journals.<br />{' '}<em>Open to the world.</em></h2></div><p>JETSI dan JIEL dikelola melalui platform jurnal Nordeo dengan tinjauan double-blind dan akses terbuka. Buka platformnya untuk membaca terbitan atau mengirim naskah.</p></div><div className="journal-grid">{journals.map((journal, index) => <JournalCard key={journal.id} journal={journal} delay={index * 90} />)}</div></section>
+    <div className="journals-section section-space container" id="journals">
+      <JournalFinder limit={6} />
+    </div>
     <section className="ecosystem-section section-space container" id="ecosystem" aria-labelledby="ecosystem-heading"><div className="section-heading" data-reveal><div><p className="eyebrow">02 / THE NORDEO ECOSYSTEM</p><h2 id="ecosystem-heading" lang="en">Connected by knowledge.<br />{' '}<em>Built for possibility.</em></h2></div><p>Satu pintu menuju publikasi dan pengembangan akademik. Kenali layanan yang tersedia dan arah yang sedang kami bangun.</p></div><div className="ecosystem-grid">{ecosystems.map(([number, title, category, description, to, image, alt, status], index) => <article className="ecosystem-card" key={title} data-reveal style={{ '--reveal-delay': `${index * 80}ms` }}><div className="ecosystem-photo"><img src={image} alt={alt} width="1600" height="1195" loading="lazy" /><span className={`status ${status === 'Tersedia' ? 'status-active' : ''}`}>{status}</span></div><div className="ecosystem-card-copy"><span className="card-number">{number}</span><p className="card-category" lang="en">{category}</p><h3>{title}</h3><p>{description}</p><Link to={to} className="text-link">{status === 'Tersedia' ? 'Lihat Jurnal' : 'Lihat Rencana'} <Arrow diagonal /></Link></div></article>)}</div></section>
     <section className="publishing-section section-space container" aria-labelledby="publishing-heading"><div className="section-heading" data-reveal><div><p className="eyebrow">03 / YOUR PUBLISHING JOURNEY</p><h2 id="publishing-heading" lang="en">Good research.<br />{' '}<em>A clear next step.</em></h2></div><p>Mulai dari jurnal yang tepat. Website Nordeo membantu Anda menemukan arah, lalu melanjutkan proses di platform jurnal terkait.</p></div><ol className="publishing-steps"><li data-reveal><span>01</span><h3>Temukan jurnal Anda</h3><p>Bandingkan ruang lingkup JETSI dan JIEL, lalu pilih yang paling dekat dengan riset Anda.</p><Link to="/journals">Cari Jurnal <Arrow /></Link></li><li data-reveal style={{ '--reveal-delay': '90ms' }}><span>02</span><h3>Kenali panduannya</h3><p>Pelajari ketentuan penulisan dan kebijakan publikasi sebelum menyiapkan naskah.</p><Link to="/author-guide">Panduan Penulis <Arrow /></Link></li><li data-reveal style={{ '--reveal-delay': '180ms' }}><span>03</span><h3>Kirim di platform jurnal</h3><p>Baca terbitan dan temukan informasi pengiriman naskah pada platform jurnal yang dipilih.</p><Link to="/journals">Buka Platform Jurnal <Arrow diagonal /></Link></li></ol></section>
     <section className="stats-section" aria-labelledby="stats-heading"><div className="container stats-inner"><div className="stats-head" data-reveal><p className="eyebrow">04 / KNOWLEDGE IN NUMBERS</p><h2 id="stats-heading" lang="en">Nordeo,<br />{' '}<em>in numbers.</em></h2></div><dl className="stats-grid">{stats.map(([label, value, suffix]) => <div key={label} data-reveal><dd><span className="sr-only">{value}{suffix}</span><span aria-hidden="true"><CountUp value={value} suffix={suffix} /></span></dd><dt>{label}</dt></div>)}</dl><p className="stats-note" data-reveal>13 dokumen JETSI tercatat di GARUDA pada 19 Oktober 2026. Metadata DOI tersedia melalui Crossref.</p></div></section>
@@ -131,7 +110,23 @@ function Home() {
 }
 
 function Journals() {
-  return <section className="container inner-page" data-reveal><p className="eyebrow">PUBLICATION PORTFOLIO</p><h1 lang="en">Journals for<br />{' '}<em>useful knowledge.</em></h1><p className="page-intro">Dua jurnal peer-review Nordeo tersedia melalui platform jurnal: JETSI untuk teknik dan teknologi, JIEL untuk pendidikan dan pembelajaran. Keduanya open access dengan tinjauan double-blind.</p><div className="journal-grid journal-grid-page">{journals.map((journal, index) => <JournalCard key={journal.id} journal={journal} delay={index * 90} />)}</div><article className="journal-archive"><div><p className="eyebrow">JURNAL PENGABDIAN</p><h2>Jurnal Pengmas</h2><p>Ruang publikasi pengabdian masyarakat dalam ekosistem Nordeo Scholar. Profil dan informasinya tersedia di website ini.</p></div><Link to="/journals/jurnalpengmas" className="button button-outline">Visit Jurnal Pengmas <Arrow /></Link></article></section>;
+  return <>
+    <section className="container inner-page journals-intro" data-reveal>
+      <p className="eyebrow">PUBLICATION PORTFOLIO</p>
+      <h1 lang="en">Journals for<br />{' '}<em>useful knowledge.</em></h1>
+      <p className="page-intro">Dua jurnal peer-review Nordeo tersedia melalui platform jurnal: JETSI untuk teknik dan teknologi, JIEL untuk pendidikan dan pembelajaran. Keduanya open access dengan tinjauan double-blind.</p>
+      <div className="journals-intro-meta">
+        <div><strong>14</strong><span>Artikel JETSI dalam pratinjau</span></div>
+        <div><strong>13</strong><span>Dokumen tercatat di GARUDA</span></div>
+        <div><strong>02</strong><span>Jurnal aktif</span></div>
+      </div>
+    </section>
+    <div className="container journals-finder"><JournalFinder limit={20} showArchiveLink={false} eyebrow="JURNAL ILMIAH KAMI" /></div>
+    <article className="container journal-archive journals-closing">
+      <div><p className="eyebrow">SEBELUM MENGIRIM NASKAH</p><h2>Kenali ruang lingkup dan etikanya.</h2><p>Setiap jurnal memiliki panduan penulis, kebijakan etika, dan alur pengiriman sendiri. Pastikan naskah Anda sesuai sebelum membuka platform jurnal.</p></div>
+      <Link to="/author-guide" className="button button-outline">Baca Panduan Penulis <Arrow /></Link>
+    </article>
+  </>;
 }
 
 function Pengmas() {
