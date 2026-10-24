@@ -30,5 +30,5 @@ export function useAnimationPreference() {
 
 export function MotionNotice() {
   const { reduced, setMode } = useAnimationPreference();
-  return reduced ? <button className="motion-notice" type="button" onClick={() => setMode('full')}>Aktifkan animasi <span aria-hidden="true">↗</span></button> : null;
+  return reduced ? <button className="motion-notice" type="button" onClick={() => setMode('full')}>Aktifkan animasi</button> : null;
 }

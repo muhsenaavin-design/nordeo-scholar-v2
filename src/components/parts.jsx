@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router';
 
 export function SmartLink({ href, children, ...rest }) {
@@ -5,8 +6,21 @@ export function SmartLink({ href, children, ...rest }) {
   return <Link to={href} {...rest}>{children}</Link>;
 }
 
-export function Arrow({ diagonal = false, size }) {
-  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className={diagonal ? 'arrow arrow-diagonal' : 'arrow'} style={size ? { width: size, height: size, flexBasis: size } : undefined}><path d={diagonal ? 'M6 18 18 6M6 6h12v12' : 'M4 12h15m-6-6 6 6-6 6'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+export function Arrow({ size }) {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="arrow" style={size ? { width: size, height: size, flexBasis: size } : undefined}><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+
+// Journal wordmarks follow each journal's own cover: JETSI cyan with a yellow "SI",
+// JIEL maroon with a yellow "EL".
+const marks = {
+  jetsi: ['JET', 'SI'],
+  jiel: ['JI', 'EL'],
+  pengmas: ['Peng', 'mas'],
+};
+
+export function JournalMark({ id, label, size = 'md' }) {
+  const [lead, accent] = marks[id] || [label || id, ''];
+  return <span className={`journal-mark journal-mark-${id} journal-mark-${size}`} aria-hidden="true"><span>{lead}</span><b>{accent}</b></span>;
 }
 
 export function SearchIcon() {
@@ -49,5 +63,12 @@ export function SectionHeading({ eyebrow, title, copy, id, link, className = '' 
 }
 
 export function EmptyState({ title, copy, action }) {
-  return <div className="empty-state"><p className="empty-state-mark" aria-hidden="true">∅</p><h3>{title}</h3><p>{copy}</p>{action}</div>;
+  return <div className="empty-state"><h3>{title}</h3><p>{copy}</p>{action}</div>;
+}
+
+// Sets "<title> | Nordeo Scholar"; null keeps the homepage title.
+export function useDocumentTitle(title) {
+  useEffect(() => {
+    document.title = title ? `${title} | Nordeo Scholar` : 'Nordeo Scholar | Advancing Knowledge';
+  }, [title]);
 }

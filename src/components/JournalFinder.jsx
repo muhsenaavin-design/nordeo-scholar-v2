@@ -1,8 +1,8 @@
 import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
-import { articleTopics, directoryJournals, journalArticles, journalAudit, journalCategories } from '../data/journal-directory';
+import { articleTopics, directoryJournals, journalArticles, journalCategories } from '../data/journal-directory';
 import { formatAuthors } from '../lib/store';
-import { Arrow, CloseIcon, EmptyState, SearchIcon, SmartLink, StatusPill } from './parts';
+import { Arrow, CloseIcon, DownloadIcon, EmptyState, JournalMark, SearchIcon, SmartLink, StatusPill } from './parts';
 
 const ALL_TOPICS = articleTopics[0];
 const normalize = value => String(value).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
@@ -36,26 +36,25 @@ function DirectoryCard({ journal, selected, matchedArticles, searching, onArticl
   const external = /^https?:/i.test(journal.url);
   return <article className={`directory-card ${selected ? 'is-selected' : ''}`} id={journal.id}>
     <div className="directory-card-top">
-      <span className="journal-mark" aria-hidden="true">{journal.short}</span>
+      <JournalMark id={journal.id} label={journal.short} />
       <StatusPill tone={journal.statusTone}>{journal.status}</StatusPill>
     </div>
-    <p className="directory-category">{journal.categoryLabel}</p>
     <h3>{journal.name}</h3>
-    <p className="directory-meta"><span>E-ISSN {journal.eissn}</span><span>P-ISSN {journal.pissn}</span></p>
+    <p className="directory-meta"><span>{journal.categoryLabel}</span>{journal.eissn !== '—' && <span>E-ISSN {journal.eissn}</span>}</p>
     <p className="directory-description">{journal.description}</p>
-    <ul className="directory-topics" aria-label={`Topik ${journal.short}`}>
-      {journal.topics.slice(0, 3).map(topic => <li key={topic}>{topic}</li>)}
-    </ul>
-    {selected && <p className="directory-state">Sedang ditampilkan di pratinjau</p>}
+    {(journal.templateUrl || journal.guidelinesUrl) && <div className="directory-resources">
+      {journal.templateUrl && <a href={journal.templateUrl} target="_blank" rel="noopener noreferrer"><DownloadIcon /> Manuscript template (.docx)</a>}
+      {journal.guidelinesUrl && <a href={journal.guidelinesUrl} target="_blank" rel="noopener noreferrer">Submission guidelines <Arrow size={14} /></a>}
+    </div>}
     <div className="directory-footer">
       <button type="button" className="finder-text-button" onClick={() => onArticles(journal.id)}>
-        {count ? `Lihat ${count} artikel` : 'Lihat profil'} <Arrow />
+        {count ? `View ${count} ${count === 1 ? 'article' : 'articles'}` : 'View profile'} <Arrow />
       </button>
       <SmartLink href={journal.url} className="text-link" {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-        {visitLabel(journal)} <Arrow diagonal />
+        {visitLabel(journal)} <Arrow />
       </SmartLink>
     </div>
-    {journal.indexing.length > 0 && <p className="directory-indexing">Terindeks: {journal.indexing.join(' · ')}</p>}
+    {journal.indexing.length > 0 && <p className="directory-indexing">{journal.indexing.join(' · ')}</p>}
   </article>;
 }
 
@@ -63,22 +62,21 @@ function ArticleCard({ article }) {
   const journal = directoryJournals.find(item => item.id === article.journal);
   return <a className="article-card" href={article.url} target="_blank" rel="noopener noreferrer">
     <div className="article-meta">
-      <span className="article-journal">{journal?.short}</span>
+      <span className={`article-journal article-journal-${article.journal}`}>{journal?.short}</span>
       <span>{article.volume}</span>
       <span>{article.year}</span>
-      {article.pages && <span>hlm. {article.pages}</span>}
+      {article.pages && <span>pp. {article.pages}</span>}
     </div>
     <h4>{article.title}</h4>
     <p className="article-authors">{formatAuthors(article.authors)}</p>
     <p className="article-excerpt">{article.excerpt}</p>
     <div className="article-footer">
-      <ul className="article-topics">{article.topics.slice(0, 2).map(topic => <li key={topic}>{topic}</li>)}</ul>
-      <span className="article-link">{article.doi ? 'DOI' : 'Buka artikel'} <Arrow diagonal /></span>
+      <span className="article-link">{article.doi ? 'DOI' : 'Read article'} <Arrow /></span>
     </div>
   </a>;
 }
 
-export default function JournalFinder({ limit = 6, showArchiveLink = true, eyebrow = '01 / JURNAL ILMIAH KAMI' }) {
+export default function JournalFinder({ limit = 6, showArchiveLink = true }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
   const [selectedJournal, setSelectedJournal] = useState('jetsi');
@@ -134,34 +132,32 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, eyebr
   return <section className="journal-finder" id="jurnal" aria-labelledby="journal-finder-heading">
     <div className="finder-head" data-reveal>
       <div>
-        <p className="eyebrow">{eyebrow}</p>
-        <h2 id="journal-finder-heading">Temukan jurnal yang sesuai dengan <em>bidang penelitian</em> Anda.</h2>
+        <h2 id="journal-finder-heading">Find the journal that fits <em>your research field.</em></h2>
       </div>
       <div className="finder-head-aside">
-        <p>Dari berbagai disiplin ilmu. Pilih jurnal, telusuri topik, lalu buka pratinjau artikel yang sudah terbit.</p>
-        <p className="finder-audit"><span aria-hidden="true" />Data JETSI diaudit {journalAudit.checkedAt} · {journalArticles.length} artikel OJS · verifikasi GARUDA &amp; Crossref</p>
+        <p>Choose a field, compare scopes, download the template, then read what has been published.</p>
       </div>
     </div>
 
     <div className="finder-toolbar">
       <div className="finder-search" role="search">
         <SearchIcon />
-        <label className="sr-only" htmlFor="journal-search">Cari nama jurnal, topik, atau judul artikel</label>
-        <input id="journal-search" type="search" value={query} placeholder="Cari nama jurnal, topik, atau judul artikel..." onChange={event => setQuery(event.target.value)} />
-        {query && <button type="button" className="search-clear" onClick={() => setQuery('')}><CloseIcon /><span>Hapus</span></button>}
+        <label className="sr-only" htmlFor="journal-search">Search journals, topics, or article titles</label>
+        <input id="journal-search" type="search" value={query} placeholder="Search journals, topics, or article titles…" onChange={event => setQuery(event.target.value)} />
+        {query && <button type="button" className="search-clear" onClick={() => setQuery('')}><CloseIcon /><span>Clear</span></button>}
       </div>
-      <p className="finder-result" role="status" aria-live="polite">{filteredJournals.length} jurnal · {searchPool.length} artikel</p>
+      <p className="finder-result" role="status" aria-live="polite">{filteredJournals.length} {filteredJournals.length === 1 ? 'journal' : 'journals'} · {searchPool.length} {searchPool.length === 1 ? 'article' : 'articles'}</p>
     </div>
 
-    <div className="filter-row" role="group" aria-label="Filter bidang jurnal">
-      <span className="filter-label">Bidang</span>
+    <div className="filter-row" role="group" aria-label="Filter journals by field">
+      <span className="filter-label">Field</span>
       {journalCategories.map(item => <button key={item.id} type="button" className={`filter-chip ${category === item.id ? 'is-active' : ''}`} aria-pressed={category === item.id} onClick={() => chooseCategory(item.id)}>
         {item.label} <span className="filter-count">{categoryCount(item.id)}</span>
       </button>)}
     </div>
 
     {filteredJournals.length === 0 && searchPool.length === 0
-      ? <EmptyState title="Tidak ada hasil" copy="Tidak ada jurnal atau artikel yang cocok dengan pencarian Anda. Coba kata kunci lain, atau kembali ke seluruh bidang dan topik." action={<button className="button button-dark" type="button" onClick={resetFilters}>Reset pencarian</button>} />
+      ? <EmptyState title="No results" copy="No journal or article matches your search. Try another keyword, or return to all fields and focus areas." action={<button className="button button-dark" type="button" onClick={resetFilters}>Reset search</button>} />
       : <>
         {filteredJournals.length > 0 && <div className="directory-grid">
           {filteredJournals.map(journal => <DirectoryCard
@@ -173,28 +169,27 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, eyebr
             onArticles={showArticles}
           />)}
         </div>}
-        {filteredJournals.length === 0 && <EmptyState title="Jurnal tidak ditemukan di bidang ini" copy="Artikel yang cocok tetap ditampilkan di bawah. Kembalikan filter bidang untuk melihat jurnal yang sesuai." action={<button className="button button-dark" type="button" onClick={resetFilters}>Lihat semua bidang</button>} />}
+        {filteredJournals.length === 0 && <EmptyState title="No journal in this field" copy="Matching articles are still listed below. Clear the field filter to see the matching journals." action={<button className="button button-dark" type="button" onClick={resetFilters}>Show all fields</button>} />}
 
         <div className="article-preview" id="artikel" ref={articleRef}>
           <div className="article-preview-head">
             <div>
-              <p className="eyebrow">PRATINJAU ARTIKEL</p>
-              <h3>Jelajahi isi jurnal</h3>
+              <h3>Published articles</h3>
             </div>
-            <p className="result-count">{visibleArticles.length < articles.length ? `${visibleArticles.length} dari ${articles.length} artikel` : `${articles.length} artikel`} · {activeJournal.short}</p>
+            <p className="result-count">{visibleArticles.length < articles.length ? `${visibleArticles.length} of ${articles.length} articles` : `${articles.length} ${articles.length === 1 ? 'article' : 'articles'}`} · {activeJournal.short}</p>
           </div>
 
-          <div className="journal-tabs" role="group" aria-label="Pilih jurnal untuk pratinjau">
+          <div className="journal-tabs" role="group" aria-label="Choose a journal">
             {directoryJournals.map(journal => {
               const count = searchPool.filter(article => article.journal === journal.id).length;
               return <button key={journal.id} type="button" aria-pressed={selectedJournal === journal.id} className={`journal-tab ${selectedJournal === journal.id ? 'is-active' : ''}`} onClick={() => { setSelectedJournal(journal.id); setTopic(ALL_TOPICS); }}>
-                <span>{journal.short}</span><small>{count} artikel</small>
+                <JournalMark id={journal.id} label={journal.short} size="sm" /><span>{journal.short}</span><small>{count} {count === 1 ? 'article' : 'articles'}</small>
               </button>;
             })}
           </div>
 
-          {searchJournalPool.length > 0 && <div className="filter-row topic-row" role="group" aria-label={`Filter topik ${activeJournal.short}`}>
-            <span className="filter-label">Topik</span>
+          {searchJournalPool.length > 0 && <div className="filter-row topic-row" role="group" aria-label={`Filter ${activeJournal.short} by focus area`}>
+            <span className="filter-label">Focus area</span>
             {articleTopics.map(item => {
               const count = topicCounts.get(item) || 0;
               return <button key={item} type="button" className={`filter-chip ${topic === item ? 'is-active' : ''} ${count === 0 && item !== ALL_TOPICS ? 'is-empty' : ''}`} aria-pressed={topic === item} disabled={count === 0 && item !== ALL_TOPICS} onClick={() => setTopic(item)}>
@@ -208,27 +203,22 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, eyebr
           </div>}
 
           {visibleArticles.length === 0 && <div className="article-empty">
-            <p className="article-empty-mark" aria-hidden="true">↳</p>
             <div>
-              <h4>{hasArticleFilters ? 'Belum ada artikel yang cocok' : `${activeJournal.short} membuka ruang untuk naskah pertama`}</h4>
+              <h4>{hasArticleFilters ? 'No matching articles yet' : `${activeJournal.short} is open for its first submissions`}</h4>
               <p>{hasArticleFilters
-                ? 'Coba topik atau kata kunci lain, atau pilih jurnal berbeda di atas. Semua artikel yang tampil berasal dari data terbitan yang sudah diaudit.'
-                : `${activeJournal.name} belum memiliki artikel terbit. Profil, ruang lingkup, dan panggilan naskah tetap dapat dijelajahi di platform jurnal.`}</p>
+                ? 'Try another focus area or keyword, or choose a different journal above.'
+                : `${activeJournal.name} has no published articles yet. Its profile, scope, and call for papers are on the journal platform.`}</p>
               <div className="article-empty-actions">
-                {hasArticleFilters && <button type="button" className="text-link finder-text-button" onClick={() => { setQuery(''); setTopic(ALL_TOPICS); }}>Reset filter <Arrow /></button>}
-                <SmartLink href={activeJournal.url} className="text-link" {...(/^https?:/i.test(activeJournal.url) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>Buka platform {activeJournal.short} <Arrow diagonal /></SmartLink>
+                {hasArticleFilters && <button type="button" className="text-link finder-text-button" onClick={() => { setQuery(''); setTopic(ALL_TOPICS); }}>Reset filters</button>}
+                <SmartLink href={activeJournal.url} className="text-link" {...(/^https?:/i.test(activeJournal.url) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>Open the {activeJournal.short} platform <Arrow /></SmartLink>
               </div>
             </div>
           </div>}
 
-          <div className="article-preview-footer">
-            <p>{limit < articles.length
-              ? `Menampilkan ${visibleArticles.length} dari ${articles.length} artikel ${activeJournal.short}. Sumber data: OJS, GARUDA, dan Crossref.`
-              : hasArticleFilters
-                ? `${articles.length} artikel cocok dengan filter aktif. Sumber data: OJS, GARUDA, dan Crossref.`
-                : journalAudit.notes}</p>
-            {showArchiveLink && <Link to="/journals" className="text-link">Lihat direktori lengkap <Arrow /></Link>}
-          </div>
+          {showArchiveLink && <div className="article-preview-footer">
+            <p>{limit < articles.length ? `Showing ${visibleArticles.length} of ${articles.length} ${activeJournal.short} articles.` : ''}</p>
+            <Link to="/journals" className="text-link">All journals and articles <Arrow /></Link>
+          </div>}
         </div>
       </>}
   </section>;

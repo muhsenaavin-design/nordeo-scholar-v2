@@ -1,8 +1,11 @@
 export const newsCategories = ['Riset', 'Jurnal', 'Catatan Editor', 'Komunitas', 'Kebijakan', 'Pengumuman'];
 
+export const newsCategoryEn = { Riset: 'Research', Jurnal: 'Journal', 'Catatan Editor': 'Editor’s Note', Komunitas: 'Community', Kebijakan: 'Policy', Pengumuman: 'Announcement' };
+
 export const seedNews = [
   {
     id: 'news-open-science',
+    titleEn: 'Open research and a more honest future for publishing',
     slug: 'riset-terbuka-masa-depan-penerbitan',
     title: 'Riset terbuka, dan masa depan penerbitan yang lebih jujur',
     dek: 'Akses terbuka bukan sekadar menghapus paywall. Ia mengubah cara kita menilai kualitas, membagikan bukti, dan mengajak publik ikut membaca ilmu.',
@@ -28,6 +31,7 @@ export const seedNews = [
   },
   {
     id: 'news-jetsi-vol2',
+    titleEn: 'JETSI Vol. 1 No. 2: technology that answers real problems',
     slug: 'jetsi-vol-1-no-2-teknologi-persoalan-nyata',
     title: 'JETSI Vol. 1 No. 2: teknologi yang menjawab persoalan nyata',
     dek: 'Edisi terbaru membawa pembaca dari sistem industri ke analitik keputusan, dengan satu benang merah: riset yang bisa dipakai.',
@@ -51,12 +55,13 @@ export const seedNews = [
   },
   {
     id: 'news-writing-craft',
+    titleEn: 'Writing for readers, not just for indexes',
     slug: 'menulis-untuk-pembaca-bukan-indeks',
     title: 'Menulis untuk pembaca, bukan hanya untuk indeks',
     dek: 'Indeks memberi jangkauan. Kejelasan memberi makna. Bagaimana menyeimbangkan keduanya tanpa membuat tulisan kehilangan nyawa?',
     category: 'Catatan Editor',
-    author: 'Sena Prameswari',
-    authorRole: 'Managing editor',
+    author: 'Redaksi Nordeo',
+    authorRole: 'Editorial desk',
     date: '2026-10-12',
     readTime: '5 menit',
     cover: '/assets/about-shelves.webp',
@@ -76,6 +81,7 @@ export const seedNews = [
   },
   {
     id: 'news-community',
+    titleEn: 'From campus to community: service you can measure',
     slug: 'dari-kampus-ke-komunitas-pengabdian-terukur',
     title: 'Dari kampus ke komunitas: pengabdian yang bisa diukur',
     dek: 'Program pengabdian tidak berhenti pada foto kegiatan. Ia perlu baseline, partisipasi, dan bukti perubahan yang bisa dibaca ulang.',
@@ -99,12 +105,13 @@ export const seedNews = [
   },
   {
     id: 'news-evidence-table',
+    titleEn: 'Evidence at the decision table: research in local policy',
     slug: 'bukti-di-meja-keputusan',
     title: 'Bukti di meja keputusan: peran riset dalam kebijakan lokal',
     dek: 'Kebijakan yang baik membutuhkan lebih dari satu laporan. Ia butuh hubungan yang cukup lama untuk saling memahami bahasa.',
     category: 'Kebijakan',
-    author: 'R. Hartono',
-    authorRole: 'Policy contributor',
+    author: 'Redaksi Nordeo',
+    authorRole: 'Policy desk',
     date: '2026-10-01',
     readTime: '7 menit',
     cover: '/assets/art/news/evidence-table.svg',
@@ -122,6 +129,7 @@ export const seedNews = [
   },
   {
     id: 'news-editors-note',
+    titleEn: 'Editor’s note: why local context still matters',
     slug: 'catatan-editor-konteks-lokal',
     title: 'Catatan editor: mengapa konteks lokal tetap penting',
     dek: 'Standar global memberi kerangka. Konteks lokal memberi makna. Keduanya perlu duduk di meja yang sama.',
@@ -149,10 +157,41 @@ export const editorialDesks = [
   { title: 'Policy Brief', copy: 'Ringkasan bukti untuk pembaca yang mengambil keputusan di ruang publik.', image: '/assets/art/news/evidence-table.svg', alt: 'Ilustrasi tangga data kebijakan' },
 ];
 
+// Publishing workflow for contributed news. Synthesised from the audited references in
+// newsReferences (pitch-first editing, embargo rules, image licensing, newsroom lead times).
 export const newsSteps = [
-  { number: '01', title: 'Siapkan kiriman', copy: 'Tulis judul, lead, dan konteks. Siapkan gambar utama, kredit, serta tautan sumber yang bisa diverifikasi.' },
-  { number: '02', title: 'Isi form & jadwal', copy: 'Lengkapi formulir digital, unggah gambar, dan tentukan jadwal tayang yang diusulkan.' },
-  { number: '03', title: 'Kurasi redaksi', copy: 'Editor menilai sudut cerita, kesesuaian kanal, dan kelengkapan bukti. Kami menghubungi lewat email.' },
-  { number: '04', title: 'Penyuntingan', copy: 'Judul, struktur, dan bahasa disunting bersama. Gambar dan alt text diperiksa sebelum tayang.' },
-  { number: '05', title: 'Terbit & arsip', copy: 'Artikel tayang sesuai kalender, dibagikan ke kanal Nordeo, lalu diarsipkan untuk dibaca ulang.' },
+  { number: '01', title: 'Cek kecocokan kanal', copy: 'Pastikan kabar Anda tentang riset, publikasi, kegiatan akademik, atau pengabdian — dan belum tayang di media lain dalam bentuk yang sama.', duration: '5 menit' },
+  { number: '02', title: 'Siapkan bahan', copy: 'Judul usulan, lead 5W1H, isi 400–900 kata, satu kutipan narasumber yang sudah disetujui, tautan sumber atau DOI, dan satu gambar highlight berlisensi.', duration: '1–2 jam' },
+  { number: '03', title: 'Isi formulir & jadwal', copy: 'Lengkapi formulir kirim berita: tanggal tayang yang diusulkan, embargo bila ada, gambar highlight beserta kredit dan alt text. Asisten draf AI membantu merapikan struktur.', duration: '15 menit' },
+  { number: '04', title: 'Kurasi redaksi', copy: 'Editor menilai sudut cerita, kelengkapan bukti, dan kesesuaian rubrik. Kami membalas lewat email paling lambat 2 hari kerja.', duration: '≤ 2 hari kerja' },
+  { number: '05', title: 'Sunting bersama', copy: 'Judul, struktur, dan bahasa disunting editor. Naskah hanya tayang setelah Anda menyetujui versi akhirnya.', duration: '2–5 hari kerja' },
+  { number: '06', title: 'Tayang & arsip', copy: 'Berita tayang sesuai jadwal atau saat embargo dibuka, dibagikan ke kanal Nordeo, lalu diarsipkan dan dapat dikoreksi terbuka bila perlu.', duration: 'Sesuai jadwal' },
+];
+
+export const newsTypes = [
+  { id: 'research', label: 'Rilis riset & publikasi', hint: 'Temuan baru, artikel jurnal terbit, atau laporan riset.' },
+  { id: 'campus', label: 'Kabar kampus & acara', hint: 'Seminar, konferensi, penghargaan, atau kerja sama institusi.' },
+  { id: 'opinion', label: 'Opini & catatan pakar', hint: 'Analisis berbasis keahlian atas isu yang sedang dibicarakan.' },
+  { id: 'community', label: 'Liputan pengabdian', hint: 'Program pengabdian dengan konteks, partisipasi, dan dampak.' },
+  { id: 'journal', label: 'Pengumuman jurnal', hint: 'Terbitan baru, call for papers, atau perubahan kebijakan jurnal.' },
+];
+
+export const newsStandards = [
+  ['Panjang naskah', '400–900 kata untuk berita; 800–1.000 kata untuk opini.'],
+  ['Lead', 'Satu paragraf pembuka yang menjawab apa, siapa, kapan, di mana, mengapa, dan bagaimana.'],
+  ['Kutipan', 'Minimal satu kutipan narasumber dengan nama dan jabatan, sudah disetujui narasumber.'],
+  ['Gambar highlight', 'Lanskap 16:9, sisi panjang ≥ 1.600 px, JPG/PNG/WebP ≤ 5 MB, dengan kredit, keterangan, dan alt text.'],
+  ['Lisensi gambar', 'Milik sendiri atau berizin tertulis. Gambar stok tanpa lisensi penggunaan ulang tidak diterima.'],
+  ['Waktu tunggu', 'Kirim minimal 7 hari sebelum tanggal tayang; acara besar 14 hari sebelumnya.'],
+  ['Embargo', 'Hanya untuk kabar yang terikat jadwal publikasi jurnal atau acara, dan informasinya belum terbuka untuk publik.'],
+  ['Sumber', 'Sertakan DOI, tautan artikel, atau dokumen pendukung yang bisa diverifikasi editor.'],
+];
+
+export const newsReferences = [
+  { name: 'The Conversation — Pitch an article', href: 'https://theconversation.com/uk/pitches', takeaway: 'Pitch dulu sebelum menulis; editor menyunting bersama; naskah tayang setelah disetujui penulis.' },
+  { name: 'EurekAlert! (AAAS) — Content Eligibility Guidelines', href: 'https://www.eurekalert.org/releaseguidelines', takeaway: 'Embargo hanya bila ditetapkan penerbit jurnal atau penyelenggara acara; kabar harus baru dan akurat.' },
+  { name: 'EurekAlert! — Multimedia permission scheme', href: 'https://blog.eurekalert.org/2022/01/20/updated-built-in-multimedia-permission-scheme-protects-all-involved/', takeaway: 'Setiap gambar membawa izin, keterangan, dan kredit; gambar stok tidak memenuhi syarat.' },
+  { name: 'UW–Madison — Submit news or a story idea', href: 'https://strategiccommunication.wisc.edu/for-communicators-and-marketers/submit-news-or-a-story-idea/', takeaway: 'Sinopsis singkat, audiens sasaran, dan waktu tunggu sekitar dua pekan.' },
+  { name: 'University of Oregon — Tips for submissions', href: 'https://news.uoregon.edu/content/tips-submissions', takeaway: 'Lengkapi semua kolom, sertakan tanggal acara, dan siapkan foto utama.' },
+  { name: 'University of St. Thomas — Submit news', href: 'https://news.stthomas.edu/submit-news/', takeaway: 'Ajuan ditinjau sekitar satu pekan; jelaskan rencana distribusi di kanal Anda.' },
 ];

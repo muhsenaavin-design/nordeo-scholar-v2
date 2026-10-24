@@ -5,6 +5,7 @@ const prefix = 'nordeo:';
 export const STORE = {
   news: `${prefix}news.v1`,
   newsSubmissions: `${prefix}news-submissions.v1`,
+  newsDraft: `${prefix}news-draft.v1`,
   trainingRegistrations: `${prefix}training-registrations.v1`,
   trainingStatus: `${prefix}training-status.v1`,
   adminSession: `${prefix}admin-session.v1`,
@@ -104,11 +105,11 @@ export function formatAuthors(authors = []) {
   return `${authors[0]} et al.`;
 }
 
-export function formatDate(value, options = { day: 'numeric', month: 'long', year: 'numeric' }) {
+export function formatDate(value, options = { day: 'numeric', month: 'long', year: 'numeric' }, locale = 'id-ID') {
   if (!value) return '';
   const date = value instanceof Date ? value : new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return String(value);
-  return new Intl.DateTimeFormat('id-ID', options).format(date);
+  return new Intl.DateTimeFormat(locale, options).format(date);
 }
 
 export function formatDateTime(value) {

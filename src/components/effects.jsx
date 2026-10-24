@@ -139,3 +139,21 @@ export function PageFade({ routeKey, children }) {
     </motion.div>
   );
 }
+
+function ScrollWord({ progress, range, children }) {
+  const opacity = useTransform(progress, range, [0.18, 1]);
+  return <motion.span className="scroll-word" style={{ opacity }}>{children}{' '}</motion.span>;
+}
+
+// Words brighten one by one as the paragraph scrolls through the viewport.
+export function ScrollWords({ text, className = '' }) {
+  const ref = useRef(null);
+  const { reduced } = useAnimationPreference();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.85', 'end 0.45'] });
+  const words = text.split(' ');
+  if (reduced) return <p className={className}>{text}</p>;
+  return <p ref={ref} className={`scroll-words ${className}`.trim()}>
+    <span className="sr-only">{text}</span>
+    <span aria-hidden="true">{words.map((word, index) => <ScrollWord key={index} progress={scrollYProgress} range={[index / words.length, (index + 1) / words.length]}>{word}</ScrollWord>)}</span>
+  </p>;
+}
