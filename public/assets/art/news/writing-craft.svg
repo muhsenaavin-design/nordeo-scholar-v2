@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3ede0"/><stop offset="1" stop-color="#e7dcc7"/></linearGradient>
+    <linearGradient id="veil" x1="0" y1="0" x2="0" y2="1"><stop offset=".35" stop-color="#f3ede0" stop-opacity="0"/><stop offset="1" stop-color="#f3ede0" stop-opacity=".9"/></linearGradient>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <circle cx="1152" cy="420" r="300" fill="none" stroke="#243137" stroke-opacity=".28"/>
+  <rect width="1600" height="1000" fill="url(#veil)"/>
+  <rect width="1600" height="1000" filter="url(#grain)" opacity=".07" fill="#243137"/>
+  <g font-family="Manrope, Arial, sans-serif" fill="#6d756f">
+    <text x="120" y="105" font-size="23" letter-spacing="5.6000000000000005" font-weight="600">THE CRAFT</text>
+    <text x="120" y="145" font-size="19" opacity=".8">NORDEO SCHOLAR</text>
+  </g>
+  <g font-family="Fraunces, Georgia, serif" fill="#243137">
+    <text x="120" y="680" font-size="99" letter-spacing="-1.98">Writing for readers,</text><text x="120" y="782.96" font-size="99" letter-spacing="-1.98">not for indexes.</text>
+  </g>
+  <line x1="120" y1="885" x2="1480" y2="885" stroke="#243137" stroke-opacity=".22"/>
+  <g font-family="Manrope, Arial, sans-serif" fill="#6d756f">
+    <text x="120" y="930" font-size="20">Editorial · 12 Oktober 2026</text>
+    <text x="1480" y="930" text-anchor="end" font-size="20" fill="#a94f36">NORDEO</text>
+  </g>
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#123742"/><stop offset="1" stop-color="#1d5564"/></linearGradient>
+    <linearGradient id="veil" x1="0" y1="0" x2="0" y2="1"><stop offset=".35" stop-color="#123742" stop-opacity="0"/><stop offset="1" stop-color="#123742" stop-opacity=".9"/></linearGradient>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <g fill="none" stroke="#b9d2d4" stroke-width="1.1" opacity=".7">
+      <path d="M 672 840 V 700 H 768"/><path d="M 734 840 V 662 H 830"/><path d="M 796 840 V 624 H 892"/><path d="M 858 840 V 586 H 954"/><path d="M 920 840 V 548 H 1016"/><path d="M 982 840 V 510 H 1078"/><path d="M 1044 840 V 472 H 1140"/><path d="M 1106 840 V 434 H 1202"/>
+    </g><rect x="640" y="840" width="672" height="2" fill="#f2c94c"/>
+  <rect width="1600" height="1000" fill="url(#veil)"/>
+  <rect width="1600" height="1000" filter="url(#grain)" opacity=".07" fill="#fbf8ef"/>
+  <g font-family="Manrope, Arial, sans-serif" fill="#b9d2d4">
+    <text x="120" y="105" font-size="23" letter-spacing="5.6000000000000005" font-weight="600">SEMINAR · 2 SESI</text>
+    <text x="120" y="145" font-size="19" opacity=".8">NORDEO ACADEMY</text>
+  </g>
+  <g font-family="Fraunces, Georgia, serif" fill="#fbf8ef">
+    <text x="120" y="680" font-size="99" letter-spacing="-1.98">From draft</text><text x="120" y="782.96" font-size="99" letter-spacing="-1.98">to submission.</text>
+  </g>
+  <line x1="120" y1="885" x2="1480" y2="885" stroke="#fbf8ef" stroke-opacity=".22"/>
+  <g font-family="Manrope, Arial, sans-serif" fill="#b9d2d4">
+    <text x="120" y="930" font-size="20">Penulisan artikel jurnal</text>
+    <text x="1480" y="930" text-anchor="end" font-size="20" fill="#f2c94c">NORDEO</text>
+  </g>
+</svg>

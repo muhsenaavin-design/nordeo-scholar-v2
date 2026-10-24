@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#24313c"/><stop offset="1" stop-color="#3a4b58"/></linearGradient>
+    <linearGradient id="veil" x1="0" y1="0" x2="0" y2="1"><stop offset=".35" stop-color="#24313c" stop-opacity="0"/><stop offset="1" stop-color="#24313c" stop-opacity=".9"/></linearGradient>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <g fill="none" stroke="#b8c6cc" stroke-width="1.2" opacity=".55">
+      <path d="M 768 1000 V 520 A 92 92 0 0 1 952 520 V 1000"/><path d="M 826 1000 V 498 A 98 98 0 0 1 1022 498 V 1000"/><path d="M 884 1000 V 476 A 104 104 0 0 1 1092 476 V 1000"/><path d="M 942 1000 V 454 A 110 110 0 0 1 1162 454 V 1000"/><path d="M 1000 1000 V 432 A 116 116 0 0 1 1232 432 V 1000"/><path d="M 1058 1000 V 410 A 122 122 0 0 1 1302 410 V 1000"/>
+    </g><circle cx="1152" cy="300" r="72" fill="#e3b44f" opacity=".9"/>
+  <rect width="1600" height="1000" fill="url(#veil)"/>
+  <rect width="1600" height="1000" filter="url(#grain)" opacity=".07" fill="#f4f1e8"/>
+  <g font-family="Manrope, Arial, sans-serif" fill="#b8c6cc">
+    <text x="120" y="105" font-size="23" letter-spacing="5.6000000000000005" font-weight="600">CONFERENCE · 2026</text>
+    <text x="120" y="145" font-size="19" opacity=".8">NORDEO ACADEMY</text>
+  </g>
+  <g font-family="Fraunces, Georgia, serif" fill="#f4f1e8">
+    <text x="120" y="680" font-size="99" letter-spacing="-1.98">Academic Writing</text><text x="120" y="782.96" font-size="99" letter-spacing="-1.98">Conference.</text>
+  </g>
+  <line x1="120" y1="885" x2="1480" y2="885" stroke="#f4f1e8" stroke-opacity=".22"/>
+  <g font-family="Manrope, Arial, sans-serif" fill="#b8c6cc">
+    <text x="120" y="930" font-size="20">Hybrid · 18–19 November 2026</text>
+    <text x="1480" y="930" text-anchor="end" font-size="20" fill="#e3b44f">NORDEO</text>
+  </g>
+</svg>
