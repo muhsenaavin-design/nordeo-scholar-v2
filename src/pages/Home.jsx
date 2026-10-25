@@ -99,22 +99,24 @@ function EcosystemPulse() {
 
 function Founder() {
   return <section id="about" className="founder-section" aria-labelledby="founder-heading">
-    <figure className="founder-media" data-reveal>
-      <Parallax className="founder-photo" distance={24}>
-        <picture>
-          <source media="(max-width: 640px)" srcSet={founder.photoSmall} />
-          <img src={founder.photo} alt={`Portrait of ${founder.name}, founder of Nordeo Scholar`} width="1247" height="1261" loading="lazy" decoding="async" />
-        </picture>
-      </Parallax>
-      <figcaption className="founder-name"><strong>{founder.name}, {founder.degrees}</strong><span>{founder.role}</span></figcaption>
-    </figure>
-    <div className="container founder-inner">
-      <div className="founder-copy" data-reveal>
+    <div className="container founder-grid">
+      <figure className="founder-card" data-reveal>
+        <Parallax className="founder-photo" distance={16}>
+          <picture>
+            <source media="(max-width: 640px)" srcSet={founder.photoSmall} />
+            <img src={founder.photo} alt={`Portrait of ${founder.name}, founder of Nordeo Scholar`} width="1247" height="1261" loading="lazy" decoding="async" />
+          </picture>
+        </Parallax>
+        <figcaption className="founder-name"><strong>{founder.name}, {founder.degrees}</strong><span>{founder.role}</span></figcaption>
+      </figure>
+      <div className="founder-copy" data-reveal style={{ '--reveal-delay': '120ms' }}>
+        <p className="founder-kicker">A note from our founder</p>
         <h2 id="founder-heading">Built by a researcher, <em>for researchers.</em></h2>
         <ScrollWords className="founder-statement" text="Nordeo Scholar began with a simple belief: good research deserves a clear, honest path to its readers. Today it brings journals, media & news, training, and books under one roof." />
-        <dl className="founder-principles">{principles.map(([term, detail]) => <div key={term}><dt>{term}</dt><dd>{detail}</dd></div>)}</dl>
+        {founder.signature && <img className="founder-signature" src={founder.signature} alt={`Signature of ${founder.name}`} loading="lazy" decoding="async" />}
+        <ul className="founder-principles" aria-label="Our principles">{principles.map(([term, detail]) => <li key={term} title={detail}>{term}</li>)}</ul>
         <div className="founder-links">
-          <Link to="/about" className="button button-light">Our story</Link>
+          <Link to="/about" className="button button-dark">Our story</Link>
           <Link to="/publication-ethics" className="text-link">Publication ethics <Arrow /></Link>
         </div>
       </div>

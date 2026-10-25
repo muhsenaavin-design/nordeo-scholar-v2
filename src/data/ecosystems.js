@@ -78,6 +78,9 @@ export const founder = {
   role: 'Founder, Nordeo Scholar',
   photo: '/assets/team/fandi-achmad.webp',
   photoSmall: '/assets/team/fandi-achmad-640.webp',
+  // Path to a scan of the founder's real signature (transparent PNG/SVG). The founder's
+  // note shows it under the statement; left empty until a real scan is supplied.
+  signature: null,
 };
 
 export const principles = [
