@@ -47,7 +47,7 @@ export function ContactPage() {
     <h1>Mari<br /> terhubung.</h1>
     <p className="page-intro">Ceritakan kebutuhan publikasi, ide buku, atau rencana pelatihan Anda. Sertakan nama, institusi, dan topik yang ingin dibahas agar tim Nordeo dapat mengarahkan percakapan dengan tepat.</p>
     <div className="contact-channels">
-      <a href={`mailto:${contact.news}`}><span>Newsroom</span><strong>{contact.news}</strong><small>Kiriman berita, wawancara, dan catatan editor.</small></a>
+      <a href={`mailto:${contact.news}`}><span>NordeoNews</span><strong>{contact.news}</strong><small>Kiriman berita, wawancara, dan catatan editor.</small></a>
       <a href={`mailto:${contact.books}`}><span>Books</span><strong>{contact.books}</strong><small>Proposal buku, monograf, dan bunga rampai.</small></a>
       <a href={`mailto:${contact.training}`}><span>Academy</span><strong>{contact.training}</strong><small>Seminar, konferensi, dan modul pelatihan.</small></a>
       <a href={`mailto:${contact.general}`}><span>Umum</span><strong>{contact.general}</strong><small>Kolaborasi institusi dan pertanyaan lain.</small></a>
@@ -133,7 +133,7 @@ export function LegalPage() {
     <BackLink />
     <h1>{title}</h1>
     <p className="page-intro">{copy}</p>
-    {isNotFound && <div className="information-panel"><h2>Mungkin Anda mencari ini</h2><div className="not-found-links"><Link to="/journals">Journals <Arrow /></Link><SmartLink href={ecosystemHref('news')}>Newsroom <Arrow /></SmartLink><SmartLink href={ecosystemHref('training')}>Academy <Arrow /></SmartLink><Link to="/contact">Contact <Arrow /></Link></div></div>}
+    {isNotFound && <div className="information-panel"><h2>Mungkin Anda mencari ini</h2><div className="not-found-links"><Link to="/journals">Journals <Arrow /></Link><SmartLink href={ecosystemHref('news')}>NordeoNews <Arrow /></SmartLink><SmartLink href={ecosystemHref('training')}>Academy <Arrow /></SmartLink><Link to="/contact">Contact <Arrow /></Link></div></div>}
   </section>;
 }
 

@@ -1,6 +1,10 @@
-export const newsCategories = ['Riset', 'Jurnal', 'Catatan Editor', 'Komunitas', 'Kebijakan', 'Pengumuman'];
+export const newsCategories = ['Berita', 'Pendidikan', 'Bisnis', 'Teknologi', 'Lifestyle', 'Opini'];
 
-export const newsCategoryEn = { Riset: 'Research', Jurnal: 'Journal', 'Catatan Editor': 'Editor’s Note', Komunitas: 'Community', Kebijakan: 'Policy', Pengumuman: 'Announcement' };
+// Older rubrics stay mapped so stories saved before the rename still get an English label.
+export const newsCategoryEn = {
+  Berita: 'News', Pendidikan: 'Education', Bisnis: 'Business', Teknologi: 'Technology', Lifestyle: 'Lifestyle', Opini: 'Opinion',
+  Riset: 'Research', Jurnal: 'Journal', 'Catatan Editor': 'Editor’s Note', Komunitas: 'Community', Kebijakan: 'Policy', Pengumuman: 'Announcement',
+};
 
 export const seedNews = [
   {
@@ -9,7 +13,7 @@ export const seedNews = [
     slug: 'riset-terbuka-masa-depan-penerbitan',
     title: 'Riset terbuka, dan masa depan penerbitan yang lebih jujur',
     dek: 'Akses terbuka bukan sekadar menghapus paywall. Ia mengubah cara kita menilai kualitas, membagikan bukti, dan mengajak publik ikut membaca ilmu.',
-    category: 'Riset',
+    category: 'Pendidikan',
     author: 'Redaksi Nordeo',
     authorRole: 'Editorial desk',
     date: '2026-10-22',
@@ -35,7 +39,7 @@ export const seedNews = [
     slug: 'jetsi-vol-1-no-2-teknologi-persoalan-nyata',
     title: 'JETSI Vol. 1 No. 2: teknologi yang menjawab persoalan nyata',
     dek: 'Edisi terbaru membawa pembaca dari sistem industri ke analitik keputusan, dengan satu benang merah: riset yang bisa dipakai.',
-    category: 'Jurnal',
+    category: 'Teknologi',
     author: 'Tim JETSI',
     authorRole: 'Journal editorial',
     date: '2026-10-18',
@@ -59,7 +63,7 @@ export const seedNews = [
     slug: 'menulis-untuk-pembaca-bukan-indeks',
     title: 'Menulis untuk pembaca, bukan hanya untuk indeks',
     dek: 'Indeks memberi jangkauan. Kejelasan memberi makna. Bagaimana menyeimbangkan keduanya tanpa membuat tulisan kehilangan nyawa?',
-    category: 'Catatan Editor',
+    category: 'Pendidikan',
     author: 'Redaksi Nordeo',
     authorRole: 'Editorial desk',
     date: '2026-10-12',
@@ -85,7 +89,7 @@ export const seedNews = [
     slug: 'dari-kampus-ke-komunitas-pengabdian-terukur',
     title: 'Dari kampus ke komunitas: pengabdian yang bisa diukur',
     dek: 'Program pengabdian tidak berhenti pada foto kegiatan. Ia perlu baseline, partisipasi, dan bukti perubahan yang bisa dibaca ulang.',
-    category: 'Komunitas',
+    category: 'Berita',
     author: 'Redaksi Nordeo',
     authorRole: 'Community desk',
     date: '2026-10-07',
@@ -109,7 +113,7 @@ export const seedNews = [
     slug: 'bukti-di-meja-keputusan',
     title: 'Bukti di meja keputusan: peran riset dalam kebijakan lokal',
     dek: 'Kebijakan yang baik membutuhkan lebih dari satu laporan. Ia butuh hubungan yang cukup lama untuk saling memahami bahasa.',
-    category: 'Kebijakan',
+    category: 'Opini',
     author: 'Redaksi Nordeo',
     authorRole: 'Policy desk',
     date: '2026-10-01',
@@ -133,7 +137,7 @@ export const seedNews = [
     slug: 'catatan-editor-konteks-lokal',
     title: 'Catatan editor: mengapa konteks lokal tetap penting',
     dek: 'Standar global memberi kerangka. Konteks lokal memberi makna. Keduanya perlu duduk di meja yang sama.',
-    category: 'Catatan Editor',
+    category: 'Opini',
     author: 'Redaksi Nordeo',
     authorRole: 'Editorial desk',
     date: '2026-10-01',
@@ -158,7 +162,7 @@ export const editorialDesks = [
 ];
 
 // Publishing workflow for contributed news. Synthesised from the audited references in
-// newsReferences (pitch-first editing, embargo rules, image licensing, newsroom lead times).
+// newsReferences (pitch-first editing, embargo rules, image licensing, editorial lead times).
 export const newsSteps = [
   { number: '01', title: 'Cek kecocokan kanal', copy: 'Pastikan kabar Anda tentang riset, publikasi, kegiatan akademik, atau pengabdian — dan belum tayang di media lain dalam bentuk yang sama.', duration: '5 menit' },
   { number: '02', title: 'Siapkan bahan', copy: 'Judul usulan, lead 5W1H, isi 400–900 kata, satu kutipan narasumber yang sudah disetujui, tautan sumber atau DOI, dan satu gambar highlight berlisensi.', duration: '1–2 jam' },

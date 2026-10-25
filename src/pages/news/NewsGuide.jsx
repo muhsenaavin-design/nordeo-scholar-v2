@@ -19,9 +19,9 @@ export default function NewsGuide() {
   const base = siteBase('news');
   return <>
     <section className="container inner-page guide-hero" data-reveal>
-      <Link to={`${base}/`} className="back-link">Kembali ke Newsroom</Link>
+      <Link to={`${base}/`} className="back-link">Kembali ke NordeoNews</Link>
       <h1>Dari kabar riset <em>sampai tayang.</em></h1>
-      <p className="page-intro">Cara mempublikasikan berita di Nordeo Newsroom, langkah demi langkah. Disusun dari praktik redaksi The Conversation, EurekAlert! (AAAS), dan newsroom universitas.</p>
+      <p className="page-intro">Cara mempublikasikan berita di NordeoNews, langkah demi langkah. Disusun dari praktik redaksi The Conversation, EurekAlert! (AAAS), dan kanal berita universitas.</p>
       <div className="button-row">
         <Link to={`${base}/kirim`} className="button button-dark">Mulai kirim berita</Link>
         <a href={newsTemplate} className="button button-outline" download><DownloadIcon /> Formulir kelengkapan (.docx)</a>

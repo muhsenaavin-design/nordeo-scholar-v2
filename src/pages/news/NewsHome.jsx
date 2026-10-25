@@ -3,18 +3,18 @@ import { Link } from 'react-router';
 import { editorialDesks, newsCategories, newsSteps } from '../../data/news';
 import { publishedNews } from '../../lib/store';
 import { siteBase } from '../../lib/site';
-import NewsCard, { SideStory } from '../../components/NewsCard';
-import { Arrow, useDocumentTitle } from '../../components/parts';
+import NewsCard from '../../components/NewsCard';
+import { HeadlineList, StoryCarousel } from '../../components/NewsPortal';
+import { Arrow, EmptyState, useDocumentTitle } from '../../components/parts';
 
 export default function NewsHome() {
-  useDocumentTitle('Newsroom');
+  useDocumentTitle('NordeoNews');
   const base = siteBase('news');
   const stories = publishedNews();
-  const featured = stories.find(story => story.featured) || stories[0];
-  const others = stories.filter(story => story.id !== featured.id);
   const [category, setCategory] = useState('Semua');
-  const used = newsCategories.filter(item => stories.some(story => story.category === item));
-  const filtered = category === 'Semua' ? others : stories.filter(story => story.category === category);
+  const filtered = category === 'Semua' ? stories : stories.filter(story => story.category === category);
+  const lead = filtered.find(story => story.featured) || filtered[0];
+  const latest = filtered.filter(story => story.id !== lead?.id).slice(0, 6);
 
   return <>
     <section className="news-masthead container" aria-labelledby="news-heading">
@@ -28,25 +28,30 @@ export default function NewsHome() {
       </div>
     </section>
 
-    <section className="news-lead container" id="terbaru" aria-labelledby="lead-heading">
-      <h2 id="lead-heading" className="sr-only">Laporan utama</h2>
-      <NewsCard story={featured} base={base} featured />
-      <div className="news-side">
-        <h2 className="side-heading">Terbaru</h2>
-        {others.slice(0, 3).map(story => <SideStory key={story.id} story={story} base={base} />)}
-      </div>
-    </section>
-
-    <section className="news-latest container section-space" aria-labelledby="latest-heading">
-      <div className="section-heading" data-reveal>
-        <div><h2 id="latest-heading">Semua <em>cerita.</em></h2></div>
-        <div className="filter-row" role="group" aria-label="Filter rubrik">
-          {['Semua', ...used].map(item => <button key={item} type="button" className={`filter-chip ${category === item ? 'is-active' : ''}`} aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}
+    <section className="news-portal container" id="terbaru" aria-labelledby="latest-heading">
+      <div className="news-portal-head" data-reveal>
+        <h2 id="latest-heading">Semua <em>cerita.</em></h2>
+        <div className="news-tabs" role="group" aria-label="Filter rubrik">
+          {['Semua', ...newsCategories].map(item => <button key={item} type="button" className={`news-tab ${category === item ? 'is-active' : ''}`} aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}
         </div>
       </div>
       <p className="sr-only" role="status">{filtered.length} cerita</p>
-      <div className="story-grid">{filtered.map(story => <NewsCard key={story.id} story={story} base={base} />)}</div>
-      <p className="sample-note">Artikel yang tampil saat ini adalah konten contoh redaksi untuk pratinjau tata letak Newsroom.</p>
+
+      {lead ? <>
+        {filtered.length > 1 && <StoryCarousel key={category} stories={filtered} base={base} label={category === 'Semua' ? 'Cerita pilihan' : `Cerita ${category}`} />}
+        <div className="news-split">
+          <NewsCard story={lead} base={base} featured />
+          <aside className="news-latest-list" aria-labelledby="newest-heading">
+            <h3 id="newest-heading" className="side-heading">Terbaru</h3>
+            {latest.length > 0 ? <HeadlineList stories={latest} base={base} /> : <p className="headline-empty">Belum ada cerita lain di rubrik ini.</p>}
+          </aside>
+        </div>
+      </> : <EmptyState
+        title={`Belum ada cerita ${category}`}
+        copy="Rubrik ini baru dibuka. Punya kabar yang cocok? Kirimkan ke redaksi."
+        action={<div className="button-row"><Link to={`${base}/kirim`} className="button button-dark">Kirim berita</Link><button type="button" className="button button-outline" onClick={() => setCategory('Semua')}>Lihat semua cerita</button></div>}
+      />}
+      <p className="sample-note">Artikel yang tampil saat ini adalah konten contoh redaksi untuk pratinjau tata letak NordeoNews.</p>
     </section>
 
     <section className="news-desks container" id="rubrik" aria-labelledby="desks-heading">

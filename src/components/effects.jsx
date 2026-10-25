@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { animate, motion, useInView, useMotionValue, useScroll, useSpring, useTransform } from 'motion/react';
 import { useLocation } from 'react-router';
 import { useAnimationPreference } from './motion-preference';
@@ -143,6 +143,37 @@ export function PageFade({ routeKey, children }) {
 function ScrollWord({ progress, range, children }) {
   const opacity = useTransform(progress, range, [0.18, 1]);
   return <motion.span className="scroll-word" style={{ opacity }}>{children}{' '}</motion.span>;
+}
+
+function StatementWord({ progress, range, children }) {
+  const opacity = useTransform(progress, range, [0.15, 1]);
+  const filter = useTransform(progress, range, ['blur(6px)', 'blur(0px)']);
+  const y = useTransform(progress, range, ['0.16em', '0em']);
+  return <motion.span className="statement-word" style={{ opacity, filter, y }}>{children}</motion.span>;
+}
+
+// Scroll-scrubbed statement in two tiers: a quiet intro line, then a large line whose
+// accent half gets a yellow highlight that sweeps in after the last word lands. Words
+// sharpen from a dim blur in reading order. No pinning, so the section keeps its natural
+// height. Reduced motion renders the finished state.
+export function ScrollStatement({ intro, lead, accent, className = '' }) {
+  const ref = useRef(null);
+  const { reduced } = useAnimationPreference();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.92', 'end 0.6'] });
+  const highlight = useTransform(scrollYProgress, [0.78, 1], ['0% 100%', '100% 100%']);
+  if (reduced) return <p className={`scroll-statement ${className}`.trim()}>
+    <span className="statement-intro">{intro}</span>
+    <span className="statement-main">{lead} <span className="statement-accent">{accent}</span></span>
+  </p>;
+  const parts = [intro, lead, accent].map(part => part.split(' '));
+  const total = parts.flat().length;
+  const range = index => [(index / total) * 0.72, (index / total) * 0.72 + 0.08];
+  const words = (list, offset) => list.map((word, index) => <Fragment key={index}>{index > 0 && ' '}<StatementWord progress={scrollYProgress} range={range(offset + index)}>{word}</StatementWord></Fragment>);
+  return <p ref={ref} className={`scroll-statement ${className}`.trim()}>
+    <span className="sr-only">{intro} {lead} {accent}</span>
+    <span className="statement-intro" aria-hidden="true">{words(parts[0], 0)}</span>
+    <span className="statement-main" aria-hidden="true">{words(parts[1], parts[0].length)} <motion.span className="statement-accent" style={{ backgroundSize: highlight }}>{words(parts[2], parts[0].length + parts[1].length)}</motion.span></span>
+  </p>;
 }
 
 // Words brighten one by one as the paragraph scrolls through the viewport.

@@ -4,6 +4,7 @@ import { ecosystems } from '../data/ecosystems';
 import { SITES, ecosystemHref, mainHref, micrositeNavHref, siteBase, siteHome } from '../lib/site';
 import { contact, officialSocial } from '../config/links';
 import { Arrow, SmartLink, StatusPill } from './parts';
+import NordeoNewsBrand from './NordeoNewsBrand';
 
 function Chevron() {
   return <svg aria-hidden="true" viewBox="0 0 16 16" className="chevron" fill="none"><path d="m3.5 6 4.5 4 4.5-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
@@ -150,12 +151,12 @@ export function MicroHeader({ siteKey }) {
   const isActive = item => item.path ? pathname === `${base}${item.path}` : (pathname === `${base}/` || pathname === base || pathname === '/') && hash === `#${item.hash}`;
   const cta = micrositeNavHref(siteKey, site.cta);
 
-  return <header lang="en" aria-label={`Nordeo ${site.name}`} className={`site-header micro-header site-${siteKey}`}>
+  return <header lang="en" aria-label={site.fullName} className={`site-header micro-header site-${siteKey}`}>
     <div className="container header-inner">
-      <Link to={siteHome(siteKey)} className="micro-brand" aria-label={`Nordeo ${site.name} home`}>
+      <Link to={siteHome(siteKey)} className="micro-brand" aria-label={`${site.fullName} home`}>
         <img src="/assets/logo-transparent.png" width="220" height="60" alt="" decoding="async" />
         <span className="micro-divider" aria-hidden="true" />
-        <span className="micro-wordmark"><strong>{site.name}</strong></span>
+        {siteKey === 'news' ? <NordeoNewsBrand className="micro-wordmark" /> : <span className="micro-wordmark"><strong>{site.name}</strong></span>}
       </Link>
       <MenuToggle open={menuOpen} toggleRef={toggleRef} controls={`${siteKey}-navigation`} onClick={() => setMenuOpen(value => !value)} />
       <nav id={`${siteKey}-navigation`} aria-label={`${site.name} navigation`} className={`primary-navigation ${menuOpen ? 'is-open' : ''}`}>

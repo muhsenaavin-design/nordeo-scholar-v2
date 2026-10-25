@@ -326,7 +326,7 @@ export default function NewsSubmit() {
               <Check id="imageRights" checked={form.imageRights} onChange={imageRights => set({ imageRights })} error={errors.imageRights}>Saya memiliki hak atau izin tertulis untuk gambar ini, dan gambar bukan dari situs stok tanpa lisensi penggunaan ulang.</Check>
             </div>
             <div className="media-preview">
-              <p className="ai-label">Pratinjau di Newsroom</p>
+              <p className="ai-label">Pratinjau di NordeoNews</p>
               {form.image ? <article className="preview-card">
                 <ImagePreview form={form} compact />
                 <div><small>{form.category}</small><strong>{form.title || 'Judul berita Anda'}</strong><p>{form.lead || 'Lead akan tampil di sini.'}</p></div>

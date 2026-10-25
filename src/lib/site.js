@@ -10,7 +10,8 @@ export const SITES = {
   },
   news: {
     key: 'news',
-    name: 'Newsroom',
+    name: 'NordeoNews',
+    fullName: 'NordeoNews',
     label: 'Media & News Publishing',
     path: '/news',
     host: 'news.nordeoscholar.com',
@@ -24,6 +25,7 @@ export const SITES = {
   training: {
     key: 'training',
     name: 'Academy',
+    fullName: 'Nordeo Academy',
     label: 'Academic Training',
     path: '/training',
     host: 'training.nordeoscholar.com',

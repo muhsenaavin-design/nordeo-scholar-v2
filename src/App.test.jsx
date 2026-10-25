@@ -29,12 +29,26 @@ test('makes journal discovery and ecosystem availability clear on the homepage',
   render(<MemoryRouter><App /></MemoryRouter>);
   const main = within(screen.getByRole('main'));
   expect(main.getByRole('heading', { level: 1, name: /advancing knowledge/i })).toBeInTheDocument();
-  expect(main.getByRole('link', { name: /explore journals/i })).toHaveAttribute('href', '/journals');
+  expect(main.queryByRole('link', { name: /explore journals/i })).not.toBeInTheDocument();
+  expect(main.getByRole('link', { name: /discover the ecosystem/i })).toHaveAttribute('href', '/#ecosystem');
   expect(main.getAllByText(/^coming soon$/i)).toHaveLength(1);
   for (const title of ['Journals Publishing', 'Media & News Publishing', 'Academic Training', 'Books Publishing']) {
     expect(main.getByRole('heading', { level: 3, name: title })).toBeInTheDocument();
   }
+  expect(main.getByText('Media & News')).toBeInTheDocument();
+  const browse = main.getByRole('link', { name: /browse the journals/i });
+  expect(browse).toHaveAttribute('href', 'https://nordeoscholar.com/journal/');
+  expect(browse).toHaveAttribute('target', '_blank');
+  expect(browse).toHaveAttribute('rel', 'noopener noreferrer');
   expect(main.getByRole('link', { name: /visit jetsi/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jetsi');
+});
+
+test('homepage states the vision in place of the metrics row', () => {
+  render(<MemoryRouter><App /></MemoryRouter>);
+  expect(screen.getByRole('heading', { level: 2, name: 'Our Vision' })).toBeInTheDocument();
+  expect(screen.getByText(/to become a trusted academic publishing and research services company/i)).toBeInTheDocument();
+  expect(screen.queryByText(/articles published in jetsi/i)).not.toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 3, name: 'NordeoNews' })).toBeInTheDocument();
 });
 
 test('mobile navigation exposes its state and closes with Escape', () => {
@@ -141,22 +155,34 @@ test('academy registration preselects the program and confirms with a reference'
   expect(screen.getByRole('link', { name: /kirim ke academy@nordeoscholar.com/i }).getAttribute('href')).toMatch(/^mailto:academy@nordeoscholar\.com/);
 });
 
-test('newsroom guide publishes the step-by-step workflow and audited references', async () => {
+test('NordeoNews guide publishes the step-by-step workflow and audited references', async () => {
   render(<MemoryRouter initialEntries={['/news/panduan']}><App /></MemoryRouter>);
   expect(await screen.findByRole('heading', { level: 1, name: /dari kabar riset/i })).toBeInTheDocument();
   expect(screen.getAllByRole('heading', { level: 3 }).map(node => node.textContent)).toEqual(expect.arrayContaining(['Cek kecocokan kanal', 'Isi formulir & jadwal', 'Tayang & arsip']));
   expect(screen.getByRole('link', { name: /eurekalert! \(aaas\)/i })).toHaveAttribute('href', 'https://www.eurekalert.org/releaseguidelines');
 });
 
-test('homepage introduces the founder and offers an honest email signup', async () => {
+test('homepage introduces the founder and closes with the office address and map', () => {
   render(<MemoryRouter><App /></MemoryRouter>);
   expect(screen.getByRole('heading', { level: 2, name: /built by a researcher/i })).toBeInTheDocument();
   expect(screen.getByRole('img', { name: /fandi achmad, founder of nordeo scholar/i })).toHaveAttribute('src', '/assets/team/fandi-achmad.webp');
   expect(screen.getByText('Integrity')).toBeInTheDocument();
-  const email = screen.getByLabelText('Email address');
-  fireEvent.click(screen.getByRole('button', { name: 'Subscribe' }));
-  expect(screen.getByText('Enter a valid email address.')).toBeInTheDocument();
-  fireEvent.change(email, { target: { value: 'reader@kampus.ac.id' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Subscribe' }));
-  expect((await screen.findByRole('link', { name: 'Open email' })).getAttribute('href')).toMatch(/^mailto:info@nordeoscholar\.com\?subject=Subscribe/);
+  expect(screen.queryByRole('button', { name: 'Subscribe' })).not.toBeInTheDocument();
+  const location = within(document.getElementById('contact'));
+  expect(location.getByText(/G-Land Arcadia Buah Batu, Jl\. Cikoneng, Bojongsoang 40288, Bandung, Indonesia\./)).toBeInTheDocument();
+  expect(location.getByTitle(/map showing nordeo scholar publishing/i).getAttribute('src')).toMatch(/^https:\/\/www\.google\.com\/maps\?q=G-Land/);
+});
+
+test('NordeoNews brands the news microsite and filters stories by the new rubrics', async () => {
+  render(<MemoryRouter initialEntries={['/news/']}><App /></MemoryRouter>);
+  expect(await screen.findByRole('link', { name: 'NordeoNews home' })).toBeInTheDocument();
+  const tabs = within(await screen.findByRole('group', { name: /filter rubrik/i }));
+  expect(tabs.getAllByRole('button').map(node => node.textContent)).toEqual(['Semua', 'Berita', 'Pendidikan', 'Bisnis', 'Teknologi', 'Lifestyle', 'Opini']);
+  expect(tabs.getByRole('button', { name: 'Semua' })).toHaveAttribute('aria-pressed', 'true');
+  expect(screen.getByRole('region', { name: /cerita pilihan/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 3, name: 'Terbaru' })).toBeInTheDocument();
+  fireEvent.click(tabs.getByRole('button', { name: 'Opini' }));
+  expect(screen.getByRole('status')).toHaveTextContent('2 cerita');
+  fireEvent.click(tabs.getByRole('button', { name: 'Bisnis' }));
+  expect(screen.getByRole('heading', { name: /belum ada cerita bisnis/i })).toBeInTheDocument();
 });

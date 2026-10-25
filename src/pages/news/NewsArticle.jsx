@@ -27,7 +27,7 @@ export default function NewsArticle() {
 
   return <article className="news-article">
     <header className="container article-header">
-      <Link to={`${base}/`} className="back-link">Kembali ke Newsroom</Link>
+      <Link to={`${base}/`} className="back-link">Kembali ke NordeoNews</Link>
       <h1>{story.title}</h1>
       <p className="article-dek">{story.dek}</p>
       <div className="article-byline">

@@ -1,3 +1,5 @@
+import { externalLinks } from '../config/links';
+
 // One record per ecosystem. Order is the order used in the header menu, the homepage
 // showcase, and the footer. Copy is English: it appears on the landing page and in menus.
 export const ecosystems = [
@@ -14,20 +16,22 @@ export const ecosystems = [
     tone: 'live',
     domain: 'nordeoscholar.com/journals',
     cta: 'Browse the journals',
+    // The showcase card opens the live journal portal; menus still point to /journals.
+    ctaHref: externalLinks.journalPortal,
   },
   {
     id: 'news',
     number: '02',
     title: 'Media & News Publishing',
-    short: 'Newsroom',
-    description: 'An academic newsroom for research news, editor’s notes, and campus stories, with an open submission desk.',
+    short: 'Media & News',
+    description: 'NordeoNews: research news, editor’s notes, and campus stories, with an open submission desk.',
     menuCopy: 'Research news and story submissions',
     image: '/assets/generated/ecosystem-media-v1.webp',
     alt: 'Academic media studio with a microphone and editing screen',
     status: 'New',
     tone: 'open',
     domain: 'news.nordeoscholar.com',
-    cta: 'Enter the Newsroom',
+    cta: 'Enter NordeoNews',
   },
   {
     id: 'training',
@@ -59,12 +63,12 @@ export const ecosystems = [
   },
 ];
 
-export const journalFacts = [
-  ['Active peer-reviewed journals', 2, ''],
-  ['Articles published in JETSI', 14, ''],
-  ['JETSI records in GARUDA', 13, ''],
-  ['Connected ecosystems', 4, ''],
-];
+// Client-supplied vision, split only for display: a quiet intro, then the large line.
+export const vision = {
+  intro: 'To become a trusted academic publishing and research services company that',
+  lead: 'advances knowledge',
+  accent: 'and creates global impact.',
+};
 
 // Founder profile: name and degrees from the JETSI and JIEL editorial pages; the founder
 // role was supplied by Nordeo. Only name, degrees, and role are shown.
