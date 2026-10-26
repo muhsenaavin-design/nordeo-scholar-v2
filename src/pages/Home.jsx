@@ -54,7 +54,7 @@ function EcosystemShowcase() {
           <h3>{item.title}</h3>
           <p className="eco-description">{item.description}</p>
           <div className="eco-panel-foot">
-            <StatusPill tone={item.tone}>{item.status}</StatusPill>
+            {item.status && <StatusPill tone={item.tone}>{item.status}</StatusPill>}
             <SmartLink href={item.ctaHref || ecosystemHref(item.id)} className="eco-cta" {...(item.ctaHref ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{item.cta} <Arrow /></SmartLink>
           </div>
         </div>

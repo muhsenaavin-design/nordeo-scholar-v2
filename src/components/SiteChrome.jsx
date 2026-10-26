@@ -73,7 +73,7 @@ export function EcosystemMenu({ current = 'main', label = 'Ecosystem' }) {
             {ecosystems.map((item, index) => <li key={item.id} style={{ '--i': index }}>
               <SmartLink href={ecosystemHref(item.id)} className={`mega-item ${preview === item.id ? 'is-previewed' : ''}`} aria-current={current === item.id ? 'true' : undefined} onPointerEnter={() => setPreview(item.id)} onFocus={() => setPreview(item.id)} onClick={() => setOpen(false)}>
                 <span className="mega-copy"><strong>{item.title}</strong><small>{item.menuCopy}</small></span>
-                <StatusPill tone={item.tone}>{item.status}</StatusPill>
+                {item.status && <StatusPill tone={item.tone}>{item.status}</StatusPill>}
               </SmartLink>
             </li>)}
           </ul>
@@ -101,7 +101,7 @@ function MobileEcosystems({ current }) {
   return <div className="mobile-ecosystem">
     <p className="mobile-label">Ecosystem</p>
     {ecosystems.map(item => <SmartLink key={item.id} href={ecosystemHref(item.id)} className="mobile-ecosystem-link" aria-current={current === item.id ? 'true' : undefined}>
-      <strong>{item.title}</strong><StatusPill tone={item.tone}>{item.status}</StatusPill>
+      <strong>{item.title}</strong>{item.status && <StatusPill tone={item.tone}>{item.status}</StatusPill>}
     </SmartLink>)}
   </div>;
 }
