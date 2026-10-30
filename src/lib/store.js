@@ -68,7 +68,8 @@ export function saveNews(items) {
 
 export function publishedNews(items = getNews()) {
   return items
-    .filter(item => item.status !== 'draft')
+    // Only articles the Owner approved in the admin dashboard; older records have no status.
+    .filter(item => !item.status || item.status === 'published')
     .sort((a, b) => String(b.date).localeCompare(String(a.date)));
 }
 
