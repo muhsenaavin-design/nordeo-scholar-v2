@@ -16,6 +16,8 @@ const NewsSubmit = lazy(() => import('./pages/news/NewsSubmit'));
 const TrainingHome = lazy(() => import('./pages/training/TrainingHome'));
 const TrainingProgram = lazy(() => import('./pages/training/TrainingProgram'));
 const TrainingRegister = lazy(() => import('./pages/training/TrainingRegister'));
+// The admin dashboard is a separate app shell without the public header and footer.
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 
 function Layout({ children }) {
   const { pathname } = useLocation();
@@ -75,5 +77,9 @@ function SiteRoutes() {
 }
 
 export default function App() {
+  const { pathname } = useLocation();
+  if (!hostSite() && (pathname === '/admin' || pathname.startsWith('/admin/'))) {
+    return <Suspense fallback={<div className="route-loading" aria-busy="true" />}><AdminDashboard /></Suspense>;
+  }
   return <MotionPreferenceProvider><Layout><Suspense fallback={<div className="route-loading" aria-busy="true" />}><SiteRoutes /></Suspense></Layout></MotionPreferenceProvider>;
 }
