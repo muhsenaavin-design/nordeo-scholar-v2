@@ -176,15 +176,19 @@ export function ScrollStatement({ intro, lead, accent, className = '' }) {
   </p>;
 }
 
-// Words brighten one by one as the paragraph scrolls through the viewport.
-export function ScrollWords({ text, className = '' }) {
+// Words brighten one by one as the paragraph scrolls through the viewport. An optional
+// `accent` tail is set in the accent colour and fills last.
+export function ScrollWords({ text, accent = '', className = '' }) {
   const ref = useRef(null);
   const { reduced } = useAnimationPreference();
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.85', 'end 0.45'] });
+  if (reduced) return <p className={className}>{text}{accent && <> <span className="scroll-accent">{accent}</span></>}</p>;
   const words = text.split(' ');
-  if (reduced) return <p className={className}>{text}</p>;
+  const tail = accent ? accent.split(' ') : [];
+  const total = words.length + tail.length;
+  const word = (value, index) => <ScrollWord key={index} progress={scrollYProgress} range={[index / total, (index + 1) / total]}>{value}</ScrollWord>;
   return <p ref={ref} className={`scroll-words ${className}`.trim()}>
-    <span className="sr-only">{text}</span>
-    <span aria-hidden="true">{words.map((word, index) => <ScrollWord key={index} progress={scrollYProgress} range={[index / words.length, (index + 1) / words.length]}>{word}</ScrollWord>)}</span>
+    <span className="sr-only">{accent ? `${text} ${accent}` : text}</span>
+    <span aria-hidden="true">{words.map(word)}{tail.length > 0 && <span className="scroll-accent">{tail.map((value, index) => word(value, words.length + index))}</span>}</span>
   </p>;
 }

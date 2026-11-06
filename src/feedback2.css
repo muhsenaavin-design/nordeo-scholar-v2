@@ -67,30 +67,42 @@ html[data-motion="reduced"] .hero-rail-fill { transform: none; }
   .hero-rail { left: clamp(80px, 6.4vw, 96px); right: clamp(80px, 6.4vw, 96px); }
 }
 
-/* ── About Nordeo (homepage): Our Vision, overview, and founder's note in one split ── */
-.home-about { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 28px clamp(40px, 6vw, 96px); margin-top: clamp(40px, 5vw, 72px); padding-top: clamp(28px, 3vw, 40px); border-top: 1px solid var(--line); }
-.home-about-head h2 { margin-top: 18px; max-width: 14ch; font: 600 clamp(30px, 3.4vw, 50px)/1.06 var(--sans); letter-spacing: -.04em; color: var(--ink); }
-.home-about-summary { max-width: 52ch; font-size: clamp(17px, 1.45vw, 20px); line-height: 1.6; color: var(--ink-2); }
-.home-about-summary mark { background: none; color: var(--ink); font-weight: 600; box-shadow: inset 0 -.38em 0 rgba(255, 210, 24, .45); }
-.home-about-quote { display: flex; gap: 14px; align-items: flex-start; margin: 26px 0 0; padding-top: 22px; border-top: 1px dashed var(--line); }
-.home-about-quote img { flex: 0 0 48px; width: 48px; height: 48px; border-radius: 50%; object-fit: cover; object-position: 50% 18%; background: var(--surface-2); }
-.home-about-quote blockquote { margin: 0; font-size: 16px; line-height: 1.55; color: var(--ink); }
-.home-about-quote figcaption { margin-top: 6px; font-size: 13px; color: var(--ink-3); }
-.home-about-quote figcaption strong { font-weight: 600; color: var(--ink); }
-.home-about-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; margin-top: 26px; }
-.home-about-links .button { min-height: 44px; }
-.home-about-links .text-link { min-height: 44px; }
-.site-main .home-about + .ecosystem-section { padding-top: clamp(56px, 6vw, 88px); }
-@media (max-width: 900px) {
-  .home-about { grid-template-columns: 1fr; gap: 20px; }
-  .home-about-head h2 { max-width: 18ch; margin-top: 14px; }
+/* ── About Nordeo (homepage): label, scroll-filled manifesto, founder line, pills ── */
+.home-about { display: flex; flex-direction: column; align-items: center; margin-top: clamp(40px, 5vw, 72px); padding-top: clamp(48px, 6vw, 88px); border-top: 1px solid var(--line); text-align: center; }
+.site .home-about-label { display: inline-flex; align-items: center; gap: 10px; margin: 0; font: 600 12px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+.home-about-label::before, .home-about-label::after { content: ''; width: 18px; height: 2px; border-radius: 1px; background: #ffd218; }
+.site .home-about-statement { max-width: 32ch; margin: 22px auto 0; font: 500 clamp(26px, 3.1vw, 44px)/1.18 var(--sans); letter-spacing: -.035em; color: var(--ink); text-wrap: balance; }
+.home-about-statement .scroll-accent { color: var(--teal); }
+.home-about-quote { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px; max-width: 720px; margin: clamp(28px, 3vw, 40px) auto 0; }
+.home-about-quote img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: 50% 18%; background: var(--surface-2); }
+.home-about-quote blockquote { margin: 0; font-size: 16px; line-height: 1.5; color: var(--ink-2); }
+.home-about-quote figcaption { font-size: 13px; color: var(--ink-3); }
+.home-about-quote figcaption strong { margin-right: 4px; font-weight: 600; color: var(--ink); }
+.home-about-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: clamp(24px, 3vw, 32px); }
+
+/* Pill link with a round arrow badge (after Vertix Advisory). The badge nudges on hover. */
+.pill-cta { display: inline-flex; align-items: center; gap: 14px; min-height: 48px; padding: 5px 5px 5px 22px; border-radius: var(--r-pill); background: var(--surface-2); color: var(--ink); font-size: 14.5px; font-weight: 600; transition: background-color .2s; }
+.pill-cta.is-dark { background: var(--deep); color: #fff; }
+.pill-cta-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #fff; color: var(--deep); }
+.pill-cta:not(.is-dark) .pill-cta-icon { background: var(--deep); color: #fff; }
+.pill-cta-icon .arrow { width: 16px; height: 16px; transition: transform .25s cubic-bezier(.22, .61, .36, 1); }
+@media (hover: hover) {
+  .pill-cta:hover { background: var(--line); }
+  .pill-cta.is-dark:hover { background: var(--teal); }
+  .pill-cta:hover .pill-cta-icon .arrow { transform: translateX(2px); }
 }
+html[data-motion="reduced"] .pill-cta-icon .arrow { transition: none; }
+
+.site-main .home-about + .ecosystem-section { padding-top: clamp(64px, 7vw, 104px); }
 @media (max-width: 640px) {
-  .home-about { margin-top: 28px; padding-top: 24px; }
-  .home-about-summary { font-size: 16.5px; }
-  .home-about-quote { margin-top: 20px; padding-top: 18px; }
-  .home-about-quote blockquote { font-size: 15px; }
-  .site-main .home-about + .ecosystem-section { padding-top: 48px; }
+  .home-about { margin-top: 28px; padding-top: 40px; }
+  .site .home-about-statement { margin-top: 18px; font-size: 25px; line-height: 1.25; }
+  .home-about-quote { margin-top: 24px; }
+  .home-about-quote blockquote { flex-basis: 100%; order: 2; font-size: 15px; }
+  .home-about-quote figcaption { order: 1; }
+  .home-about-links { width: 100%; }
+  .pill-cta { flex: 1 1 100%; justify-content: space-between; }
+  .site-main .home-about + .ecosystem-section { padding-top: 56px; }
 }
 
 /* ── Core values (Our Story page) ──────────────────────────────────────────── */

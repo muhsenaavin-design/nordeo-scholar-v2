@@ -64,12 +64,12 @@ test('makes journal discovery and ecosystem availability clear on the homepage',
 test('homepage merges vision, overview, and founder note into one section before the four rooms', () => {
   render(<MemoryRouter><App /></MemoryRouter>);
   const main = within(screen.getByRole('main'));
-  const about = main.getByRole('heading', { level: 2, name: /built by a researcher/i });
+  const about = main.getByRole('heading', { level: 2, name: /about nordeo/i });
   const rooms = main.getByRole('heading', { level: 2, name: /one house of knowledge/i });
   expect(about.closest('section')).toHaveAttribute('id', 'about');
   expect(about.compareDocumentPosition(rooms) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   const section = within(about.closest('section'));
-  expect(section.getByText(/to become a trusted academic publishing and research services company/i)).toBeInTheDocument();
+  expect(section.getByText(/journals, news, training, and books under one roof/i)).toHaveTextContent(/advance knowledge and create global impact/i);
   expect(section.getByText(/good research deserves a clear, honest path/i)).toBeInTheDocument();
   expect(section.getByRole('link', { name: /more about nordeo/i })).toHaveAttribute('href', '/about');
   expect(section.getByRole('link', { name: /meet the founder/i })).toHaveAttribute('href', '/founder');

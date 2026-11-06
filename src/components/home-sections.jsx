@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
-import { ecosystems, founder, vision } from '../data/ecosystems';
-import { companyOverview, faqs, indexingServices, partners, testimonials } from '../data/company';
+import { ecosystems, founder } from '../data/ecosystems';
+import { faqs, indexingServices, partners, testimonials } from '../data/company';
 import { newsCategoryEn } from '../data/news';
 import { programTypeEn, trainingPrograms } from '../data/training';
 import { contact } from '../config/links';
 import { ecosystemHref } from '../lib/site';
 import { formatDate, popularNews, publishedNews } from '../lib/store';
-import { BlurText } from './effects';
+import { BlurText, ScrollWords } from './effects';
 import { useAnimationPreference } from './motion-preference';
 import { Arrow, SmartLink } from './parts';
 
@@ -95,29 +95,28 @@ export function HeroSlideshow({ notice = null }) {
   </div>;
 }
 
-/* ── About Nordeo: one short section between the hero and the four rooms ───────
-   Our Vision, the company overview, and the founder's note used to be three stacked
-   sections. They are now one editorial split (heading left, summary right) so the
-   ecosystem sits close to the hero; the full profile lives on /about and /founder. */
+/* ── About Nordeo: one short manifesto between the hero and the four rooms ─────
+   Option A of the About audit (Nov 2026), after Vertix Advisory and Cavell Partners:
+   a small label, one centred statement whose words fill from grey to ink as it scrolls
+   (closing line in teal), the founder's line, and two pill links. Our Vision, the company
+   overview, and the founder's note used to be three stacked sections; the full profile
+   lives on /about and /founder. Reduced motion shows the finished statement. */
 export function CompanyOverview() {
   return <section id="about" className="home-about container" aria-labelledby="home-about-heading">
-    <div className="home-about-head" data-reveal>
-      <p className="vision-label">About Nordeo</p>
-      <h2 id="home-about-heading">Built by a researcher, <em>for researchers.</em></h2>
-    </div>
-    <div className="home-about-body" data-reveal style={{ '--reveal-delay': '100ms' }}>
-      <p className="home-about-summary">{companyOverview.name} is an academic publishing and research support company. Our vision: {vision.intro.replace(/^To/, 'to')} {vision.lead} <mark>{vision.accent}</mark></p>
-      <figure className="home-about-quote">
-        <img src={founder.photoSmall} alt="" width="48" height="48" loading="lazy" decoding="async" />
-        <div>
-          <blockquote>“Good research deserves a clear, honest path to its readers.”</blockquote>
-          <figcaption><strong>{founder.name}</strong> <span>Founder &amp; CEO</span></figcaption>
-        </div>
-      </figure>
-      <div className="home-about-links">
-        <Link to="/about" className="button button-dark button-small">More about Nordeo</Link>
-        <Link to="/founder" className="text-link">Meet the founder <Arrow /></Link>
-      </div>
+    <h2 id="home-about-heading" className="home-about-label" data-reveal>About Nordeo</h2>
+    <ScrollWords
+      className="home-about-statement"
+      text="Nordeo Scholar brings journals, news, training, and books under one roof, so research can"
+      accent="advance knowledge and create global impact."
+    />
+    <figure className="home-about-quote" data-reveal>
+      <img src={founder.photoSmall} alt="" width="40" height="40" loading="lazy" decoding="async" />
+      <blockquote>“Good research deserves a clear, honest path to its readers.”</blockquote>
+      <figcaption><strong>{founder.name}</strong> Founder &amp; CEO</figcaption>
+    </figure>
+    <div className="home-about-links" data-reveal style={{ '--reveal-delay': '80ms' }}>
+      <Link to="/about" className="pill-cta is-dark">More about Nordeo <span className="pill-cta-icon"><Arrow /></span></Link>
+      <Link to="/founder" className="pill-cta">Meet the founder <span className="pill-cta-icon"><Arrow /></span></Link>
     </div>
   </section>;
 }
