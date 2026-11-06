@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { ecosystems, founder, principles, vision } from '../data/ecosystems';
+import { ecosystems } from '../data/ecosystems';
 import { contact, office } from '../config/links';
 import { ecosystemHref } from '../lib/site';
-import { Parallax, ScrollStatement, ScrollWords } from '../components/effects';
 import { MotionNotice } from '../components/motion-preference';
 import JournalFinder from '../components/JournalFinder';
 import { AcademyCalendar, CompanyOverview, HeroSlideshow, NewsSpotlight, TrustAndFaq } from '../components/home-sections';
@@ -13,15 +12,6 @@ function Hero() {
   return <section className="hero container" aria-labelledby="hero-heading">
     <div className="hero-frame">
       <HeroSlideshow notice={<MotionNotice />} />
-    </div>
-  </section>;
-}
-
-function Vision() {
-  return <section className="vision" aria-labelledby="vision-heading">
-    <div className="container vision-inner" data-reveal>
-      <h2 id="vision-heading" className="vision-label">Our Vision</h2>
-      <ScrollStatement className="vision-statement" {...vision} />
     </div>
   </section>;
 }
@@ -51,33 +41,6 @@ function EcosystemShowcase() {
   </section>;
 }
 
-function Founder() {
-  return <section id="founder" className="founder-section" aria-labelledby="founder-heading">
-    <div className="container founder-grid">
-      <figure className="founder-card" data-reveal>
-        <Parallax className="founder-photo" distance={16}>
-          <picture>
-            <source media="(max-width: 640px)" srcSet={founder.photoSmall} />
-            <img src={founder.photo} alt={`Portrait of ${founder.name}, founder of Nordeo Scholar`} width="1247" height="1261" loading="lazy" decoding="async" />
-          </picture>
-        </Parallax>
-        <figcaption className="founder-name"><strong>{founder.name}, {founder.degrees}</strong><span>{founder.role}</span></figcaption>
-      </figure>
-      <div className="founder-copy" data-reveal style={{ '--reveal-delay': '120ms' }}>
-        <p className="founder-kicker">A note from our founder</p>
-        <h2 id="founder-heading">Built by a researcher, <em>for researchers.</em></h2>
-        <ScrollWords className="founder-statement" text="Nordeo Scholar began with a simple belief: good research deserves a clear, honest path to its readers. Today it brings journals, media & news, training, and books under one roof." />
-        {founder.signature && <img className="founder-signature" src={founder.signature} alt={`Signature of ${founder.name}`} loading="lazy" decoding="async" />}
-        <ul className="founder-principles" aria-label="Our core values">{principles.map(([term, detail]) => <li key={term} title={detail}>{term}</li>)}</ul>
-        <div className="founder-links">
-          <Link to="/about" className="button button-dark">Our story</Link>
-          <Link to="/founder" className="text-link">Founder profile <Arrow /></Link>
-        </div>
-      </div>
-    </div>
-  </section>;
-}
-
 function Location() {
   return <section id="contact" className="final-cta location-section" aria-labelledby="location-heading">
     <div className="container final-grid location-grid">
@@ -102,13 +65,12 @@ function Location() {
   </section>;
 }
 
-// Order follows Feedback 2 (Nov 2026): company overview between Our Vision and the four
-// rooms; NordeoNews and the Academy calendar as separate sections; FAQ before contact.
+// Order follows Feedback 2 (Nov 2026), with Our Vision, the company overview, and the
+// founder's note merged into one short About section so the four rooms sit near the hero.
 export default function Home() {
   useDocumentTitle(null);
   return <div lang="en">
     <Hero />
-    <Vision />
     <CompanyOverview />
     <EcosystemShowcase />
     <div className="journals-section section-space container" id="journals">
@@ -116,7 +78,6 @@ export default function Home() {
     </div>
     <NewsSpotlight />
     <AcademyCalendar />
-    <Founder />
     <TrustAndFaq />
     <Location />
   </div>;

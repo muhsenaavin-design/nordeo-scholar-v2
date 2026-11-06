@@ -67,23 +67,33 @@ html[data-motion="reduced"] .hero-rail-fill { transform: none; }
   .hero-rail { left: clamp(80px, 6.4vw, 96px); right: clamp(80px, 6.4vw, 96px); }
 }
 
-/* ── Our Vision: one grid with the company overview below it ───────────────── */
-.vision-inner, .company-inner { grid-template-columns: minmax(180px, .3fr) minmax(0, 1fr); align-items: start; }
-.vision-statement .statement-intro { max-width: 46ch; }
-/* Two even lines on desktop: "advances knowledge and" / "creates global impact." */
-@media (min-width: 901px) {
-  .vision-statement .statement-accent { display: inline-block; }
+/* ── About Nordeo (homepage): Our Vision, overview, and founder's note in one split ── */
+.home-about { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 28px clamp(40px, 6vw, 96px); margin-top: clamp(40px, 5vw, 72px); padding-top: clamp(28px, 3vw, 40px); border-top: 1px solid var(--line); }
+.home-about-head h2 { margin-top: 18px; max-width: 14ch; font: 600 clamp(30px, 3.4vw, 50px)/1.06 var(--sans); letter-spacing: -.04em; color: var(--ink); }
+.home-about-summary { max-width: 52ch; font-size: clamp(17px, 1.45vw, 20px); line-height: 1.6; color: var(--ink-2); }
+.home-about-summary mark { background: none; color: var(--ink); font-weight: 600; box-shadow: inset 0 -.38em 0 rgba(255, 210, 24, .45); }
+.home-about-quote { display: flex; gap: 14px; align-items: flex-start; margin: 26px 0 0; padding-top: 22px; border-top: 1px dashed var(--line); }
+.home-about-quote img { flex: 0 0 48px; width: 48px; height: 48px; border-radius: 50%; object-fit: cover; object-position: 50% 18%; background: var(--surface-2); }
+.home-about-quote blockquote { margin: 0; font-size: 16px; line-height: 1.55; color: var(--ink); }
+.home-about-quote figcaption { margin-top: 6px; font-size: 13px; color: var(--ink-3); }
+.home-about-quote figcaption strong { font-weight: 600; color: var(--ink); }
+.home-about-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; margin-top: 26px; }
+.home-about-links .button { min-height: 44px; }
+.home-about-links .text-link { min-height: 44px; }
+.site-main .home-about + .ecosystem-section { padding-top: clamp(56px, 6vw, 88px); }
+@media (max-width: 900px) {
+  .home-about { grid-template-columns: 1fr; gap: 20px; }
+  .home-about-head h2 { max-width: 18ch; margin-top: 14px; }
+}
+@media (max-width: 640px) {
+  .home-about { margin-top: 28px; padding-top: 24px; }
+  .home-about-summary { font-size: 16.5px; }
+  .home-about-quote { margin-top: 20px; padding-top: 18px; }
+  .home-about-quote blockquote { font-size: 15px; }
+  .site-main .home-about + .ecosystem-section { padding-top: 48px; }
 }
 
-/* ── Company overview + core values ────────────────────────────────────────── */
-.company-section { padding-top: clamp(56px, 6vw, 88px); }
-.company-inner { display: grid; gap: 24px clamp(32px, 5vw, 80px); padding-top: clamp(28px, 3vw, 40px); border-top: 1px solid var(--line); }
-.company-name { font: 600 clamp(26px, 2.6vw, 38px)/1.12 var(--sans); letter-spacing: -.035em; color: var(--ink); }
-.company-copy { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px clamp(24px, 3vw, 48px); margin-top: 18px; }
-.company-copy p { font-size: 16.5px; line-height: 1.75; color: var(--ink-2); }
-.company-links { display: flex; flex-wrap: wrap; gap: 4px 28px; margin-top: 18px; }
-.company-links .text-link { min-height: 44px; }
-
+/* ── Core values (Our Story page) ──────────────────────────────────────────── */
 .values-band { position: relative; overflow: hidden; margin-top: clamp(48px, 6vw, 80px); padding-block: clamp(56px, 7vw, 96px); background: var(--deep); color: #fff; }
 .values-band::before { content: ''; position: absolute; right: -12%; top: -45%; width: 52%; aspect-ratio: 1; border: 1px solid rgba(255, 210, 24, .16); border-radius: 50%; pointer-events: none; }
 .values-head { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: clamp(28px, 4vw, 44px); }
@@ -351,8 +361,6 @@ html[data-motion="reduced"] .hero-slide-copy { transform: none; }
 /* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .hero-arrow { display: none; }
-  .company-inner, .vision-inner { grid-template-columns: 1fr; }
-  .company-copy { grid-template-columns: 1fr; }
   .values-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .nn-grid, .academy-grid, .faq-grid, .reel, .story-pillars, .founder-page-grid { grid-template-columns: 1fr; }
   .faq-aside, .founder-page-grid .founder-card { position: static; }

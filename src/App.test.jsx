@@ -61,13 +61,21 @@ test('makes journal discovery and ecosystem availability clear on the homepage',
   expect(main.getByRole('link', { name: /visit jetsi/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jetsi');
 });
 
-test('homepage states the vision in place of the metrics row', () => {
+test('homepage merges vision, overview, and founder note into one section before the four rooms', () => {
   render(<MemoryRouter><App /></MemoryRouter>);
-  expect(screen.getByRole('heading', { level: 2, name: 'Our Vision' })).toBeInTheDocument();
-  expect(screen.getByText(/to become a trusted academic publishing and research services company/i)).toBeInTheDocument();
+  const main = within(screen.getByRole('main'));
+  const about = main.getByRole('heading', { level: 2, name: /built by a researcher/i });
+  const rooms = main.getByRole('heading', { level: 2, name: /one house of knowledge/i });
+  expect(about.closest('section')).toHaveAttribute('id', 'about');
+  expect(about.compareDocumentPosition(rooms) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  const section = within(about.closest('section'));
+  expect(section.getByText(/to become a trusted academic publishing and research services company/i)).toBeInTheDocument();
+  expect(section.getByText(/good research deserves a clear, honest path/i)).toBeInTheDocument();
+  expect(section.getByRole('link', { name: /more about nordeo/i })).toHaveAttribute('href', '/about');
+  expect(section.getByRole('link', { name: /meet the founder/i })).toHaveAttribute('href', '/founder');
+  for (const name of [/^our vision$/i, /company overview/i, /core values/i]) expect(main.queryByRole('heading', { name })).not.toBeInTheDocument();
+  expect(document.getElementById('founder')).toBeNull();
   expect(screen.queryByText(/articles published in jetsi/i)).not.toBeInTheDocument();
-  expect(screen.getByRole('heading', { level: 2, name: 'Company Overview' })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { level: 3, name: 'Core values' })).toBeInTheDocument();
   expect(screen.getByRole('heading', { level: 3, name: /popular stories/i })).toBeInTheDocument();
   expect(screen.getByRole('heading', { level: 2, name: /academy calendar/i })).toBeInTheDocument();
   expect(screen.getByRole('heading', { level: 2, name: /questions, answered/i })).toBeInTheDocument();
@@ -86,7 +94,7 @@ test('mobile navigation exposes its state and closes with Escape', () => {
 test('header lists the ecosystems and returns from a detail page to the landing', () => {
   render(<MemoryRouter initialEntries={['/books']}><App /></MemoryRouter>);
   const nav = within(screen.getByRole('navigation', { name: /main navigation/i }));
-  for (const [name, href] of [['About', '/#about'], ['Journals', '/#journals'], ['NordeoNews', '/news'], ['Academy', '/training'], ['Contact', '/#contact']]) {
+  for (const [name, href] of [['About', '/about'], ['Journals', '/#journals'], ['NordeoNews', '/news'], ['Academy', '/training'], ['Contact', '/#contact']]) {
     expect(nav.getByRole('link', { name, exact: true })).toHaveAttribute('href', href);
   }
   const books = nav.getAllByRole('link', { name: /^books/i }).find(link => !/publishing/i.test(link.textContent));
@@ -95,8 +103,8 @@ test('header lists the ecosystems and returns from a detail page to the landing'
   expect(nav.queryByRole('link', { name: /explore journals/i })).not.toBeInTheDocument();
   expect(nav.getByRole('button', { name: 'Ecosystem' })).toHaveClass('button-dark');
   fireEvent.click(nav.getByRole('link', { name: 'About', exact: true }));
-  expect(screen.getByRole('heading', { level: 1, name: /advancing knowledge/i })).toBeInTheDocument();
-  expect(nav.getByRole('link', { name: 'About', exact: true })).toHaveAttribute('aria-current', 'location');
+  expect(screen.getByRole('heading', { level: 1, name: /empowering research/i })).toBeInTheDocument();
+  expect(nav.getByRole('link', { name: 'About', exact: true })).toHaveAttribute('aria-current', 'page');
 });
 
 test('keeps the homepage focused: no discovery logo wall, official social links in the footer', () => {
@@ -188,16 +196,8 @@ test('NordeoNews guide publishes the step-by-step workflow and audited reference
   expect(screen.getByRole('link', { name: /eurekalert! \(aaas\)/i })).toHaveAttribute('href', 'https://www.eurekalert.org/releaseguidelines');
 });
 
-test('homepage introduces the founder and closes with the office address and map', () => {
+test('homepage closes with the office address and map', () => {
   render(<MemoryRouter><App /></MemoryRouter>);
-  expect(screen.getByRole('heading', { level: 2, name: /built by a researcher/i })).toBeInTheDocument();
-  expect(screen.getByRole('img', { name: /fandi achmad, founder of nordeo scholar/i })).toHaveAttribute('src', '/assets/team/fandi-achmad.webp');
-  const founderNote = within(document.getElementById('founder'));
-  for (const value of ['Integrity', 'Excellence', 'Innovation', 'Collaboration', 'Knowledge Sharing', 'Professionalism']) {
-    expect(founderNote.getByText(value)).toBeInTheDocument();
-  }
-  expect(founderNote.getByRole('link', { name: 'Our story' })).toHaveAttribute('href', '/about');
-  expect(founderNote.getByRole('link', { name: /founder profile/i })).toHaveAttribute('href', '/founder');
   expect(screen.queryByRole('button', { name: 'Subscribe' })).not.toBeInTheDocument();
   const location = within(document.getElementById('contact'));
   expect(location.getByText(/G-Land Arcadia Buah Batu, Jl\. Cikoneng, Bojongsoang 40288, Bandung, Indonesia\./)).toBeInTheDocument();
@@ -213,8 +213,13 @@ test('founder profile links to the Scopus, Google Scholar, and SINTA profiles', 
   expect(screen.getByRole('link', { name: /on sinta/i })).toHaveAttribute('href', 'https://sinta.kemdiktisaintek.go.id/authors/profile/6856625');
 });
 
-test('our story page shows the milestones, mission, and core values', () => {
+test('our story page carries the full company profile: overview, vision, mission, and core values', () => {
   render(<MemoryRouter initialEntries={['/about']}><App /></MemoryRouter>);
+  expect(screen.getByText(/we collaborate with researchers, students, educational institutions/i)).toBeInTheDocument();
+  expect(screen.getByText(/to become a trusted academic publishing and research services company/i)).toBeInTheDocument();
+  for (const value of ['Integrity', 'Excellence', 'Innovation', 'Collaboration', 'Knowledge Sharing', 'Professionalism']) {
+    expect(screen.getByRole('heading', { level: 3, name: value })).toBeInTheDocument();
+  }
   expect(screen.getByRole('heading', { level: 2, name: /how nordeo grew/i })).toBeInTheDocument();
   expect(screen.getByText(/upholding publication ethics and scientific integrity/i)).toBeInTheDocument();
   expect(screen.getByRole('heading', { level: 2, name: 'Core values' })).toBeInTheDocument();

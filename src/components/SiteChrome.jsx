@@ -129,7 +129,7 @@ export function MainHeader({ onReplaySection }) {
         {/* Feedback 2: the ecosystems sit in the top navigation, and the dark button
             opens the ecosystem menu (it replaced "Explore Journals"). Names match the
             sections and microsites (UX audit, Nov 2026). */}
-        {sectionLink('About')}
+        <Link to="/about" className={pathname === '/about' ? 'active' : undefined} aria-current={pathname === '/about' ? 'page' : undefined}>About</Link>
         {sectionLink('Journals')}
         <SmartLink href={ecosystemHref('news')}>NordeoNews</SmartLink>
         <SmartLink href={ecosystemHref('training')}>Academy</SmartLink>

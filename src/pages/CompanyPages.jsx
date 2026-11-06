@@ -21,7 +21,7 @@ export function StoryPage() {
         <div className="page-lead-copy">
           <p className="vision-label">Our Story</p>
           <h1>Empowering research. <em>Advancing knowledge.</em></h1>
-          <p className="page-intro">{companyOverview.paragraphs[0]}</p>
+          {companyOverview.paragraphs.map(text => <p key={text.slice(0, 24)} className="page-intro">{text}</p>)}
         </div>
         <figure className="page-art">
           <img src="/assets/generated/hero-editorial-v1.webp" alt="An open book on a reading desk, a symbol of shared knowledge" width="1600" height="1195" />

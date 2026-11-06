@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
-import { ecosystems } from '../data/ecosystems';
-import { companyOverview, coreValues, faqs, indexingServices, partners, testimonials } from '../data/company';
+import { ecosystems, founder, vision } from '../data/ecosystems';
+import { companyOverview, faqs, indexingServices, partners, testimonials } from '../data/company';
 import { newsCategoryEn } from '../data/news';
 import { programTypeEn, trainingPrograms } from '../data/training';
 import { contact } from '../config/links';
@@ -95,33 +95,28 @@ export function HeroSlideshow({ notice = null }) {
   </div>;
 }
 
-/* ── Company overview + core values (new, between Our Vision and Four rooms) ── */
+/* ── About Nordeo: one short section between the hero and the four rooms ───────
+   Our Vision, the company overview, and the founder's note used to be three stacked
+   sections. They are now one editorial split (heading left, summary right) so the
+   ecosystem sits close to the hero; the full profile lives on /about and /founder. */
 export function CompanyOverview() {
-  return <section id="about" className="company-section" aria-labelledby="company-heading">
-    <div className="container company-inner">
-      <h2 id="company-heading" className="vision-label" data-reveal>Company Overview</h2>
-      <div className="company-body" data-reveal style={{ '--reveal-delay': '100ms' }}>
-        <p className="company-name">{companyOverview.name}</p>
-        <div className="company-copy">{companyOverview.paragraphs.map(text => <p key={text.slice(0, 24)}>{text}</p>)}</div>
-        <div className="company-links">
-          <Link to="/about" className="text-link">Read our story <Arrow /></Link>
-          <Link to="/founder" className="text-link">Meet the founder <Arrow /></Link>
-        </div>
-      </div>
+  return <section id="about" className="home-about container" aria-labelledby="home-about-heading">
+    <div className="home-about-head" data-reveal>
+      <p className="vision-label">About Nordeo</p>
+      <h2 id="home-about-heading">Built by a researcher, <em>for researchers.</em></h2>
     </div>
-    <div className="values-band">
-      <div className="container">
-        <div className="values-head" data-reveal>
-          <h3>Core values</h3>
-          <p>{companyOverview.tagline}</p>
+    <div className="home-about-body" data-reveal style={{ '--reveal-delay': '100ms' }}>
+      <p className="home-about-summary">{companyOverview.name} is an academic publishing and research support company. Our vision: {vision.intro.replace(/^To/, 'to')} {vision.lead} <mark>{vision.accent}</mark></p>
+      <figure className="home-about-quote">
+        <img src={founder.photoSmall} alt="" width="48" height="48" loading="lazy" decoding="async" />
+        <div>
+          <blockquote>“Good research deserves a clear, honest path to its readers.”</blockquote>
+          <figcaption><strong>{founder.name}</strong> <span>Founder &amp; CEO</span></figcaption>
         </div>
-        <ol className="values-grid">
-          {coreValues.map((value, i) => <li key={value.title} data-reveal style={{ '--reveal-delay': `${i * 70}ms` }}>
-            <span className="value-number">{pad(i + 1)}</span>
-            <h4>{value.title}</h4>
-            <p>{value.copy}</p>
-          </li>)}
-        </ol>
+      </figure>
+      <div className="home-about-links">
+        <Link to="/about" className="button button-dark button-small">More about Nordeo</Link>
+        <Link to="/founder" className="text-link">Meet the founder <Arrow /></Link>
       </div>
     </div>
   </section>;
