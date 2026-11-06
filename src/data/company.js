@@ -77,6 +77,7 @@ export const founderProfile = {
     { id: 'scopus', label: 'Scopus', detail: 'Author ID 58139295200', href: 'https://www.scopus.com/authid/detail.uri?authorId=58139295200' },
     { id: 'scholar', label: 'Google Scholar', detail: 'Citations and publications', href: 'https://scholar.google.co.id/citations?user=jYKJgjwAAAAJ&hl=id' },
     { id: 'sinta', label: 'SINTA', detail: 'SINTA ID 6856625', href: 'https://sinta.kemdiktisaintek.go.id/authors/profile/6856625' },
+    { id: 'orcid', label: 'ORCID', detail: 'ORCID 0000-0001-9599-1369', href: 'https://orcid.org/0000-0001-9599-1369' },
   ],
 };
 
@@ -91,11 +92,24 @@ export const indexingServices = [
   { name: 'Double-blind review', note: 'Peer review' },
 ];
 
-export const partners = [];
+// Logos: ITB from Indonesian Wikipedia (Indonesian government work, public domain);
+// Politeknik META Industri from the header of politeknikmeta.ac.id.
+export const partners = [
+  { name: 'Institut Teknologi Bandung', logo: '/assets/partners/itb.svg', scale: 1.3 },
+  { name: 'Politeknik META Industri', logo: '/assets/partners/politeknik-meta.webp' },
+];
 
-// Testimonials appear only when real, approved quotes are added here:
-// { quote, name, role, institution, photo }.
-export const testimonials = [];
+// PLACEHOLDER REVIEWS (Nov 2026). Written as samples at Nordeo's request so the section can
+// be designed; they are not quotes from real people. Replace each one with a real, approved
+// quote before relying on it: { quote, name, role, service, rating, photo? }.
+export const testimonials = [
+  { quote: 'The review comments were specific and fair. I knew exactly what to fix, and the revised paper is far stronger than the one I sent.', name: 'JETSI author', role: 'Lecturer, industrial engineering', service: 'Journals', rating: 5 },
+  { quote: 'Every email got a reply within days. For a first submission, that calm communication mattered more than I expected.', name: 'JIEL author', role: 'Master’s student, education', service: 'Journals', rating: 5 },
+  { quote: 'The writing clinic took us from a messy draft to a manuscript we were confident enough to submit.', name: 'Academy participant', role: 'Lecturer, business faculty', service: 'Academy', rating: 5 },
+  { quote: 'Our community service report became a story people actually read. The editors kept our facts and made them clearer.', name: 'NordeoNews contributor', role: 'Public relations, university', service: 'NordeoNews', rating: 5 },
+  { quote: 'Clear author guidelines, a working template, and a DOI on publication. Everything a young journal should get right.', name: 'JIBDI author', role: 'Researcher, digital business', service: 'Journals', rating: 5 },
+  { quote: 'The seminar was practical from start to finish: real examples, real reviewer comments, no filler.', name: 'Academy participant', role: 'Doctoral candidate', service: 'Academy', rating: 5 },
+];
 
 export const faqs = [
   {

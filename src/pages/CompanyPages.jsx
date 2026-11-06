@@ -78,6 +78,7 @@ const profileMarks = {
   scopus: <span className="profile-mark profile-mark-scopus">Scopus</span>,
   scholar: <span className="profile-mark profile-mark-scholar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 1 9.5l11 6.5 9-5.3V17h2V9.5L12 3Z" fill="currentColor" /><path d="M5.5 13.3v3.6C7 18.8 9.4 20 12 20s5-1.2 6.5-3.1v-3.6L12 17.2l-6.5-3.9Z" fill="currentColor" opacity=".7" /></svg>Google Scholar</span>,
   sinta: <span className="profile-mark profile-mark-sinta">SINTA</span>,
+  orcid: <span className="profile-mark profile-mark-orcid"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#a6ce39" /><path d="M7.2 6.6a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm-.75 3.2h1.5v7.6h-1.5V9.8Zm3.6 0h3.1c2.6 0 4.1 1.7 4.1 3.8 0 2.2-1.6 3.8-4.1 3.8h-3.1V9.8Zm1.5 1.35v4.9h1.5c1.8 0 2.6-1.1 2.6-2.45 0-1.4-.85-2.45-2.6-2.45h-1.5Z" fill="#fff" /></svg>ORCID</span>,
 };
 
 // Founder profile — opened from the founder's note (Feedback 2: "siapa FDC, beberapa logo:

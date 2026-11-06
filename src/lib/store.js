@@ -10,6 +10,8 @@ export const STORE = {
   trainingStatus: `${prefix}training-status.v1`,
   adminSession: `${prefix}admin-session.v1`,
   bookProposals: `${prefix}book-proposals.v1`,
+  newsComments: `${prefix}news-comments.v1`,
+  commenter: `${prefix}commenter.v1`,
 };
 
 export function read(key, fallback) {
@@ -182,4 +184,12 @@ export function humanSize(bytes = 0) {
   if (!bytes) return '0 KB';
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+const stripLabel = (value, label) => String(value || '').replace(new RegExp(`^\\s*${label}\\s*:\\s*`, 'i'), '').trim();
+
+// The credit line printed under each article, in the house format
+// "Penulis: … | Editor: … | Foto: …". Empty parts are left out.
+export function creditParts({ writer, editor, photo }) {
+  return [['Penulis', stripLabel(writer, 'Penulis')], ['Editor', stripLabel(editor, 'Editor')], ['Foto', stripLabel(photo, 'Foto')]].filter(([, value]) => value);
 }

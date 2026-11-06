@@ -22,6 +22,7 @@ export const seedNews = [
     coverAlt: 'Ilustrasi orbit pengetahuan di atas latar teal gelap',
     featured: true,
     status: 'published',
+    credits: { editor: 'Redaksi NordeoNews', photo: 'Dok. Nordeo Scholar' },
     body: [
       { type: 'p', text: 'Selama puluhan tahun, kualitas sebuah riset diukur dari tempat ia terbit. Semakin tinggi dinding langganan, semakin bergengsi jurnalnya. Logika itu memberi insentif yang jelas, tetapi juga menjauhkan pengetahuan dari orang-orang yang paling membutuhkannya.' },
       { type: 'h2', text: 'Akses bukan akhir dari cerita' },
@@ -48,6 +49,7 @@ export const seedNews = [
     coverAlt: 'Cuplikan halaman JETSI di platform jurnal',
     featured: false,
     status: 'published',
+    credits: { editor: 'Redaksi NordeoNews', photo: 'Dok. Nordeo Scholar' },
     body: [
       { type: 'p', text: 'Edisi kedua JETSI bukan kumpulan abstraksi tentang masa depan. Artikel-artikelnya berangkat dari persoalan yang cukup konkret: efisiensi sistem, kualitas keputusan, dan keberlanjutan operasi.' },
       { type: 'h2', text: 'Dari laboratorium ke lantai produksi' },
@@ -72,6 +74,7 @@ export const seedNews = [
     coverAlt: 'Rak dan lorong perpustakaan dengan koleksi buku',
     featured: false,
     status: 'published',
+    credits: { editor: 'Redaksi NordeoNews', photo: 'Dok. Nordeo Scholar' },
     body: [
       { type: 'p', text: 'Setiap penulis akademik pernah mendengar nasihat yang sama: ikuti gaya selingkung, penuhi jumlah kata, dan pastikan kata kunci sesuai. Nasihat itu berguna, tetapi belum menjawab pertanyaan yang lebih dasar: untuk siapa tulisan ini dibuat?' },
       { type: 'h2', text: 'Kejelasan adalah bentuk penghormatan' },
@@ -98,6 +101,7 @@ export const seedNews = [
     coverAlt: 'Peneliti berdiskusi dengan warga dalam workshop komunitas',
     featured: false,
     status: 'published',
+    credits: { editor: 'Redaksi NordeoNews', photo: 'Dok. Nordeo Scholar' },
     body: [
       { type: 'p', text: 'Pengabdian masyarakat sering dinilai dari jumlah kegiatan, bukan dari perubahan yang ditinggalkan. Padahal, pertanyaan yang paling penting justru sederhana: apa yang berbeda setelah program selesai?' },
       { type: 'h2', text: 'Mulai dari data yang sudah ada' },
@@ -122,6 +126,7 @@ export const seedNews = [
     coverAlt: 'Ilustrasi tangga data di atas latar rust',
     featured: false,
     status: 'published',
+    credits: { editor: 'Redaksi NordeoNews', photo: 'Dok. Nordeo Scholar' },
     body: [
       { type: 'p', text: 'Di ruang rapat, riset sering hadir sebagai dokumen tebal yang dibaca pada menit terakhir. Bukan karena pembuat kebijakan mengabaikan bukti, tetapi karena bahasa keduanya jarang dipertemukan.' },
       { type: 'h2', text: 'Ringkas bukan berarti dangkal' },
@@ -146,6 +151,7 @@ export const seedNews = [
     coverAlt: 'Ilustrasi buku terbuka dengan cahaya keemasan',
     featured: false,
     status: 'published',
+    credits: { editor: 'Redaksi NordeoNews', photo: 'Dok. Nordeo Scholar' },
     body: [
       { type: 'p', text: 'Ada ketegangan yang sehat antara mengikuti standar internasional dan menulis dari tempat kita berdiri. Menghilangkan salah satunya membuat riset kehilangan presisi atau relevansi.' },
       { type: 'p', text: 'Konteks lokal bukan hiasan etnografis. Ia bagian dari metode: siapa yang diwawancarai, bagaimana data dibaca, dan mengapa sebuah temuan mungkin tidak dapat dipindahkan begitu saja ke tempat lain.' },

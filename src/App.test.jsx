@@ -150,7 +150,8 @@ test('ecosystem dropdown lists all four ecosystems and closes with Escape', () =
 
 test('news submission validates each step and offers the AI draft assistant', async () => {
   render(<MemoryRouter initialEntries={['/news/kirim']}><App /></MemoryRouter>);
-  expect(await screen.findByRole('heading', { level: 2, name: 'Jenis & sudut' })).toBeInTheDocument();
+  fireEvent.click(await screen.findByRole('button', { name: /isi langsung di sini/i }));
+  expect(screen.getByRole('heading', { level: 2, name: 'Jenis & sudut' })).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /lanjut: isi berita/i }));
   expect(screen.getByRole('alert')).toHaveTextContent(/3 isian/);
   expect(screen.getByLabelText(/judul usulan/i)).toHaveAttribute('aria-invalid', 'true');
@@ -159,11 +160,57 @@ test('news submission validates each step and offers the AI draft assistant', as
   fireEvent.change(screen.getByLabelText(/mengapa sekarang/i), { target: { value: 'Artikel baru saja terbit minggu ini.' } });
   fireEvent.click(screen.getByRole('button', { name: /lanjut: isi berita/i }));
   expect(screen.getByRole('heading', { level: 2, name: 'Isi berita' })).toBeInTheDocument();
+  const editor = screen.getByRole('textbox', { name: /isi naskah/i });
+  expect(editor).toHaveAttribute('contenteditable', 'true');
+  const toolbar = screen.getByRole('toolbar', { name: /format teks/i });
+  ['Tebal (Ctrl+B)', 'Miring (Ctrl+I)', 'Garis bawah (Ctrl+U)', 'Rata kiri-kanan (justify)', 'Daftar bernomor', 'Sisipkan tautan'].forEach(name => expect(within(toolbar).getByRole('button', { name })).toBeInTheDocument());
+  expect(screen.getByLabelText('Penulis')).toBeInTheDocument();
+  expect(screen.getByLabelText(/^editor/i)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /susun draf dengan ai/i }));
   expect(await screen.findByText('Alternatif judul', {}, { timeout: 2000 })).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /pakai lead ini/i }));
+  fireEvent.click(screen.getByRole('button', { name: /masukkan draf ke isi naskah/i }));
+  expect(editor.querySelector('p')).not.toBeNull();
   fireEvent.click(screen.getByRole('button', { name: /kembali/i }));
   expect(screen.getByLabelText(/judul usulan/i)).toHaveValue('Riset UX e-commerce terbit di JETSI');
+});
+
+test('news submission can go through the Word template instead', async () => {
+  render(<MemoryRouter initialEntries={['/news/kirim']}><App /></MemoryRouter>);
+  fireEvent.click(await screen.findByRole('button', { name: /pakai template word/i }));
+  expect(screen.getByRole('heading', { level: 2, name: /kirim dengan template word/i })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: /unduh template/i })).toHaveAttribute('href', '/templates/Nordeo-News-Submission-Form.docx');
+  fireEvent.click(screen.getByRole('button', { name: /kirim ke redaksi/i }));
+  expect(screen.getByRole('alert')).toHaveTextContent(/8 isian/);
+  expect(screen.getByText('Unggah formulir Word yang sudah diisi.')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /pakai formulir online/i }));
+  expect(screen.getByRole('heading', { level: 2, name: 'Jenis & sudut' })).toBeInTheDocument();
+});
+
+test('news articles show the credit line and accept reader comments', async () => {
+  render(<MemoryRouter initialEntries={['/news/riset-terbuka-masa-depan-penerbitan']}><App /></MemoryRouter>);
+  expect((await screen.findByText(/penulis:/i)).closest('.article-credits')).toHaveTextContent('Penulis: Redaksi Nordeo|Editor: Redaksi NordeoNews|Foto: Dok. Nordeo Scholar');
+  expect(screen.getByRole('heading', { level: 2, name: /komentar \(0\)/i })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /kirim komentar/i }));
+  expect(screen.getByLabelText(/komentar \*/i)).toHaveAttribute('aria-invalid', 'true');
+  fireEvent.change(screen.getByLabelText(/komentar \*/i), { target: { value: 'Tulisan yang jernih, terima kasih.' } });
+  fireEvent.change(screen.getByLabelText(/nama \*/i), { target: { value: 'Rina' } });
+  fireEvent.change(screen.getByLabelText(/email \*/i), { target: { value: 'rina@kampus.ac.id' } });
+  fireEvent.click(screen.getByRole('button', { name: /kirim komentar/i }));
+  expect(screen.getByRole('heading', { level: 2, name: /komentar \(1\)/i })).toBeInTheDocument();
+  expect(screen.getByText('Tulisan yang jernih, terima kasih.')).toBeInTheDocument();
+  expect(screen.queryByText('rina@kampus.ac.id')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Balas' }));
+  expect(screen.getByRole('heading', { level: 3, name: /balas rina/i })).toBeInTheDocument();
+});
+
+test('homepage shows the partner logos and the review wall', () => {
+  render(<MemoryRouter><App /></MemoryRouter>);
+  expect(screen.getByRole('img', { name: 'Institut Teknologi Bandung' })).toHaveAttribute('src', '/assets/partners/itb.svg');
+  expect(screen.getByRole('img', { name: 'Politeknik META Industri' })).toHaveAttribute('src', '/assets/partners/politeknik-meta.webp');
+  expect(screen.getByRole('heading', { level: 2, name: /trusted by the people/i })).toBeInTheDocument();
+  expect(screen.getByText('5.0')).toBeInTheDocument();
+  expect(screen.getAllByText(/rated 5 out of 5/i).length).toBeGreaterThanOrEqual(6);
 });
 
 test('academy lists placeholder programs and records interest for a chosen program', async () => {
@@ -205,12 +252,13 @@ test('homepage closes with the office address and map', () => {
   expect(location.getByRole('link', { name: /admin@nordeoscholar\.com/ })).toHaveAttribute('href', 'mailto:admin@nordeoscholar.com');
 });
 
-test('founder profile links to the Scopus, Google Scholar, and SINTA profiles', () => {
+test('founder profile links to the Scopus, Google Scholar, SINTA, and ORCID profiles', () => {
   render(<MemoryRouter initialEntries={['/founder']}><App /></MemoryRouter>);
   expect(screen.getByRole('heading', { level: 1, name: /fandi achmad/i })).toBeInTheDocument();
   expect(screen.getByRole('link', { name: /on scopus/i })).toHaveAttribute('href', 'https://www.scopus.com/authid/detail.uri?authorId=58139295200');
   expect(screen.getByRole('link', { name: /on google scholar/i }).getAttribute('href')).toMatch(/user=jYKJgjwAAAAJ/);
   expect(screen.getByRole('link', { name: /on sinta/i })).toHaveAttribute('href', 'https://sinta.kemdiktisaintek.go.id/authors/profile/6856625');
+  expect(screen.getByRole('link', { name: /on orcid/i })).toHaveAttribute('href', 'https://orcid.org/0000-0001-9599-1369');
 });
 
 test('our story page carries the full company profile: overview, vision, mission, and core values', () => {

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { newsCategories } from '../../data/news';
+import { htmlToText, sanitizeHtml } from '../../lib/rich-text';
 import { downloadFile, formatDate, formatDateTime, makeId, readImage, slugify } from '../../lib/store';
 import { ACCESS, MODULES, NEWS_STATUS, ROLES, can, daysSince, toCsv } from './admin-store';
 import { Btn, Card, Editor, Empty, Field, Icon, IconBtn, Pill } from './ui';
@@ -56,6 +57,10 @@ function FormCard({ title, fields, value, onSave, rights, delay, extra, classNam
 }
 
 const lines = (text) => String(text || '').split('\n').map((s) => s.trim()).filter(Boolean);
+// Plain text of an article body for the admin textarea; rich-text blocks become paragraphs.
+const bodyToText = (body) => (body || []).map((b) => b.text || (b.html ? htmlToText(b.html) : '') || (b.items || []).join('\n')).filter(Boolean).join('\n');
+// The admin form keeps credits flat; articles store them as { writer, editor, photo }.
+const withFlatCredits = (n) => ({ ...n, bodyText: bodyToText(n.body), bodyOriginal: bodyToText(n.body), creditEditor: n.credits?.editor || '', creditPhoto: n.credits?.photo || '' });
 const reviewTone = (date) => (daysSince(date) > 90 ? 'red' : 'green');
 const reviewText = (date) => (date ? `Ditinjau ${formatDate(date, { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Belum ditinjau');
 
@@ -187,9 +192,12 @@ export function NewsModule({ data, role, rights, toast }) {
     .sort((x, y) => String(y.date).localeCompare(String(x.date)));
   const setOne = (id, patch, action) => { const n = news.find((x) => x.id === id); commitNews(news.map((x) => (x.id === id ? { ...x, ...patch } : x)), action, n.title); };
   const save = (d) => {
-    const body = lines(d.bodyText).map((text) => ({ type: 'p', text }));
-    const rec = { ...d, slug: d.slug || slugify(d.title), titleEn: d.titleEn || d.title, body: body.length ? body : d.body || [], readTime: d.readTime || `${Math.max(1, Math.round(String(d.bodyText || '').split(/\s+/).length / 200))} menit` };
-    delete rec.bodyText;
+    // Keep the original blocks (headings, lists, rich text) unless the text was edited here.
+    const unchanged = d.body?.length && d.bodyText === d.bodyOriginal;
+    const body = unchanged ? d.body : lines(d.bodyText).map((text) => ({ type: 'p', text }));
+    const credits = { ...(d.credits || {}), writer: d.author || d.credits?.writer || '', editor: d.creditEditor || '', photo: d.creditPhoto || '' };
+    const rec = { ...d, credits, slug: d.slug || slugify(d.title), titleEn: d.titleEn || d.title, body: body.length ? body : d.body || [], readTime: d.readTime || `${Math.max(1, Math.round(String(d.bodyText || '').split(/\s+/).length / 200))} menit` };
+    ['bodyText', 'bodyOriginal', 'creditEditor', 'creditPhoto'].forEach((key) => delete rec[key]);
     const exists = news.some((x) => x.id === rec.id);
     commitNews(exists ? news.map((x) => (x.id === rec.id ? rec : x)) : [rec, ...news], exists ? 'mengubah artikel' : 'membuat draft artikel', rec.title);
     setEditing(null); toast(exists ? 'Artikel disimpan.' : 'Draft artikel dibuat.');
@@ -221,7 +229,7 @@ export function NewsModule({ data, role, rights, toast }) {
             {role === 'admin' && n.status === 'published' && <Btn onClick={() => { setOne(n.id, { status: 'archived' }, 'mengarsipkan'); toast('Artikel diarsipkan dan turun dari website.'); }}>Arsipkan</Btn>}
             {role === 'admin' && n.status === 'archived' && <Btn icon="undo" onClick={() => setOne(n.id, { status: 'draft' }, 'mengembalikan ke draft')}>Jadikan draft</Btn>}
             {rights.U && <IconBtn icon="star" label={n.featured ? 'Lepas featured' : 'Jadikan featured'} onClick={() => commitNews(news.map((x) => ({ ...x, featured: x.id === n.id ? !n.featured : (n.featured ? x.featured : false) })), n.featured ? 'melepas featured' : 'menjadikan featured', n.title)} />}
-            {rights.U && <IconBtn icon="edit" label={`Ubah ${n.title}`} onClick={() => setEditing({ ...n, bodyText: (n.body || []).filter((b) => b.text).map((b) => b.text).join('\n') })} />}
+            {rights.U && <IconBtn icon="edit" label={`Ubah ${n.title}`} onClick={() => setEditing(withFlatCredits(n))} />}
             {n.status === 'published' && <a className="adm-circle is-sm adm-btn" href={`/news/${n.slug}`} target="_blank" rel="noreferrer" aria-label={`Lihat ${n.title} di website`} title="Lihat di website"><Icon name="eye" size={15} width={1.8} /></a>}
             {rights.D && n.status === 'draft' && <IconBtn icon="trash" label={`Hapus ${n.title}`} onClick={() => { commitNews(news.filter((x) => x.id !== n.id), 'menghapus draft', n.title); toast('Draft dihapus.'); }} />}
           </td>
@@ -235,9 +243,11 @@ export function NewsModule({ data, role, rights, toast }) {
         { key: 'category', label: 'Kategori', type: 'select', options: newsCategories },
         { key: 'dek', label: 'Ringkasan (dek)', type: 'textarea', rows: 3 },
         { key: 'author', label: 'Penulis' },
+        { key: 'creditEditor', label: 'Editor', hint: 'Tampil di bawah artikel: Penulis: … | Editor: … | Foto: …' },
+        { key: 'creditPhoto', label: 'Kredit foto', hint: 'Contoh: Public Relations' },
         { key: 'date', label: 'Tanggal terbit', type: 'date' },
         { key: 'cover', label: 'Gambar sampul (URL)', hint: 'Pilih dari menu Media, salin alamatnya.' },
-        { key: 'bodyText', label: 'Isi artikel', type: 'textarea', rows: 8, hint: 'Satu paragraf per baris.' },
+        { key: 'bodyText', label: 'Isi artikel', type: 'textarea', rows: 8, hint: 'Satu paragraf per baris. Format dari kiriman (tebal, rata, daftar) tetap tersimpan selama teks ini tidak diubah.' },
         { key: 'featured', label: 'Jadikan featured story', type: 'toggle' },
       ]} />}
     {rejecting && <Editor title="Tolak artikel" value={{ note: '' }} saveLabel="Kembalikan ke Admin" onClose={() => setRejecting(null)}
@@ -283,7 +293,7 @@ export function InboxModule({ data, role, rights, toast, go }) {
   const storyCols = [['reference', 'Referensi'], ['title', 'Judul'], ['category', 'Kategori'], ['name', 'Pengirim'], ['email', 'Email'], ['institution', 'Institusi'], ['submittedAt', 'Dikirim'], ['status', 'Status']];
   const regCols = [['reference', 'Referensi'], ['name', 'Nama'], ['email', 'Email'], ['institution', 'Institusi'], ['role', 'Peran'], ['program', 'Program'], ['submittedAt', 'Dikirim']];
   const toDraft = (s) => {
-    const rec = { id: makeId('news'), title: s.title || 'Kiriman tanpa judul', category: s.category || newsCategories[0], dek: s.lead || '', author: s.name || 'Kontributor', date: data.today(), cover: s.image?.dataUrl || '', featured: false, status: 'draft', slug: slugify(s.title || 'kiriman'), titleEn: s.title || '', body: lines(s.body).map((text) => ({ type: 'p', text })), readTime: '4 menit' };
+    const rec = { id: makeId('news'), title: s.title || 'Kiriman tanpa judul', category: s.category || newsCategories[0], dek: s.lead || '', author: s.writer || s.name || 'Kontributor', credits: { writer: s.writer || s.name || '', editor: s.editor || '', photo: s.credit || '' }, date: data.today(), cover: s.image?.dataUrl || '', featured: false, status: 'draft', slug: slugify(s.title || 'kiriman'), titleEn: s.title || '', body: s.bodyHtml ? [{ type: 'html', html: sanitizeHtml(s.bodyHtml) }] : lines(s.body).map((text) => ({ type: 'p', text })), readTime: '4 menit' };
     commitNews([rec, ...news], 'membuat draft dari kiriman', rec.title);
     commitSubmissions(submissions.map((x) => (x.id === s.id ? { ...x, status: 'diproses' } : x)));
     toast('Kiriman dijadikan draft di NordeoNews.'); go('news');
@@ -297,11 +307,11 @@ export function InboxModule({ data, role, rights, toast, go }) {
       {tab === 'stories' && (submissions.length === 0 ? <Empty>Belum ada kiriman dari form “Submit a story” NordeoNews.</Empty> : <div className="adm-table-wrap"><table className="adm-table">
         <thead><tr><th scope="col">Kiriman</th><th scope="col">Pengirim</th><th scope="col">Dikirim</th><th scope="col">Status</th><th scope="col"><span className="adm-sr">Aksi</span></th></tr></thead>
         <tbody>{submissions.map((s) => <tr key={s.id}>
-          <td><b>{s.title || '(tanpa judul)'}</b><div className="adm-muted">{s.reference} · {s.category}</div></td>
+          <td><b>{s.title || '(tanpa judul)'}</b><div className="adm-muted">{s.reference} · {s.category}{s.mode === 'word' ? ' · via template Word' : ''}</div></td>
           <td>{s.name}<div className="adm-muted">{s.email}</div></td>
           <td>{formatDateTime(s.submittedAt)}</td>
           <td><select aria-label={`Status ${s.title}`} value={s.status || 'baru'} disabled={role !== 'admin'} onChange={(e) => commitSubmissions(submissions.map((x) => (x.id === s.id ? { ...x, status: e.target.value } : x)))}>{['baru', 'diproses', 'diterima', 'ditolak'].map((o) => <option key={o}>{o}</option>)}</select></td>
-          <td className="adm-actions">{role === 'admin' && <Btn icon="news" onClick={() => toDraft(s)}>Jadikan draft</Btn>}</td>
+          <td className="adm-actions">{s.docFile?.dataUrl && <a className="adm-btn" href={s.docFile.dataUrl} download={s.docFile.name}>Unduh .docx</a>}{role === 'admin' && <Btn icon="news" onClick={() => toDraft(s)}>Jadikan draft</Btn>}</td>
         </tr>)}</tbody>
       </table></div>)}
       {tab === 'academy' && (registrations.length === 0 ? <Empty>Belum ada pendaftar dari form minat Academy.</Empty> : <div className="adm-table-wrap"><table className="adm-table">

@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { formatDate, getNewsBySlug, publishedNews } from '../../lib/store';
+import { creditParts, formatDate, getNewsBySlug, publishedNews } from '../../lib/store';
 import { siteBase } from '../../lib/site';
 import { SideStory } from '../../components/NewsCard';
 import { Arrow, useDocumentTitle } from '../../components/parts';
 import { LegalPage } from '../InfoPages';
+import ArticleComments from '../../components/ArticleComments';
+import { sanitizeHtml } from '../../lib/rich-text';
 
 function Block({ block }) {
+  if (block.type === 'html') return <div className="article-rich" dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.html) }} />;
   if (block.type === 'h2') return <h2>{block.text}</h2>;
   if (block.type === 'quote') return <blockquote><p>{block.text}</p></blockquote>;
   if (block.type === 'list') return <ul>{block.items.map(item => <li key={item}>{item}</li>)}</ul>;
@@ -21,6 +24,7 @@ export default function NewsArticle() {
   useDocumentTitle(story?.title || null);
   if (!story) return <LegalPage />;
   const related = publishedNews().filter(item => item.id !== story.id && item.category === story.category).concat(publishedNews().filter(item => item.id !== story.id && item.category !== story.category)).slice(0, 3);
+  const credits = creditParts({ writer: story.credits?.writer || story.author, editor: story.credits?.editor, photo: story.credits?.photo });
   const copy = async () => {
     try { await navigator.clipboard.writeText(window.location.href); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { setCopied(false); }
   };
@@ -40,7 +44,11 @@ export default function NewsArticle() {
     </header>
     <figure className="article-cover container"><img src={story.cover} alt={story.coverAlt} width="1600" height="1000" decoding="async" /></figure>
     <div className="container article-layout">
-      <div className="article-body">{story.body.map((block, index) => <Block key={index} block={block} />)}</div>
+      <div className="article-main">
+        <div className="article-body">{story.body.map((block, index) => <Block key={index} block={block} />)}</div>
+        {credits.length > 0 && <p className="article-credits">{credits.map(([label, value], index) => <span key={label}>{index > 0 && <i aria-hidden="true">|</i>}{label}: <strong>{value}</strong></span>)}</p>}
+        <ArticleComments storyId={story.id} />
+      </div>
       <aside className="article-aside">
         <h2 className="side-heading">Baca juga</h2>
         {related.map(item => <SideStory key={item.id} story={item} base={base} />)}

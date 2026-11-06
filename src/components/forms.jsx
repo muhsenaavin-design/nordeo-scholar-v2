@@ -3,7 +3,7 @@
 export function Field({ id, label, hint, error, optional = false, counter, children, className = '' }) {
   return <div className={`field ${error ? 'has-error' : ''} ${className}`.trim()}>
     <div className="field-label-row">
-      <label htmlFor={id}>{label}{optional && <span className="field-optional">opsional</span>}</label>
+      <label id={`${id}-label`} htmlFor={id}>{label}{optional && <span className="field-optional">opsional</span>}</label>
       {counter && <span className="field-counter">{counter}</span>}
     </div>
     {hint && <p className="field-hint" id={`${id}-hint`}>{hint}</p>}

@@ -264,42 +264,65 @@ export function AcademyCalendar() {
 }
 
 /* ── Logo strip, testimonials, and FAQ (new, before Contact) ───────────────── */
-function LogoTicker({ items, label }) {
+function LogoTicker({ items, label, still = false }) {
   const { reduced } = useAnimationPreference();
-  const row = list => list.map(item => <li key={item.name}>{item.logo ? <img src={item.logo} alt={item.name} height="40" loading="lazy" decoding="async" /> : <span className="ticker-word">{item.name}</span>}{item.note && <small>{item.note}</small>}</li>);
-  return <div className="ticker" data-static={reduced}>
+  const fixed = reduced || still;
+  const row = list => list.map(item => <li key={item.name}>{item.logo ? <img src={item.logo} alt={item.name} height="40" loading="lazy" decoding="async" style={item.scale ? { "--logo-scale": item.scale } : undefined} /> : <span className="ticker-word">{item.name}</span>}{item.note && <small>{item.note}</small>}</li>);
+  return <div className={`ticker ${still ? 'is-partners' : ''}`.trim()} data-static={fixed}>
     <p className="ticker-label">{label}</p>
     <div className="ticker-window">
       <ul className="ticker-track">{row(items)}</ul>
-      {!reduced && <ul className="ticker-track" aria-hidden="true">{row(items)}</ul>}
+      {!fixed && <ul className="ticker-track" aria-hidden="true">{row(items)}</ul>}
     </div>
   </div>;
 }
 
-function TestimonialReel() {
-  const [index, setIndex] = useState(0);
-  const item = testimonials[index];
-  const go = step => setIndex(current => (current + step + testimonials.length) % testimonials.length);
-  return <div className="reel container">
-    <div className="reel-aside">
-      <h3>What authors say</h3>
-      {testimonials.length > 1 && <div className="reel-nav">
-        <button type="button" className="cal-nav" aria-label="Previous testimonial" onClick={() => go(-1)}><Arrow /></button>
-        <button type="button" className="cal-nav is-next" aria-label="Next testimonial" onClick={() => go(1)}><Arrow /></button>
-      </div>}
+function Stars({ value = 5 }) {
+  return <span className="stars" aria-hidden="true">{Array.from({ length: 5 }, (_, i) => <svg key={i} viewBox="0 0 20 20" className={i < value ? 'is-on' : undefined}><path d="m10 1.6 2.6 5.3 5.8.8-4.2 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.6 7.7l5.8-.8L10 1.6Z" /></svg>)}</span>;
+}
+
+function ReviewCard({ item }) {
+  return <li className="review-card">
+    <div className="review-top"><Stars value={item.rating} /><span className="sr-only">Rated {item.rating} out of 5.</span>{item.service && <span className="review-service">{item.service}</span>}</div>
+    <blockquote>“{item.quote}”</blockquote>
+    <p className="review-by"><strong>{item.name}</strong>{item.role}</p>
+  </li>;
+}
+
+/* Review wall (Nov 2026). Pattern from the Framer testimonial references: a rating summary
+   beside the heading, then two slow rows of cards drifting in opposite directions that pause
+   on hover or focus. The second row is a decorative echo, hidden from assistive tech.
+   Reduced motion shows one static grid. */
+function ReviewWall() {
+  const { reduced } = useAnimationPreference();
+  const count = testimonials.length;
+  const average = (testimonials.reduce((sum, item) => sum + (item.rating || 5), 0) / count).toFixed(1);
+  const rowB = [...testimonials.slice(3), ...testimonials.slice(0, 3)];
+  const track = (list, hidden) => <ul className="review-track" aria-hidden={hidden || undefined}>{list.map((item, i) => <ReviewCard key={`${item.name}-${i}`} item={item} />)}</ul>;
+  return <div className="reviews" aria-labelledby="reviews-heading">
+    <div className="container reviews-head" data-reveal>
+      <div>
+        <p className="reviews-label">Reviews</p>
+        <h2 id="reviews-heading">Trusted by the people <em>we publish and teach.</em></h2>
+      </div>
+      <div className="reviews-score">
+        <strong>{average}</strong>
+        <div><Stars value={Math.round(average)} /><span>Average of {count} reviews from authors, participants, and contributors</span></div>
+      </div>
     </div>
-    <figure className="reel-quote" aria-live="polite">
-      <blockquote>“{item.quote}”</blockquote>
-      <figcaption>{item.photo && <img src={item.photo} alt="" width="56" height="56" loading="lazy" />}<span><strong>{item.name}</strong>{[item.role, item.institution].filter(Boolean).join(', ')}</span></figcaption>
-    </figure>
+    {reduced ? <ul className="container review-grid">{testimonials.map((item, i) => <ReviewCard key={i} item={item} />)}</ul>
+      : <div className="review-rows">
+        <div className="review-row">{track(testimonials, false)}{track(testimonials, true)}</div>
+        <div className="review-row is-reverse" aria-hidden="true">{track(rowB, true)}{track(rowB, true)}</div>
+      </div>}
   </div>;
 }
 
 export function TrustAndFaq() {
   return <section className="trust-section section-space" aria-labelledby="faq-heading">
-    {partners.length > 0 && <LogoTicker items={partners} label="Our partners" />}
+    {partners.length > 0 && <LogoTicker items={partners} label="Our partners" still={partners.length < 5} />}
     <LogoTicker items={indexingServices} label="Registered and indexed with" />
-    {testimonials.length > 0 && <TestimonialReel />}
+    {testimonials.length > 0 && <ReviewWall />}
     <div className="container faq-grid">
       <div className="faq-aside" data-reveal>
         <h2 id="faq-heading">Questions, <em>answered.</em></h2>
