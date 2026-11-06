@@ -49,6 +49,9 @@ export const trainingPrograms = [
     title: 'Dari Draf ke Submission',
     summary: 'Menyusun artikel jurnal yang layak review: struktur, argumen, dan cara membaca panduan penulis.',
     dateLabel: 'November 2026',
+    // `date` places the programme on the homepage Academy calendar. Tentative until the
+    // Academy team confirms it; the calendar marks every date as tentative.
+    date: '2026-11-21',
     time: 'Jam menyusul',
     duration: '3 jam',
     mode: 'Online',
@@ -67,6 +70,7 @@ export const trainingPrograms = [
     title: 'Merespons Reviewer Tanpa Kehilangan Argumen',
     summary: 'Membaca catatan review, memilah permintaan substantif, dan menulis surat respons yang membuat naskah lebih kuat.',
     dateLabel: 'Desember 2026',
+    date: '2026-12-12',
     time: 'Jam menyusul',
     duration: '90 menit',
     mode: 'Online',

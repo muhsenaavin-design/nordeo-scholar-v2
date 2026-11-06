@@ -16,6 +16,7 @@ const marks = {
   jetsi: ['JET', 'SI'],
   jiel: ['JI', 'EL'],
   pengmas: ['Peng', 'mas'],
+  jibdi: ['JIB', 'DI'],
 };
 
 export function JournalMark({ id, label, size = 'md' }) {

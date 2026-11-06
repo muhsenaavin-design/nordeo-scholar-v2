@@ -7,7 +7,8 @@ import { hostSite, resolveSite } from './lib/site';
 import { useReveal } from './lib/use-reveal';
 import Home from './pages/Home';
 import Journals from './pages/Journals';
-import { AboutPage, AuthorGuidePage, BooksPage, ContactPage, LegalPage, PengmasPage, PublicationEthicsPage } from './pages/InfoPages';
+import { AuthorGuidePage, BooksPage, ContactPage, LegalPage, PengmasPage, PublicationEthicsPage } from './pages/InfoPages';
+import { FounderPage, StoryPage } from './pages/CompanyPages';
 // NordeoNews and Academy load on demand so the landing page ships less JavaScript.
 const NewsHome = lazy(() => import('./pages/news/NewsHome'));
 const NewsArticle = lazy(() => import('./pages/news/NewsArticle'));
@@ -64,7 +65,8 @@ function SiteRoutes() {
     <Route path="/journals" element={<Journals />} />
     <Route path="/journals/jurnalpengmas" element={<PengmasPage />} />
     <Route path="/author-guide" element={<AuthorGuidePage />} />
-    <Route path="/about" element={<AboutPage />} />
+    <Route path="/about" element={<StoryPage />} />
+    <Route path="/founder" element={<FounderPage />} />
     <Route path="/contact" element={<ContactPage />} />
     <Route path="/collaboration" element={<Navigate to="/contact" replace />} />
     <Route path="/publication-ethics" element={<PublicationEthicsPage />} />

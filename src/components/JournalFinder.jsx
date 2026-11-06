@@ -2,7 +2,8 @@ import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { articleTopics, directoryJournals, journalArticles, journalCategories } from '../data/journal-directory';
 import { formatAuthors } from '../lib/store';
-import { Arrow, CloseIcon, DownloadIcon, EmptyState, JournalMark, SearchIcon, SmartLink, StatusPill } from './parts';
+import { Arrow, CloseIcon, EmptyState, JournalMark, SearchIcon, SmartLink, StatusPill } from './parts';
+import Carousel from './Carousel';
 
 const ALL_TOPICS = articleTopics[0];
 const normalize = value => String(value).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
@@ -23,16 +24,14 @@ function journalMatches(journal, query) {
   return journalArticles.some(article => article.journal === journal.id && articleMatches(article, query));
 }
 
-function totalArticles(journalId) {
-  return journalArticles.filter(article => article.journal === journalId).length;
-}
-
 function visitLabel(journal) {
   return journal.id === 'pengmas' ? 'Visit Jurnal Pengmas' : `Visit ${journal.short}`;
 }
 
-function DirectoryCard({ journal, selected, matchedArticles, searching, onArticles }) {
-  const count = searching ? matchedArticles : totalArticles(journal.id);
+// Cards carry only "Visit <journal>": guidelines, templates, and articles live on each
+// journal's own site, so visitors go there directly (journal traffic counts toward
+// accreditation — Nordeo, Feedback 2).
+function DirectoryCard({ journal, selected }) {
   const external = /^https?:/i.test(journal.url);
   return <article className={`directory-card ${selected ? 'is-selected' : ''}`} id={journal.id}>
     <div className="directory-card-top">
@@ -42,16 +41,9 @@ function DirectoryCard({ journal, selected, matchedArticles, searching, onArticl
     <h3>{journal.name}</h3>
     <p className="directory-meta"><span>{journal.categoryLabel}</span>{journal.eissn !== '—' && <span>E-ISSN {journal.eissn}</span>}</p>
     <p className="directory-description">{journal.description}</p>
-    {(journal.templateUrl || journal.guidelinesUrl) && <div className="directory-resources">
-      {journal.templateUrl && <a href={journal.templateUrl} target="_blank" rel="noopener noreferrer"><DownloadIcon /> Manuscript template (.docx)</a>}
-      {journal.guidelinesUrl && <a href={journal.guidelinesUrl} target="_blank" rel="noopener noreferrer">Submission guidelines <Arrow size={14} /></a>}
-    </div>}
     <div className="directory-footer">
-      <button type="button" className="finder-text-button" onClick={() => onArticles(journal.id)}>
-        {count ? `View ${count} ${count === 1 ? 'article' : 'articles'}` : 'View profile'} <Arrow />
-      </button>
-      <SmartLink href={journal.url} className="text-link" {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-        {visitLabel(journal)} <Arrow />
+      <SmartLink href={journal.url} className="text-link directory-visit" {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+        {visitLabel(journal)} <Arrow />{external && <span className="sr-only"> (opens in a new tab)</span>}
       </SmartLink>
     </div>
     {journal.indexing.length > 0 && <p className="directory-indexing">{journal.indexing.join(' · ')}</p>}
@@ -104,13 +96,6 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true }) {
   }, [searchJournalPool]);
 
   const hasArticleFilters = Boolean(search) || topic !== ALL_TOPICS;
-  const scrollBehavior = typeof document !== 'undefined' && document.documentElement.dataset.motion === 'reduced' ? 'auto' : 'smooth';
-
-  function showArticles(id) {
-    setSelectedJournal(id);
-    setTopic(ALL_TOPICS);
-    requestAnimationFrame(() => articleRef.current?.scrollIntoView({ behavior: scrollBehavior, block: 'start' }));
-  }
 
   function chooseCategory(id) {
     setCategory(id);
@@ -135,7 +120,7 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true }) {
         <h2 id="journal-finder-heading">Find the journal that fits <em>your research field.</em></h2>
       </div>
       <div className="finder-head-aside">
-        <p>Choose a field, compare scopes, download the template, then read what has been published.</p>
+        <p>Choose a field, compare scopes, then visit the journal to submit and read its full archive.</p>
       </div>
     </div>
 
@@ -159,16 +144,14 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true }) {
     {filteredJournals.length === 0 && searchPool.length === 0
       ? <EmptyState title="No results" copy="No journal or article matches your search. Try another keyword, or return to all fields and focus areas." action={<button className="button button-dark" type="button" onClick={resetFilters}>Reset search</button>} />
       : <>
-        {filteredJournals.length > 0 && <div className="directory-grid">
-          {filteredJournals.map(journal => <DirectoryCard
-            key={journal.id}
-            journal={journal}
-            selected={selectedJournal === journal.id}
-            searching={Boolean(search)}
-            matchedArticles={searchPool.filter(article => article.journal === journal.id).length}
-            onArticles={showArticles}
-          />)}
-        </div>}
+        {filteredJournals.length > 0 && <Carousel
+          className="journal-carousel"
+          label="Nordeo journals"
+          prevLabel="Previous journals"
+          nextLabel="More journals"
+          items={filteredJournals}
+          renderItem={journal => <DirectoryCard journal={journal} selected={selectedJournal === journal.id} />}
+        />}
         {filteredJournals.length === 0 && <EmptyState title="No journal in this field" copy="Matching articles are still listed below. Clear the field filter to see the matching journals." action={<button className="button button-dark" type="button" onClick={resetFilters}>Show all fields</button>} />}
 
         <div className="article-preview" id="artikel" ref={articleRef}>
