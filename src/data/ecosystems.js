@@ -1,4 +1,5 @@
 import { externalLinks } from '../config/links';
+import { coreValues } from './company';
 
 // One record per ecosystem. Order is the order used in the header menu, the homepage
 // showcase, and the footer. Copy is English: it appears on the landing page and in menus.
@@ -8,8 +9,8 @@ export const ecosystems = [
     number: '01',
     title: 'Journals Publishing',
     short: 'Journals',
-    description: 'Open-access, peer-reviewed journals: JETSI for engineering and technology, JIEL for education and learning.',
-    menuCopy: 'JETSI, JIEL, and Jurnal Pengmas',
+    description: 'Open-access, peer-reviewed journals: JETSI for engineering and technology, JIEL for education and learning, JIBDI for business and digital innovation.',
+    menuCopy: 'JETSI, JIEL, JIBDI, and Jurnal Pengmas',
     image: '/assets/generated/ecosystem-journals-v1.webp',
     alt: 'Editor’s desk with manuscripts, journals, and research instruments',
     domain: 'nordeoscholar.com/journals',
@@ -21,7 +22,7 @@ export const ecosystems = [
     id: 'news',
     number: '02',
     title: 'Media & News Publishing',
-    short: 'Media & News',
+    short: 'NordeoNews',
     description: 'NordeoNews: research news, editor’s notes, and campus stories, with an open submission desk.',
     menuCopy: 'Research news and story submissions',
     image: '/assets/generated/ecosystem-media-v1.webp',
@@ -60,8 +61,8 @@ export const ecosystems = [
 // Client-supplied vision, split only for display: a quiet intro, then the large line.
 export const vision = {
   intro: 'To become a trusted academic publishing and research services company that',
-  lead: 'advances knowledge',
-  accent: 'and creates global impact.',
+  lead: 'advances knowledge and',
+  accent: 'creates global impact.',
 };
 
 // Founder profile: name and degrees from the JETSI and JIEL editorial pages; the founder
@@ -77,8 +78,5 @@ export const founder = {
   signature: null,
 };
 
-export const principles = [
-  ['Integrity', 'Editorial work that can be accounted for.'],
-  ['Transparency', 'Clear stages, policies, and costs.'],
-  ['Collaboration', 'Authors, editors, and partners in one conversation.'],
-];
+// The founder's note lists the six company core values (Feedback 2).
+export const principles = coreValues.map(value => [value.title, value.copy]);

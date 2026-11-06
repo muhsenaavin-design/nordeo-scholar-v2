@@ -9,37 +9,6 @@ function BackLink() {
   return <Link to="/" className="back-link">Kembali ke Beranda</Link>;
 }
 
-export function AboutPage() {
-  useDocumentTitle('About Nordeo Scholar');
-  return <section className="container inner-page editorial-page" data-reveal>
-    <BackLink />
-    <div className="page-lead">
-      <div className="page-lead-copy">
-        <h1>Knowledge,<br /> with purpose.</h1>
-        <p className="page-intro">Nordeo Scholar adalah ekosistem akademik yang menghubungkan riset, pendidikan, publikasi, dan kolaborasi yang bermakna. Kami percaya pengetahuan tumbuh ketika ia dibagikan.</p>
-      </div>
-      <figure className="page-art">
-        <img src="/assets/generated/hero-editorial-v1.webp" alt="Ilustrasi buku terbuka sebagai simbol berbagi pengetahuan" width="1600" height="1195" />
-        <figcaption>Knowledge grows when shared.</figcaption>
-      </figure>
-    </div>
-    <div className="about-story-grid">
-      <article><h2>Menerbitkan,<br /> mendampingi, menghubungkan.</h2><p>Kami mengelola jurnal open access, menyiapkan buku dan kanal berita akademik, serta membangun program pelatihan untuk penulis dan peneliti. Setiap kanal memiliki peran, tetapi semuanya berbagi satu standar: kejelasan, integritas, dan kegunaan.</p></article>
-      <div className="about-values">
-        <div><span>01</span><h3>Integritas</h3><p>Proses editorial yang bisa dipertanggungjawabkan, dari review sampai arsip.</p></div>
-        <div><span>02</span><h3>Transparansi</h3><p>Status, biaya, dan tahapan publikasi disampaikan tanpa samar.</p></div>
-        <div><span>03</span><h3>Kolaborasi</h3><p>Penulis, editor, reviewer, dan mitra bekerja dalam satu percakapan.</p></div>
-      </div>
-    </div>
-    <div className="information-panel about-ecosystem-panel">
-      <h2>Satu ekosistem, banyak pintu masuk.</h2>
-      <div className="about-ecosystem-links">
-        {ecosystems.map(item => <SmartLink key={item.id} href={ecosystemHref(item.id)}><span>{item.number}</span><strong>{item.short}</strong><small>{item.menuCopy}</small></SmartLink>)}
-      </div>
-    </div>
-  </section>;
-}
-
 export function ContactPage() {
   useDocumentTitle('Contact');
   return <section className="container inner-page reading-page" data-reveal>

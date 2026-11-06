@@ -1,30 +1,18 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { ecosystems, founder, principles, vision } from '../data/ecosystems';
-import { dateLabelEn, programTypeEn, trainingPrograms } from '../data/training';
-import { newsCategoryEn } from '../data/news';
 import { contact, office } from '../config/links';
 import { ecosystemHref } from '../lib/site';
-import { formatDate, publishedNews } from '../lib/store';
-import { BlurText, HeroImage, Parallax, ScrollStatement, ScrollWords } from '../components/effects';
+import { Parallax, ScrollStatement, ScrollWords } from '../components/effects';
 import { MotionNotice } from '../components/motion-preference';
 import JournalFinder from '../components/JournalFinder';
+import { AcademyCalendar, CompanyOverview, HeroSlideshow, NewsSpotlight, TrustAndFaq } from '../components/home-sections';
 import { Arrow, SmartLink, StatusPill, useDocumentTitle } from '../components/parts';
 
 function Hero() {
   return <section className="hero container" aria-labelledby="hero-heading">
     <div className="hero-frame">
-      <div className="hero-visual">
-        <HeroImage src="/assets/generated/hero-library-v2.webp" alt="A grand teal library with open books in golden light" width="1672" height="940" />
-      </div>
-      <div className="hero-copy">
-        <MotionNotice />
-        <h1 id="hero-heading"><span className="line-mask"><span>Advancing Knowledge.</span></span>{' '}<span className="line-mask"><span className="hero-heading-accent">Creating Global Impact.</span></span></h1>
-        <p className="hero-description"><BlurText text="An academic publishing and research support company: peer-reviewed journals, media & news, training, and books in one ecosystem." /></p>
-        <div className="hero-actions">
-          <Link to="/#ecosystem" className="button button-yellow">Discover the ecosystem</Link>
-        </div>
-      </div>
+      <HeroSlideshow notice={<MotionNotice />} />
     </div>
   </section>;
 }
@@ -63,42 +51,8 @@ function EcosystemShowcase() {
   </section>;
 }
 
-function EcosystemPulse() {
-  const stories = publishedNews().slice(0, 3);
-  const programs = trainingPrograms.filter(program => program.type !== 'Modul Pelatihan').slice(0, 3);
-  return <section className="pulse-section section-space container" aria-labelledby="pulse-heading">
-    <div className="section-heading" data-reveal>
-      <h2 id="pulse-heading">What’s moving <em>across Nordeo.</em></h2>
-      <p>The latest from NordeoNews and the Academy calendar.</p>
-    </div>
-    <div className="pulse-grid">
-      <div className="pulse-column" data-reveal>
-        <div className="pulse-head"><h3>NordeoNews</h3><SmartLink href={ecosystemHref('news')} className="text-link">All stories <Arrow /></SmartLink></div>
-        <ol className="pulse-list">
-          {stories.map(story => <li key={story.id}><SmartLink href={ecosystemHref('news', `/${story.slug}`)}>
-            <img src={story.cover} alt="" width="160" height="110" loading="lazy" decoding="async" />
-            <span><small>{newsCategoryEn[story.category] || story.category} · {formatDate(story.date, { day: 'numeric', month: 'short', year: 'numeric' }, 'en-GB')}</small><strong>{story.titleEn || story.title}</strong></span>
-          </SmartLink></li>)}
-        </ol>
-        <SmartLink href={ecosystemHref('news', '/kirim')} className="button button-outline">Submit your story</SmartLink>
-      </div>
-      <div className="pulse-column pulse-dark" data-reveal style={{ '--reveal-delay': '120ms' }}>
-        <div className="pulse-head"><h3>Academy</h3><SmartLink href={ecosystemHref('training', '/#jadwal')} className="text-link">All programs <Arrow /></SmartLink></div>
-        <ol className="pulse-list pulse-agenda">
-          {programs.map(program => <li key={program.id}><SmartLink href={ecosystemHref('training', `/program/${program.id}`)}>
-            <span className="agenda-date">{programTypeEn[program.type] || program.type}</span>
-            <span><small>{dateLabelEn[program.dateLabel] || program.dateLabel} · {program.mode}</small><strong>{program.titleEn || program.title}</strong></span>
-          </SmartLink></li>)}
-        </ol>
-        <p className="pulse-note">Tentative schedule. Dates and facilitators will be announced.</p>
-        <SmartLink href={ecosystemHref('training', '/daftar')} className="button button-gold">Register interest</SmartLink>
-      </div>
-    </div>
-  </section>;
-}
-
 function Founder() {
-  return <section id="about" className="founder-section" aria-labelledby="founder-heading">
+  return <section id="founder" className="founder-section" aria-labelledby="founder-heading">
     <div className="container founder-grid">
       <figure className="founder-card" data-reveal>
         <Parallax className="founder-photo" distance={16}>
@@ -114,10 +68,10 @@ function Founder() {
         <h2 id="founder-heading">Built by a researcher, <em>for researchers.</em></h2>
         <ScrollWords className="founder-statement" text="Nordeo Scholar began with a simple belief: good research deserves a clear, honest path to its readers. Today it brings journals, media & news, training, and books under one roof." />
         {founder.signature && <img className="founder-signature" src={founder.signature} alt={`Signature of ${founder.name}`} loading="lazy" decoding="async" />}
-        <ul className="founder-principles" aria-label="Our principles">{principles.map(([term, detail]) => <li key={term} title={detail}>{term}</li>)}</ul>
+        <ul className="founder-principles" aria-label="Our core values">{principles.map(([term, detail]) => <li key={term} title={detail}>{term}</li>)}</ul>
         <div className="founder-links">
           <Link to="/about" className="button button-dark">Our story</Link>
-          <Link to="/publication-ethics" className="text-link">Publication ethics <Arrow /></Link>
+          <Link to="/founder" className="text-link">Founder profile <Arrow /></Link>
         </div>
       </div>
     </div>
@@ -148,17 +102,22 @@ function Location() {
   </section>;
 }
 
+// Order follows Feedback 2 (Nov 2026): company overview between Our Vision and the four
+// rooms; NordeoNews and the Academy calendar as separate sections; FAQ before contact.
 export default function Home() {
   useDocumentTitle(null);
   return <div lang="en">
     <Hero />
     <Vision />
+    <CompanyOverview />
     <EcosystemShowcase />
     <div className="journals-section section-space container" id="journals">
       <JournalFinder limit={4} />
     </div>
-    <EcosystemPulse />
+    <NewsSpotlight />
+    <AcademyCalendar />
     <Founder />
+    <TrustAndFaq />
     <Location />
   </div>;
 }

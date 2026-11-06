@@ -20,9 +20,27 @@ test('links JIEL to its own journal platform', () => {
   expect(screen.getByRole('link', { name: /visit jiel/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jiel');
 });
 
-test('keeps Jurnal Pengmas inside Nordeo', () => {
+test('links Jurnal Pengmas and JIBDI to their journal paths (Feedback 2)', () => {
   render(<MemoryRouter initialEntries={['/journals']}><App /></MemoryRouter>);
-  expect(screen.getAllByRole('link', { name: /visit jurnal pengmas/i }).at(-1)).toHaveAttribute('href', '/journals/jurnalpengmas');
+  expect(screen.getAllByRole('link', { name: /visit jurnal pengmas/i }).at(-1)).toHaveAttribute('href', 'https://nordeoscholar.com/journal/pengmas');
+  expect(screen.getAllByRole('link', { name: /visit jibdi/i }).at(-1)).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jibdi');
+});
+
+test('journal cards send visitors to the journal site only', () => {
+  render(<MemoryRouter><App /></MemoryRouter>);
+  const journals = within(document.getElementById('journals'));
+  expect(journals.queryByText(/submission guidelines/i)).not.toBeInTheDocument();
+  expect(journals.queryByText(/manuscript template/i)).not.toBeInTheDocument();
+  expect(journals.queryByRole('button', { name: /view \d+ articles|view profile/i })).not.toBeInTheDocument();
+  expect(journals.getByRole('region', { name: /nordeo journals/i })).toBeInTheDocument();
+});
+
+test('article links use the DOIs registered with Crossref', () => {
+  render(<MemoryRouter initialEntries={['/journals']}><App /></MemoryRouter>);
+  expect(screen.getByRole('link', { name: /shopee live among generation z/i })).toHaveAttribute('href', 'https://doi.org/10.68627/742989');
+  for (const link of screen.getAllByRole('link').filter(item => /doi\.org/.test(item.getAttribute('href')))) {
+    expect(link.getAttribute('href')).toMatch(/^https:\/\/doi\.org\/10\.68627\/\d+$/);
+  }
 });
 
 test('makes journal discovery and ecosystem availability clear on the homepage', () => {
@@ -35,7 +53,7 @@ test('makes journal discovery and ecosystem availability clear on the homepage',
   for (const title of ['Journals Publishing', 'Media & News Publishing', 'Academic Training', 'Books Publishing']) {
     expect(main.getByRole('heading', { level: 3, name: title })).toBeInTheDocument();
   }
-  expect(main.getByText('Media & News')).toBeInTheDocument();
+  expect(main.getAllByText('NordeoNews').length).toBeGreaterThan(0);
   const browse = main.getByRole('link', { name: /browse the journals/i });
   expect(browse).toHaveAttribute('href', 'https://nordeoscholar.com/journal/');
   expect(browse).toHaveAttribute('target', '_blank');
@@ -48,7 +66,11 @@ test('homepage states the vision in place of the metrics row', () => {
   expect(screen.getByRole('heading', { level: 2, name: 'Our Vision' })).toBeInTheDocument();
   expect(screen.getByText(/to become a trusted academic publishing and research services company/i)).toBeInTheDocument();
   expect(screen.queryByText(/articles published in jetsi/i)).not.toBeInTheDocument();
-  expect(screen.getByRole('heading', { level: 3, name: 'NordeoNews' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 2, name: 'Company Overview' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 3, name: 'Core values' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 3, name: /popular stories/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 2, name: /academy calendar/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 2, name: /questions, answered/i })).toBeInTheDocument();
 });
 
 test('mobile navigation exposes its state and closes with Escape', () => {
@@ -61,13 +83,17 @@ test('mobile navigation exposes its state and closes with Escape', () => {
   expect(toggle).toHaveAttribute('aria-expanded', 'false');
 });
 
-test('header sections return from a detail page to the landing while keeping the catalog CTA', () => {
+test('header lists the ecosystems and returns from a detail page to the landing', () => {
   render(<MemoryRouter initialEntries={['/books']}><App /></MemoryRouter>);
   const nav = within(screen.getByRole('navigation', { name: /main navigation/i }));
-  for (const name of ['About', 'Journals', 'Contact']) {
-    expect(nav.getByRole('link', { name, exact: true })).toHaveAttribute('href', `/#${name.toLowerCase()}`);
+  for (const [name, href] of [['About', '/#about'], ['Journals', '/#journals'], ['NordeoNews', '/news'], ['Academy', '/training'], ['Contact', '/#contact']]) {
+    expect(nav.getByRole('link', { name, exact: true })).toHaveAttribute('href', href);
   }
-  expect(nav.getByRole('link', { name: /explore journals/i })).toHaveAttribute('href', '/journals');
+  const books = nav.getAllByRole('link', { name: /^books/i }).find(link => !/publishing/i.test(link.textContent));
+  expect(books).toHaveAttribute('href', '/books');
+  expect(books).toHaveTextContent(/coming soon/i);
+  expect(nav.queryByRole('link', { name: /explore journals/i })).not.toBeInTheDocument();
+  expect(nav.getByRole('button', { name: 'Ecosystem' })).toHaveClass('button-dark');
   fireEvent.click(nav.getByRole('link', { name: 'About', exact: true }));
   expect(screen.getByRole('heading', { level: 1, name: /advancing knowledge/i })).toBeInTheDocument();
   expect(nav.getByRole('link', { name: 'About', exact: true })).toHaveAttribute('aria-current', 'location');
@@ -166,11 +192,32 @@ test('homepage introduces the founder and closes with the office address and map
   render(<MemoryRouter><App /></MemoryRouter>);
   expect(screen.getByRole('heading', { level: 2, name: /built by a researcher/i })).toBeInTheDocument();
   expect(screen.getByRole('img', { name: /fandi achmad, founder of nordeo scholar/i })).toHaveAttribute('src', '/assets/team/fandi-achmad.webp');
-  expect(screen.getByText('Integrity')).toBeInTheDocument();
+  const founderNote = within(document.getElementById('founder'));
+  for (const value of ['Integrity', 'Excellence', 'Innovation', 'Collaboration', 'Knowledge Sharing', 'Professionalism']) {
+    expect(founderNote.getByText(value)).toBeInTheDocument();
+  }
+  expect(founderNote.getByRole('link', { name: 'Our story' })).toHaveAttribute('href', '/about');
+  expect(founderNote.getByRole('link', { name: /founder profile/i })).toHaveAttribute('href', '/founder');
   expect(screen.queryByRole('button', { name: 'Subscribe' })).not.toBeInTheDocument();
   const location = within(document.getElementById('contact'));
   expect(location.getByText(/G-Land Arcadia Buah Batu, Jl\. Cikoneng, Bojongsoang 40288, Bandung, Indonesia\./)).toBeInTheDocument();
   expect(location.getByTitle(/map showing nordeo scholar publishing/i).getAttribute('src')).toMatch(/^https:\/\/www\.google\.com\/maps\?q=G-Land/);
+  expect(location.getByRole('link', { name: /admin@nordeoscholar\.com/ })).toHaveAttribute('href', 'mailto:admin@nordeoscholar.com');
+});
+
+test('founder profile links to the Scopus, Google Scholar, and SINTA profiles', () => {
+  render(<MemoryRouter initialEntries={['/founder']}><App /></MemoryRouter>);
+  expect(screen.getByRole('heading', { level: 1, name: /fandi achmad/i })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: /on scopus/i })).toHaveAttribute('href', 'https://www.scopus.com/authid/detail.uri?authorId=58139295200');
+  expect(screen.getByRole('link', { name: /on google scholar/i }).getAttribute('href')).toMatch(/user=jYKJgjwAAAAJ/);
+  expect(screen.getByRole('link', { name: /on sinta/i })).toHaveAttribute('href', 'https://sinta.kemdiktisaintek.go.id/authors/profile/6856625');
+});
+
+test('our story page shows the milestones, mission, and core values', () => {
+  render(<MemoryRouter initialEntries={['/about']}><App /></MemoryRouter>);
+  expect(screen.getByRole('heading', { level: 2, name: /how nordeo grew/i })).toBeInTheDocument();
+  expect(screen.getByText(/upholding publication ethics and scientific integrity/i)).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 2, name: 'Core values' })).toBeInTheDocument();
 });
 
 test('NordeoNews brands the news microsite and filters stories by the new rubrics', async () => {
@@ -185,4 +232,35 @@ test('NordeoNews brands the news microsite and filters stories by the new rubric
   expect(screen.getByRole('status')).toHaveTextContent('2 cerita');
   fireEvent.click(tabs.getByRole('button', { name: 'Bisnis' }));
   expect(screen.getByRole('heading', { name: /belum ada cerita bisnis/i })).toBeInTheDocument();
+});
+
+test('hero slides carry their own copy and the running segment pauses the slideshow', () => {
+  render(<MemoryRouter><App /></MemoryRouter>);
+  const slides = within(screen.getByRole('group', { name: 'Slides' }));
+  const first = slides.getByRole('button', { name: /nordeo scholar: pause slideshow/i });
+  expect(first).toHaveAttribute('aria-pressed', 'false');
+  fireEvent.click(first);
+  expect(slides.getByRole('button', { name: /nordeo scholar: resume slideshow/i })).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(slides.getByRole('button', { name: /show journals/i }));
+  expect(within(document.querySelector('.hero')).getByRole('link', { name: /browse the journals/i })).toHaveAttribute('href', '/#journals');
+  expect(screen.getByRole('heading', { level: 1, name: /advancing knowledge/i })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /^pause$/i })).not.toBeInTheDocument();
+});
+
+test('journal status badges use the clarified labels', () => {
+  render(<MemoryRouter><App /></MemoryRouter>);
+  const journals = within(document.getElementById('journals'));
+  expect(journals.getByText('Open for submissions')).toHaveClass('status-live');
+  expect(journals.queryByText('Accepting submissions')).not.toBeInTheDocument();
+  expect(journals.getAllByText('Call for papers')[0]).toHaveClass('status-open');
+});
+
+test('academy lists upcoming programmes as an agenda with a month-calendar toggle', () => {
+  render(<MemoryRouter><App /></MemoryRouter>);
+  const academy = within(document.getElementById('academy'));
+  expect(academy.getByRole('list', { name: /upcoming programmes/i })).toBeInTheDocument();
+  const toggle = academy.getByRole('button', { name: /view month calendar/i });
+  expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  fireEvent.click(toggle);
+  expect(academy.getByRole('button', { name: /hide month calendar/i })).toHaveAttribute('aria-expanded', 'true');
 });

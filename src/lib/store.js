@@ -73,6 +73,13 @@ export function publishedNews(items = getNews()) {
     .sort((a, b) => String(b.date).localeCompare(String(a.date)));
 }
 
+// Popular order for the homepage. Editors pin an order with `popularRank` (1 = top);
+// stories without a rank follow by `views`, then by date.
+export function popularNews(items = publishedNews()) {
+  const rank = item => (Number.isFinite(item.popularRank) ? item.popularRank : Infinity);
+  return [...items].sort((a, b) => (rank(a) - rank(b)) || ((b.views || 0) - (a.views || 0)) || String(b.date).localeCompare(String(a.date)));
+}
+
 export function getNewsBySlug(slug) {
   return publishedNews().find(item => item.slug === slug);
 }

@@ -8,7 +8,7 @@
    ========================================================================== */
 
 @theme {
-  --color-nordeo: #1e5566;
+  --color-nordeo: #00586f;
   --color-ink: #142a32;
 }
 
@@ -26,17 +26,18 @@
   --ink-3: #5e7278;
 
   /* Brand */
-  --teal: #1e5566;
+  --teal: #00586f;
   --teal-deep: #17414f;
   --deep: #0f3038;
   --deep-2: #0a242b;
 
-  /* Accent — brass, derived from the gold in the previous palette but calmer */
-  --accent: #c9a227;
-  --accent-strong: #b08f1e;
-  --accent-bright: #e3b341;
-  --accent-ink: #7a5a0e;
-  --accent-soft: #f0e3b8;
+  /* Accent: one yellow scale on Nordeo yellow #FFD218 (palette audit, Nov 2026).
+     Yellow is a fill or sits on dark green; never text on cream (use --accent-ink). */
+  --accent: #ffd218;
+  --accent-strong: #f2c200;
+  --accent-bright: #ffd218;
+  --accent-ink: #6b4e00;
+  --accent-soft: #fff4c2;
   --gold: var(--accent);
 
   /* Lines & shadow */
@@ -433,7 +434,7 @@ html[data-motion="full"] .hero-footer { animation-delay: .5s; }
   background: var(--surface);
   transition: border-color .2s, box-shadow .2s;
 }
-.finder-search:focus-within { border-color: var(--teal); box-shadow: 0 0 0 4px rgba(30, 85, 102, .12); }
+.finder-search:focus-within { border-color: var(--teal); box-shadow: 0 0 0 4px rgba(0, 88, 111, .12); }
 .finder-search > .icon { width: 22px; height: 22px; color: var(--teal); }
 .finder-search input {
   flex: 1;
@@ -590,7 +591,7 @@ html[data-motion="full"] .hero-footer { animation-delay: .5s; }
 .journal-tab small { font-size: 12px; font-weight: 500; color: var(--ink-3); }
 .journal-tab:hover:not(.is-active) { background: var(--surface-2); }
 .journal-tab.is-active { background: var(--deep); color: #fff; }
-.journal-tab.is-active small { color: rgba(227, 179, 65, .95); }
+.journal-tab.is-active small { color: rgba(255, 210, 24, .95); }
 .topic-row { margin-top: 18px; }
 .article-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 22px; }
 .article-card {
@@ -718,7 +719,7 @@ html[data-motion="full"] .hero-footer { animation-delay: .5s; }
   z-index: -1;
   width: 380px;
   height: 380px;
-  border: 1px solid rgba(227, 179, 65, .34);
+  border: 1px solid rgba(255, 210, 24, .34);
   border-radius: 50%;
 }
 .collaboration-section .eyebrow { margin-bottom: 16px; font-size: 12px; color: var(--accent-bright); }

@@ -27,7 +27,7 @@ function useEscape(active, onEscape) {
 
 // Mega menu listing the four ecosystems. Opens on click or keyboard; on a mouse it also
 // opens on hover. The preview column follows whichever item is hovered or focused.
-export function EcosystemMenu({ current = 'main', label = 'Ecosystem' }) {
+export function EcosystemMenu({ current = 'main', label = 'Ecosystem', asButton = false }) {
   const [open, setOpen] = useState(false);
   const [preview, setPreview] = useState(ecosystems.find(item => item.id === current)?.id || ecosystems[0].id);
   const wrapRef = useRef(null);
@@ -62,8 +62,8 @@ export function EcosystemMenu({ current = 'main', label = 'Ecosystem' }) {
   };
   const active = ecosystems.find(item => item.id === preview) || ecosystems[0];
 
-  return <div className="nav-dropdown" ref={wrapRef} onPointerEnter={hover(true)} onPointerLeave={hover(false)}>
-    <button ref={buttonRef} type="button" className={`nav-trigger ${open ? 'is-open' : ''}`} aria-expanded={open} aria-controls="ecosystem-menu" onClick={toggle}>
+  return <div className={`nav-dropdown ${asButton ? 'is-button' : ''}`.trim()} ref={wrapRef} onPointerEnter={hover(true)} onPointerLeave={hover(false)}>
+    <button ref={buttonRef} type="button" className={`nav-trigger ${asButton ? 'button button-small button-dark' : ''} ${open ? 'is-open' : ''}`.replace(/\s+/g, ' ').trim()} aria-expanded={open} aria-controls="ecosystem-menu" onClick={toggle}>
       {label} <Chevron />
     </button>
     <div className={`mega-menu ${open ? 'is-open' : ''}`} id="ecosystem-menu" inert={!open}>
@@ -114,8 +114,7 @@ export function MainHeader({ onReplaySection }) {
   useEffect(() => { setMenuOpen(false); }, [pathname, hash]);
   useEscape(menuOpen, () => { setMenuOpen(false); toggleRef.current?.focus(); });
 
-  const sectionLink = label => {
-    const id = label.toLowerCase();
+  const sectionLink = (label, id = label.toLowerCase()) => {
     const active = pathname === '/' && hash === `#${id}`;
     return <Link key={label} to={`/#${id}`} className={active ? 'active' : undefined} aria-current={active ? 'location' : undefined} onClick={event => {
       if (active && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onReplaySection?.(); }
@@ -127,12 +126,16 @@ export function MainHeader({ onReplaySection }) {
       <Link to="/" className="brand" aria-label="Nordeo Scholar home"><img src="/assets/logo-transparent.png" width="220" height="60" alt="Nordeo Scholar Publishing" decoding="async" /></Link>
       <MenuToggle open={menuOpen} toggleRef={toggleRef} controls="primary-navigation" onClick={() => setMenuOpen(value => !value)} />
       <nav id="primary-navigation" aria-label="Main navigation" className={`primary-navigation ${menuOpen ? 'is-open' : ''}`}>
+        {/* Feedback 2: the ecosystems sit in the top navigation, and the dark button
+            opens the ecosystem menu (it replaced "Explore Journals"). Names match the
+            sections and microsites (UX audit, Nov 2026). */}
         {sectionLink('About')}
-        <EcosystemMenu />
         {sectionLink('Journals')}
+        <SmartLink href={ecosystemHref('news')}>NordeoNews</SmartLink>
+        <SmartLink href={ecosystemHref('training')}>Academy</SmartLink>
+        <SmartLink href={ecosystemHref('books')}>Books<span className="nav-soon" aria-hidden="true">Soon</span><span className="sr-only"> (coming soon)</span></SmartLink>
         {sectionLink('Contact')}
-        <Link className="button button-small button-dark" to="/journals">Explore Journals</Link>
-        <MobileEcosystems current="main" />
+        <EcosystemMenu asButton />
       </nav>
     </div>
   </header>;

@@ -1,6 +1,9 @@
 export const externalLinks = {
   jetsi: 'https://nordeoscholar.com/journal/jetsi',
   jiel: 'https://nordeoscholar.com/journal/jiel',
+  jibdi: 'https://nordeoscholar.com/journal/jibdi',
+  // Temporary path chosen by Nordeo (Feedback 2); the OJS journal is not live there yet.
+  pengmas: 'https://nordeoscholar.com/journal/pengmas',
   journalPortal: 'https://nordeoscholar.com/journal/',
 };
 
@@ -21,7 +24,7 @@ export const officialSocial = {
 export const newsTemplate = '/templates/Nordeo-News-Submission-Form.docx';
 
 export const contact = {
-  general: 'info@nordeoscholar.com',
+  general: 'admin@nordeoscholar.com',
   news: 'news@nordeoscholar.com',
   books: 'books@nordeoscholar.com',
   training: 'academy@nordeoscholar.com',
