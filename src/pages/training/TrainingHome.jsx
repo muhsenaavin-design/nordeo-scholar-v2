@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { programTypes, publicationPath, trainingFaq, trainingPrograms, trainingTracks, writingModules } from '../../data/training';
+import { programTypes, publicationPath, trainingFaq, trainingTracks, writingModules } from '../../data/training';
+import { usePrograms } from '../../lib/content';
 import { contact } from '../../config/links';
 import { siteBase } from '../../lib/site';
 import { Magnet } from '../../components/effects';
@@ -22,7 +23,8 @@ export default function TrainingHome() {
   useDocumentTitle('Nordeo Academy');
   const base = siteBase('training');
   const [type, setType] = useState(programTypes[0]);
-  const programs = type === programTypes[0] ? trainingPrograms : trainingPrograms.filter(program => program.type === type);
+  const allPrograms = usePrograms();
+  const programs = type === programTypes[0] ? allPrograms : allPrograms.filter(program => program.type === type);
   const showType = next => { setType(next); document.getElementById('jadwal')?.scrollIntoView({ behavior: document.documentElement.dataset.motion === 'reduced' ? 'auto' : 'smooth', block: 'start' }); };
 
   return <>

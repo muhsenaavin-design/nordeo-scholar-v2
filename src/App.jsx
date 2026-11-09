@@ -18,7 +18,7 @@ const TrainingHome = lazy(() => import('./pages/training/TrainingHome'));
 const TrainingProgram = lazy(() => import('./pages/training/TrainingProgram'));
 const TrainingRegister = lazy(() => import('./pages/training/TrainingRegister'));
 // The admin dashboard is a separate app shell without the public header and footer.
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminApp'));
 
 function Layout({ children }) {
   const { pathname } = useLocation();

@@ -103,12 +103,12 @@ export const partners = [
 // be designed; they are not quotes from real people. Replace each one with a real, approved
 // quote before relying on it: { quote, name, role, service, rating, photo? }.
 export const testimonials = [
-  { quote: 'The review comments were specific and fair. I knew exactly what to fix, and the revised paper is far stronger than the one I sent.', name: 'JETSI author', role: 'Lecturer, industrial engineering', service: 'Journals', rating: 5 },
-  { quote: 'Every email got a reply within days. For a first submission, that calm communication mattered more than I expected.', name: 'JIEL author', role: 'Master’s student, education', service: 'Journals', rating: 5 },
-  { quote: 'The writing clinic took us from a messy draft to a manuscript we were confident enough to submit.', name: 'Academy participant', role: 'Lecturer, business faculty', service: 'Academy', rating: 5 },
-  { quote: 'Our community service report became a story people actually read. The editors kept our facts and made them clearer.', name: 'NordeoNews contributor', role: 'Public relations, university', service: 'NordeoNews', rating: 5 },
-  { quote: 'Clear author guidelines, a working template, and a DOI on publication. Everything a young journal should get right.', name: 'JIBDI author', role: 'Researcher, digital business', service: 'Journals', rating: 5 },
-  { quote: 'The seminar was practical from start to finish: real examples, real reviewer comments, no filler.', name: 'Academy participant', role: 'Doctoral candidate', service: 'Academy', rating: 5 },
+  { quote: 'The review comments were specific and fair. I knew exactly what to fix, and the revised paper is far stronger than the one I sent.', name: 'JETSI author', role: 'Lecturer, industrial engineering', service: 'Journals', rating: 5, sample: true },
+  { quote: 'Every email got a reply within days. For a first submission, that calm communication mattered more than I expected.', name: 'JIEL author', role: 'Master’s student, education', service: 'Journals', rating: 5, sample: true },
+  { quote: 'The writing clinic took us from a messy draft to a manuscript we were confident enough to submit.', name: 'Academy participant', role: 'Lecturer, business faculty', service: 'Academy', rating: 5, sample: true },
+  { quote: 'Our community service report became a story people actually read. The editors kept our facts and made them clearer.', name: 'NordeoNews contributor', role: 'Public relations, university', service: 'NordeoNews', rating: 5, sample: true },
+  { quote: 'Clear author guidelines, a working template, and a DOI on publication. Everything a young journal should get right.', name: 'JIBDI author', role: 'Researcher, digital business', service: 'Journals', rating: 5, sample: true },
+  { quote: 'The seminar was practical from start to finish: real examples, real reviewer comments, no filler.', name: 'Academy participant', role: 'Doctoral candidate', service: 'Academy', rating: 5, sample: true },
 ];
 
 export const faqs = [

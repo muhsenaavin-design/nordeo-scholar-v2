@@ -66,7 +66,7 @@ const reviewText = (date) => (date ? `Ditinjau ${formatDate(date, { day: 'numeri
 
 // ---------------------------------------------------------------- 1. Dashboard
 export function Overview({ data, role, go, t, a, journalCard, toast }) {
-  const { news, submissions, registrations, cms } = data;
+  const { news, submissions, registrations, cms, comments = [] } = data;
   const published = news.filter((n) => n.status === 'published');
   const review = news.filter((n) => n.status === 'review');
   const fresh = submissions.filter((s) => (s.status || 'baru') === 'baru');
@@ -74,15 +74,16 @@ export function Overview({ data, role, go, t, a, journalCard, toast }) {
     .filter((x) => daysSince(x.date) > 90);
   const tasks = [
     ...(role !== 'marketing' ? review.map((n) => ({ key: n.id, title: n.title, meta: `NordeoNews · ${n.category}`, pill: ['gold', 'In review'], action: role === 'owner' ? 'Tinjau' : 'Buka', to: 'news' })) : []),
-    ...fresh.slice(0, 3).map((s) => ({ key: s.id, title: s.title || '(tanpa judul)', meta: `Kiriman cerita · ${s.name || 'pengirim'}`, pill: ['teal', 'Baru'], action: 'Buka', to: 'inbox' })),
+    ...fresh.slice(0, 3).map((s) => ({ key: s.id, title: s.title || '(tanpa judul)', meta: `Kiriman cerita · ${s.name || 'pengirim'}`, pill: ['teal', 'Baru'], action: 'Buka', to: 'stories' })),
+    ...comments.filter((c) => c.status === 'pending').slice(0, 3).map((c) => ({ key: c.id, title: c.comment.slice(0, 60), meta: `Komentar · ${c.name}`, pill: ['gold', 'Moderasi'], action: 'Tinjau', to: 'comments' })),
     ...stale.map((s) => ({ key: s.name, title: s.name, meta: 'Belum ditinjau lebih dari 90 hari', pill: ['red', 'Perlu cek'], action: 'Cek', to: s.to })),
   ].filter((x) => can(x.to, role, 'R'));
   const accent = {
     owner: { title: ['Tinjau', 'Konten'], value: review.length, unit: ['menunggu', 'persetujuan'], cta: 'Buka antrean', to: 'news' },
     admin: { title: ['Tulis', 'Artikel'], value: published.length, unit: ['artikel', 'terbit'], cta: 'Buat baru', to: 'news' },
-    marketing: { title: ['Data', 'Peminat'], value: registrations.length + submissions.length, unit: ['masukan', 'tersimpan'], cta: 'Buka pesan', to: 'inbox' },
+    marketing: { title: ['Data', 'Peminat'], value: registrations.length, unit: ['peminat', 'Academy'], cta: 'Buka peminat', to: 'registrations' },
   }[role];
-  const recent = (cms.log || []).slice(0, 6);
+  const recent = (data.activity || []).slice(0, 6);
   return <div className="adm-grid">
     <Card title="Empat ekosistem" className="c10" delay={140}
       action={can('ecosystems', role, 'R') && <IconBtn icon="arrow" label="Kelola ekosistem" onClick={() => go('ecosystems')} />}>
@@ -129,15 +130,13 @@ export function PagesModule({ data, rights, toast }) {
         { key: 'heroLine1', label: 'Judul hero, baris 1', required: true },
         { key: 'heroLine2', label: 'Judul hero, baris 2 (tampil kuning #FFD218)' },
         { key: 'heroCta', label: 'Tombol hero', hint: 'Hanya satu tombol: “Discover the ecosystem” (FB-02).' },
-        { key: 'vision', label: 'Our Vision', type: 'textarea', rows: 3 },
-        { key: 'about', label: 'Halaman About', type: 'textarea', rows: 4 },
       ]} />
     <Card title="Pratinjau hero" className="c10" delay={140}>
       <div className="adm-hero-preview">
-        <img src="/assets/hero.webp" alt="" />
+        <img src="/assets/generated/hero-library-v2.webp" alt="" />
         <div><p className="l1">{p.heroLine1}</p><p className="l2">{p.heroLine2}</p><span className="adm-hero-preview__cta">{p.heroCta}</span></div>
       </div>
-      <p className="adm-muted" style={{ marginTop: 12 }}>Our Vision: {p.vision}</p>
+      <p className="adm-muted" style={{ marginTop: 12 }}>Tampil sebagai slide pertama di beranda. Visi dan misi diubah di menu Profil perusahaan.</p>
       {rights.U && <Btn icon="check" onClick={() => { update('pages', { ...p, reviewedAt: data.today() }, 'menandai sudah ditinjau', 'konten beranda'); toast('Ditandai sudah ditinjau.'); }}>Tandai sudah ditinjau</Btn>}
     </Card>
     <Card title="Susunan section beranda" className="c24" delay={200}>
@@ -196,7 +195,8 @@ export function NewsModule({ data, role, rights, toast }) {
     const unchanged = d.body?.length && d.bodyText === d.bodyOriginal;
     const body = unchanged ? d.body : lines(d.bodyText).map((text) => ({ type: 'p', text }));
     const credits = { ...(d.credits || {}), writer: d.author || d.credits?.writer || '', editor: d.creditEditor || '', photo: d.creditPhoto || '' };
-    const rec = { ...d, credits, slug: d.slug || slugify(d.title), titleEn: d.titleEn || d.title, body: body.length ? body : d.body || [], readTime: d.readTime || `${Math.max(1, Math.round(String(d.bodyText || '').split(/\s+/).length / 200))} menit` };
+    const rank = Number.parseInt(d.popularRank, 10);
+    const rec = { ...d, popularRank: Number.isFinite(rank) && rank > 0 ? rank : undefined, credits, slug: d.slug || slugify(d.title), titleEn: d.titleEn || d.title, body: body.length ? body : d.body || [], readTime: d.readTime || `${Math.max(1, Math.round(String(d.bodyText || '').split(/\s+/).length / 200))} menit` };
     ['bodyText', 'bodyOriginal', 'creditEditor', 'creditPhoto'].forEach((key) => delete rec[key]);
     const exists = news.some((x) => x.id === rec.id);
     commitNews(exists ? news.map((x) => (x.id === rec.id ? rec : x)) : [rec, ...news], exists ? 'mengubah artikel' : 'membuat draft artikel', rec.title);
@@ -248,6 +248,7 @@ export function NewsModule({ data, role, rights, toast }) {
         { key: 'date', label: 'Tanggal terbit', type: 'date' },
         { key: 'cover', label: 'Gambar sampul (URL)', hint: 'Pilih dari menu Media, salin alamatnya.' },
         { key: 'bodyText', label: 'Isi artikel', type: 'textarea', rows: 8, hint: 'Satu paragraf per baris. Format dari kiriman (tebal, rata, daftar) tetap tersimpan selama teks ini tidak diubah.' },
+        { key: 'popularRank', label: 'Urutan populer di beranda', type: 'number', hint: '1 = paling atas. Kosongkan agar diurutkan menurut jumlah pembaca (FR-24).' },
         { key: 'featured', label: 'Jadikan featured story', type: 'toggle' },
       ]} />}
     {rejecting && <Editor title="Tolak artikel" value={{ note: '' }} saveLabel="Kembalikan ke Admin" onClose={() => setRejecting(null)}
@@ -256,70 +257,184 @@ export function NewsModule({ data, role, rights, toast }) {
   </div>;
 }
 
-// ---------------------------------------------------------------- 5. Academy
+// ---------------------------------------------------------------- Academy: programmes and calendar
 export function AcademyModule({ data, rights, toast }) {
   const { cms, update, registrations } = data;
   const countFor = (id) => registrations.filter((r) => r.program === id).length;
   return <div className="adm-grid">
     <RecordList title="Program Academy" label="program" delay={80} rights={rights} items={cms.programs}
-      onChange={(next, action, target) => { update('programs', next, action, target); toast('Program disimpan.'); }}
-      blank={{ title: '', type: 'Seminar', dateLabel: 'Tanggal menyusul', mode: 'Online', facilitator: '', link: '/training/', status: 'draft' }}
+      onChange={(next, action, target) => { update('programs', next, action, target); toast('Program disimpan dan tampil di kalender.'); }}
+      blank={{ title: '', titleEn: '', type: 'Seminar', date: '', dateLabel: 'Tanggal menyusul', mode: 'Online', facilitator: '', summary: '', status: 'draft' }}
       columns={[
         [(p) => <><b>{p.title}</b><div className="adm-muted">{p.facilitator}</div></>, 'Program'],
         [(p) => p.type, 'Jenis'],
-        [(p) => `${p.dateLabel} · ${p.mode}`, 'Jadwal'],
-        [(p) => <Pill tone={countFor(p.id) ? 'teal' : 'neutral'}>{countFor(p.id)} peminat</Pill>, 'Pendaftar'],
+        [(p) => <>{p.date ? formatDate(p.date, { day: 'numeric', month: 'short', year: 'numeric' }) : 'Tanggal menyusul'}<div className="adm-muted">{p.mode}</div></>, 'Jadwal'],
+        [(p) => <Pill tone={countFor(p.id) ? 'teal' : 'neutral'}>{countFor(p.id)} peminat</Pill>, 'Peminat'],
         [(p) => <Pill tone={p.status === 'published' ? 'green' : 'neutral'}>{p.status === 'published' ? 'Tampil' : 'Draft'}</Pill>, 'Status'],
       ]}
       fields={[
-        { key: 'title', label: 'Nama program', required: true },
+        { key: 'title', label: 'Nama program (Indonesia)', required: true },
+        { key: 'titleEn', label: 'Nama program (Inggris, untuk beranda)' },
         { key: 'type', label: 'Jenis', type: 'select', options: ['Seminar', 'Konferensi', 'Modul Pelatihan'] },
-        { key: 'dateLabel', label: 'Tanggal' },
+        { key: 'date', label: 'Tanggal di kalender', type: 'date', hint: 'Kosongkan bila belum pasti; program masuk daftar “Date to be announced”.' },
+        { key: 'dateLabel', label: 'Label jadwal', hint: 'Mis. “November 2026”.' },
         { key: 'mode', label: 'Mode', type: 'select', options: ['Online', 'On-site', 'Hybrid'] },
         { key: 'facilitator', label: 'Fasilitator' },
-        { key: 'link', label: 'Link pendaftaran' },
-        { key: 'status', label: 'Status', type: 'select', options: [{ value: 'published', label: 'Tampil' }, { value: 'draft', label: 'Draft' }] },
+        { key: 'summary', label: 'Ringkasan', type: 'textarea', rows: 3 },
+        { key: 'status', label: 'Status', type: 'select', options: [{ value: 'published', label: 'Tampil di website' }, { value: 'draft', label: 'Draft' }] },
       ]} />
   </div>;
 }
 
-// ---------------------------------------------------------------- 6. Pesan (subscribers & messages)
-export function InboxModule({ data, role, rights, toast, go }) {
-  const { submissions, commitSubmissions, registrations, news, commitNews, cms } = data;
-  const [tab, setTab] = useState('stories');
-  const programTitle = (id) => cms.programs.find((p) => p.id === id)?.title || id;
-  const canExport = rights.E;
-  const exportCsv = (rows, columns, name) => { downloadFile(`${name}-${data.today()}.csv`, toCsv(rows, columns), 'text/csv'); data.log('mengekspor', name); toast('File CSV diunduh.'); };
+const exportCsv = (data, toast, rows, columns, name) => { downloadFile(`${name}-${data.today()}.csv`, toCsv(rows, columns), 'text/csv'); data.log('mengekspor', name); toast('File CSV diunduh.'); };
+
+// ---------------------------------------------------------------- NordeoNews: story submissions
+export function StoriesModule({ data, rights, toast, go }) {
+  const { submissions, commitSubmissions, news, commitNews } = data;
+  const [open, setOpen] = useState(null);
   const storyCols = [['reference', 'Referensi'], ['title', 'Judul'], ['category', 'Kategori'], ['name', 'Pengirim'], ['email', 'Email'], ['institution', 'Institusi'], ['submittedAt', 'Dikirim'], ['status', 'Status']];
-  const regCols = [['reference', 'Referensi'], ['name', 'Nama'], ['email', 'Email'], ['institution', 'Institusi'], ['role', 'Peran'], ['program', 'Program'], ['submittedAt', 'Dikirim']];
+  const setStatus = (s, status) => commitSubmissions(submissions.map((x) => (x.id === s.id ? { ...x, status } : x)), `menandai kiriman ${status}`, s.title);
   const toDraft = (s) => {
-    const rec = { id: makeId('news'), title: s.title || 'Kiriman tanpa judul', category: s.category || newsCategories[0], dek: s.lead || '', author: s.writer || s.name || 'Kontributor', credits: { writer: s.writer || s.name || '', editor: s.editor || '', photo: s.credit || '' }, date: data.today(), cover: s.image?.dataUrl || '', featured: false, status: 'draft', slug: slugify(s.title || 'kiriman'), titleEn: s.title || '', body: s.bodyHtml ? [{ type: 'html', html: sanitizeHtml(s.bodyHtml) }] : lines(s.body).map((text) => ({ type: 'p', text })), readTime: '4 menit' };
+    const rec = { id: makeId('news'), title: s.title || 'Kiriman tanpa judul', category: s.category || newsCategories[0], dek: s.lead || '', author: s.writer || s.name || 'Kontributor', credits: { writer: s.writer || s.name || '', editor: s.editor || '', photo: s.credit || '' }, date: data.today(), cover: s.image?.dataUrl || '', featured: false, status: 'draft', slug: `${slugify(s.title || 'kiriman')}-${Date.now().toString(36).slice(-4)}`, titleEn: s.title || '', body: s.bodyHtml ? [{ type: 'html', html: sanitizeHtml(s.bodyHtml) }] : lines(s.body).map((text) => ({ type: 'p', text })), readTime: '4 menit' };
     commitNews([rec, ...news], 'membuat draft dari kiriman', rec.title);
-    commitSubmissions(submissions.map((x) => (x.id === s.id ? { ...x, status: 'diproses' } : x)));
-    toast('Kiriman dijadikan draft di NordeoNews.'); go('news');
+    setStatus(s, 'diproses');
+    toast(s.imagePath ? 'Draft dibuat. Unggah gambar sampulnya lewat menu Media.' : 'Kiriman dijadikan draft artikel.'); go('news');
   };
+  const download = async (path, name) => { const url = await data.fileLink(path); if (url) window.open(url, '_blank', 'noopener'); else toast(`Berkas ${name || ''} tidak dapat dibuka.`); };
   return <div className="adm-grid">
-    <Card title="Pesan & data peminat" className="c24" delay={80}
-      action={canExport && <Btn icon="export" onClick={() => (tab === 'stories' ? exportCsv(submissions, storyCols, 'kiriman-nordeonews') : exportCsv(registrations.map((r) => ({ ...r, program: programTitle(r.program) })), regCols, 'peminat-academy'))} disabled={tab === 'subs'}>Ekspor CSV</Btn>}>
-      <div role="tablist" aria-label="Jenis pesan" className="adm-seg-text">
-        {[['stories', `Kiriman cerita (${submissions.length})`], ['academy', `Peminat Academy (${registrations.length})`], ['subs', 'Subscriber']].map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} className="adm-btn" onClick={() => setTab(k)}>{l}</button>)}
-      </div>
-      {tab === 'stories' && (submissions.length === 0 ? <Empty>Belum ada kiriman dari form “Submit a story” NordeoNews.</Empty> : <div className="adm-table-wrap"><table className="adm-table">
+    <Card title="Kiriman cerita" className="c24" delay={80} action={<Btn icon="export" disabled={!submissions.length} onClick={() => exportCsv(data, toast, submissions, storyCols, 'kiriman-nordeonews')}>Ekspor CSV</Btn>}>
+      {submissions.length === 0 ? <Empty>Belum ada kiriman dari form “Kirim berita” NordeoNews.</Empty> : <div className="adm-table-wrap"><table className="adm-table">
         <thead><tr><th scope="col">Kiriman</th><th scope="col">Pengirim</th><th scope="col">Dikirim</th><th scope="col">Status</th><th scope="col"><span className="adm-sr">Aksi</span></th></tr></thead>
         <tbody>{submissions.map((s) => <tr key={s.id}>
           <td><b>{s.title || '(tanpa judul)'}</b><div className="adm-muted">{s.reference} · {s.category}{s.mode === 'word' ? ' · via template Word' : ''}</div></td>
           <td>{s.name}<div className="adm-muted">{s.email}</div></td>
           <td>{formatDateTime(s.submittedAt)}</td>
-          <td><select aria-label={`Status ${s.title}`} value={s.status || 'baru'} disabled={role !== 'admin'} onChange={(e) => commitSubmissions(submissions.map((x) => (x.id === s.id ? { ...x, status: e.target.value } : x)))}>{['baru', 'diproses', 'diterima', 'ditolak'].map((o) => <option key={o}>{o}</option>)}</select></td>
-          <td className="adm-actions">{s.docFile?.dataUrl && <a className="adm-btn" href={s.docFile.dataUrl} download={s.docFile.name}>Unduh .docx</a>}{role === 'admin' && <Btn icon="news" onClick={() => toDraft(s)}>Jadikan draft</Btn>}</td>
+          <td><select aria-label={`Status ${s.title}`} value={s.status || 'baru'} disabled={!rights.U} onChange={(e) => setStatus(s, e.target.value)}>{['baru', 'diproses', 'diterima', 'ditolak'].map((o) => <option key={o}>{o}</option>)}</select></td>
+          <td className="adm-actions">
+            <IconBtn icon="eye" label={`Baca ${s.title || 'kiriman'}`} onClick={() => setOpen(s)} />
+            {s.docPath && <Btn icon="export" onClick={() => download(s.docPath, s.docName)}>Word</Btn>}
+            {s.docFile?.dataUrl && <a className="adm-b adm-b--ghost adm-btn" href={s.docFile.dataUrl} download={s.docFile.name}>Word</a>}
+            {rights.U && <Btn icon="news" onClick={() => toDraft(s)}>Jadikan draft</Btn>}
+          </td>
         </tr>)}</tbody>
-      </table></div>)}
-      {tab === 'academy' && (registrations.length === 0 ? <Empty>Belum ada pendaftar dari form minat Academy.</Empty> : <div className="adm-table-wrap"><table className="adm-table">
-        <thead><tr>{regCols.slice(1).map(([, h]) => <th key={h} scope="col">{h}</th>)}</tr></thead>
-        <tbody>{registrations.map((r) => <tr key={r.id}>{regCols.slice(1).map(([k]) => <td key={k}>{k === 'submittedAt' ? formatDateTime(r[k]) : k === 'program' ? (programTitle(r[k]) || '—') : r[k]}</td>)}</tr>)}</tbody>
-      </table></div>)}
-      {tab === 'subs' && <Empty>Form newsletter belum terhubung ke server, jadi belum ada daftar subscriber yang tersimpan.</Empty>}
+      </table></div>}
     </Card>
+    {open && <Reader title={open.title || 'Kiriman'} onClose={() => setOpen(null)}>
+      <p className="adm-muted">{open.reference} · {open.name} · {open.email}{open.institution ? ` · ${open.institution}` : ''}</p>
+      {open.lead && <p><b>{open.lead}</b></p>}
+      {open.bodyHtml ? <div className="adm-reader__body" dangerouslySetInnerHTML={{ __html: sanitizeHtml(open.bodyHtml) }} /> : <p className="adm-reader__body">{open.body || 'Isi naskah ada di berkas Word.'}</p>}
+      {open.imagePath && <Btn icon="image" onClick={() => download(open.imagePath, open.imageName)}>Buka gambar highlight</Btn>}
+    </Reader>}
+  </div>;
+}
+
+// ---------------------------------------------------------------- NordeoNews: comments
+export function CommentsModule({ data, rights, toast }) {
+  const { comments, commitComments, news } = data;
+  const [status, setStatus] = useState('pending');
+  const title = (slug) => news.find((n) => n.slug === slug || n.id === slug)?.title || slug;
+  const list = comments.filter((c) => status === 'all' || c.status === status);
+  const set = (c, next, action) => { commitComments(comments.map((x) => (x.id === c.id ? { ...x, status: next } : x)), action, c.name); toast(next === 'approved' ? 'Komentar tampil di artikel.' : 'Komentar disembunyikan.'); };
+  const counts = { pending: comments.filter((c) => c.status === 'pending').length, approved: comments.filter((c) => c.status === 'approved').length, hidden: comments.filter((c) => c.status === 'hidden').length };
+  return <div className="adm-grid">
+    <Card title="Komentar pembaca" className="c24" delay={80}>
+      <div className="adm-filters"><div role="group" aria-label="Status komentar" className="adm-seg-text">
+        {[['pending', `Menunggu (${counts.pending})`], ['approved', `Tampil (${counts.approved})`], ['hidden', `Disembunyikan (${counts.hidden})`], ['all', `Semua (${comments.length})`]].map(([k, l]) => <button key={k} type="button" className="adm-btn" aria-pressed={status === k} onClick={() => setStatus(k)}>{l}</button>)}
+      </div></div>
+      {list.length === 0 ? <Empty>{status === 'pending' ? 'Tidak ada komentar yang menunggu moderasi.' : 'Tidak ada komentar untuk filter ini.'}</Empty> : <ul className="adm-comments">
+        {list.map((c) => <li key={c.id}>
+          <div><b>{c.name}</b> <span className="adm-muted">{c.email} · {formatDateTime(c.at)}</span></div>
+          <p>{c.comment}</p>
+          <div className="adm-muted">Pada: {title(c.slug)}</div>
+          {rights.U && <span className="adm-actions">
+            {c.status !== 'approved' && <Btn kind="primary" icon="check" onClick={() => set(c, 'approved', 'menyetujui komentar')}>Tampilkan</Btn>}
+            {c.status !== 'hidden' && <Btn icon="eyeOff" onClick={() => set(c, 'hidden', 'menyembunyikan komentar')}>Sembunyikan</Btn>}
+            {rights.D && <IconBtn icon="trash" label={`Hapus komentar ${c.name}`} onClick={() => { commitComments(comments.filter((x) => x.id !== c.id), 'menghapus komentar', c.name); toast('Komentar dihapus.'); }} />}
+          </span>}
+        </li>)}
+      </ul>}
+    </Card>
+  </div>;
+}
+
+// ---------------------------------------------------------------- Academy: registrations
+export function RegistrationsModule({ data, rights, toast }) {
+  const { registrations, commitRegistrations, cms } = data;
+  const programTitle = (id) => cms.programs.find((p) => p.id === id)?.title || id || '—';
+  const regCols = [['reference', 'Referensi'], ['name', 'Nama'], ['email', 'Email'], ['institution', 'Institusi'], ['role', 'Peran'], ['program', 'Program'], ['submittedAt', 'Dikirim'], ['status', 'Status']];
+  return <div className="adm-grid">
+    <Card title="Peminat program Academy" className="c24" delay={80} action={rights.E && <Btn icon="export" disabled={!registrations.length} onClick={() => exportCsv(data, toast, registrations.map((r) => ({ ...r, program: programTitle(r.program) })), regCols, 'peminat-academy')}>Ekspor CSV</Btn>}>
+      {registrations.length === 0 ? <Empty>Belum ada pendaftar dari form minat Academy.</Empty> : <div className="adm-table-wrap"><table className="adm-table">
+        <thead><tr><th scope="col">Peminat</th><th scope="col">Program</th><th scope="col">Dikirim</th><th scope="col">Status</th></tr></thead>
+        <tbody>{registrations.map((r) => <tr key={r.id}>
+          <td><b>{r.name}</b><div className="adm-muted">{r.email}{r.institution ? ` · ${r.institution}` : ''}{r.role ? ` · ${r.role}` : ''}</div></td>
+          <td>{programTitle(r.program)}</td>
+          <td>{formatDateTime(r.submittedAt)}</td>
+          <td><select aria-label={`Status ${r.name}`} value={r.status || 'baru'} disabled={!rights.U} onChange={(e) => commitRegistrations(registrations.map((x) => (x.id === r.id ? { ...x, status: e.target.value } : x)), `menandai peminat ${e.target.value}`, r.name)}>{['baru', 'dihubungi', 'terdaftar', 'batal'].map((o) => <option key={o}>{o}</option>)}</select></td>
+        </tr>)}</tbody>
+      </table></div>}
+    </Card>
+  </div>;
+}
+
+// ---------------------------------------------------------------- Marketing: subscribers
+export function SubscribersModule({ data, rights, toast }) {
+  const { subscribers, commitSubscribers } = data;
+  const cols = [['email', 'Email'], ['topics', 'Topik'], ['createdAt', 'Bergabung']];
+  return <div className="adm-grid">
+    <Card title="Subscriber NordeoNews" className="c24" delay={80} action={rights.E && <Btn icon="export" disabled={!subscribers.length} onClick={() => exportCsv(data, toast, subscribers, cols, 'subscriber-nordeonews')}>Ekspor CSV</Btn>}>
+      {subscribers.length === 0 ? <Empty>{data.remote ? 'Belum ada yang berlangganan lewat form di halaman NordeoNews.' : 'Mode demo tidak menyimpan subscriber. Masuk dengan akun untuk melihat daftar asli.'}</Empty> : <div className="adm-table-wrap"><table className="adm-table">
+        <thead><tr><th scope="col">Email</th><th scope="col">Bergabung</th><th scope="col"><span className="adm-sr">Aksi</span></th></tr></thead>
+        <tbody>{subscribers.map((s) => <tr key={s.id}><td><b>{s.email}</b></td><td>{formatDateTime(s.createdAt)}</td>
+          <td className="adm-actions">{rights.D && <IconBtn icon="trash" label={`Hapus ${s.email}`} onClick={() => { commitSubscribers(subscribers.filter((x) => x.id !== s.id), 'menghapus subscriber', s.email); toast('Subscriber dihapus.'); }} />}</td></tr>)}</tbody>
+      </table></div>}
+    </Card>
+  </div>;
+}
+
+// ---------------------------------------------------------------- Marketing: reviews, partners, FAQ
+export function PromoModule({ data, rights, toast }) {
+  const { cms, update } = data;
+  const promo = cms.promo || { testimonials: [], partners: [], faqs: [] };
+  const set = (key, next, action, target) => { update('promo', { ...promo, [key]: next }, action, target); toast('Disimpan. Beranda memakai data ini.'); };
+  return <div className="adm-grid">
+    <RecordList title="Review" label="review" className="c24" delay={80} rights={rights} items={promo.testimonials || []}
+      onChange={(next, action, target) => set('testimonials', next.map((r) => ({ ...r, rating: Number(r.rating) || 5 })), action, target)}
+      blank={{ quote: '', name: '', role: '', service: 'Journals', rating: 5, sample: false }}
+      columns={[
+        [(r) => <><b>“{r.quote.slice(0, 90)}{r.quote.length > 90 ? '…' : ''}”</b><div className="adm-muted">{r.name} · {r.role}</div></>, 'Review'],
+        [(r) => r.service, 'Layanan'],
+        [(r) => <Pill tone={r.sample ? 'red' : 'green'}>{r.sample ? 'Contoh · tidak tampil' : 'Tampil'}</Pill>, 'Status'],
+      ]}
+      fields={[
+        { key: 'quote', label: 'Isi review', type: 'textarea', rows: 4, required: true },
+        { key: 'name', label: 'Nama atau peran pemberi review', required: true, hint: 'Pakai kutipan asli yang sudah disetujui pemiliknya.' },
+        { key: 'role', label: 'Keterangan', hint: 'Mis. Dosen teknik industri' },
+        { key: 'service', label: 'Layanan', type: 'select', options: ['Journals', 'NordeoNews', 'Academy', 'Books'] },
+        { key: 'rating', label: 'Nilai (1–5)', type: 'select', options: ['5', '4', '3', '2', '1'] },
+        { key: 'sample', label: 'Ini contoh, jangan tampilkan', type: 'toggle' },
+      ]} />
+    <RecordList title="Logo mitra" label="mitra" className="c12" delay={140} rights={rights} items={promo.partners || []}
+      onChange={(next, action, target) => set('partners', next, action, target)}
+      blank={{ name: '', logo: '', confirmed: false }}
+      columns={[[(p) => <span className="adm-logo-cell">{p.logo && <img src={p.logo} alt="" />}<b>{p.name}</b></span>, 'Mitra'], [(p) => <Pill tone={p.confirmed ? 'green' : 'gold'}>{p.confirmed ? 'Disetujui mitra' : 'Perlu konfirmasi'}</Pill>, 'Izin']]}
+      fields={[{ key: 'name', label: 'Nama institusi', required: true }, { key: 'logo', label: 'Alamat logo', hint: 'Salin dari menu Media.' }, { key: 'confirmed', label: 'Mitra sudah setuju logonya ditampilkan', type: 'toggle' }]} />
+    <RecordList title="FAQ" label="pertanyaan" className="c12" delay={200} rights={rights} items={promo.faqs || []}
+      onChange={(next, action, target) => set('faqs', next, action, target)}
+      blank={{ q: '', a: '' }}
+      columns={[[(f) => <><b>{f.q}</b><div className="adm-muted">{f.a.slice(0, 80)}…</div></>, 'Pertanyaan']]}
+      fields={[{ key: 'q', label: 'Pertanyaan', required: true }, { key: 'a', label: 'Jawaban', type: 'textarea', rows: 4, required: true }]} />
+  </div>;
+}
+
+// A wide read-only drawer for reading a submission.
+function Reader({ title, onClose, children }) {
+  return <div className="adm-overlay">
+    <button type="button" className="adm-overlay__close" onClick={onClose} aria-label="Tutup" tabIndex={-1} />
+    <aside className="adm-drawer is-wide" role="dialog" aria-modal="true" aria-label={title}>
+      <div className="adm-drawer__head"><h2>{title}</h2><button type="button" className="adm-circle adm-btn" onClick={onClose} aria-label="Tutup" autoFocus><Icon name="close" size={14} width={2} /></button></div>
+      {children}
+    </aside>
   </div>;
 }
 
@@ -382,44 +497,49 @@ export function ContactModule({ data, rights, toast }) {
   </div>;
 }
 
-// ---------------------------------------------------------------- 10. Navigasi
+// ---------------------------------------------------------------- Footer menu
 export function NavigationModule({ data, rights, toast }) {
   const { cms, update } = data;
-  const groups = [['header', 'Menu header'], ['footer', 'Menu footer'], ['news', 'Menu NordeoNews']];
-  const set = (key, next, action, target) => { update('navigation', { ...cms.navigation, [key]: next }, action, target); toast('Navigasi disimpan.'); };
-  return <div className="adm-grid">{groups.map(([key, title], gi) => <RecordList key={key} title={title} label="menu" className="c8" delay={80 + gi * 60} rights={rights}
-    items={cms.navigation[key]} onChange={(next, action, target) => set(key, next, action, target)} blank={{ label: '', href: '/' }}
-    columns={[[(n) => <><b>{n.label}</b><div className="adm-muted">{n.href}</div></>, 'Item']]}
+  const items = cms.navigation?.footer || [];
+  const set = (next, action, target) => { update('navigation', { ...cms.navigation, footer: next }, action, target); toast('Menu footer disimpan.'); };
+  return <div className="adm-grid"><RecordList title="Tautan “For scholars” di footer" label="tautan" className="c24" delay={80} rights={rights}
+    items={items} onChange={set} blank={{ label: '', href: '/' }}
+    columns={[[(n) => <><b>{n.label}</b><div className="adm-muted">{n.href}</div></>, 'Tautan']]}
     rowActions={(n, i) => rights.U && <>
-      <IconBtn icon="up" label={`Naikkan ${n.label}`} disabled={i === 0} onClick={() => { const a = [...cms.navigation[key]]; [a[i - 1], a[i]] = [a[i], a[i - 1]]; set(key, a, 'mengurutkan menu', n.label); }} />
-      <IconBtn icon="down" label={`Turunkan ${n.label}`} disabled={i === cms.navigation[key].length - 1} onClick={() => { const a = [...cms.navigation[key]]; [a[i + 1], a[i]] = [a[i], a[i + 1]]; set(key, a, 'mengurutkan menu', n.label); }} /></>}
-    fields={[{ key: 'label', label: 'Label', required: true }, { key: 'href', label: 'Link', required: true }]} />)}</div>;
+      <IconBtn icon="up" label={`Naikkan ${n.label}`} disabled={i === 0} onClick={() => { const a = [...items]; [a[i - 1], a[i]] = [a[i], a[i - 1]]; set(a, 'mengurutkan menu', n.label); }} />
+      <IconBtn icon="down" label={`Turunkan ${n.label}`} disabled={i === items.length - 1} onClick={() => { const a = [...items]; [a[i + 1], a[i]] = [a[i], a[i + 1]]; set(a, 'mengurutkan menu', n.label); }} /></>}
+    fields={[{ key: 'label', label: 'Label', required: true }, { key: 'href', label: 'Link', required: true, hint: 'Halaman website diawali “/”, mis. /author-guide.' }]} />
+    <Card title="Menu utama" className="c24" delay={140}><p className="adm-muted">Menu header (Home, Ecosystem, Journals, NordeoNews, Academy, About, Contact) mengikuti struktur empat ekosistem. Nama dan status ekosistem diubah di menu Ekosistem.</p></Card>
+  </div>;
 }
 
-// ---------------------------------------------------------------- 11. Media
+// ---------------------------------------------------------------- Media
 export function MediaModule({ data, rights, toast }) {
   const { cms, update } = data;
   const [editing, setEditing] = useState(null);
+  const [busy, setBusy] = useState(false);
   const upload = async (e) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
+    setBusy(true);
     try {
-      const img = await readImage(file, 1200);
-      update('media', [...cms.media, { id: makeId('media'), src: img.dataUrl, name: file.name, alt: '', used: 'Belum dipakai' }], 'mengunggah', file.name);
-      toast('Gambar diunggah. Lengkapi alt text-nya.');
+      const img = data.remote ? null : await readImage(file, 1200);
+      const src = await data.uploadMedia(file, img?.dataUrl);
+      if (src) { update('media', [...cms.media, { id: makeId('media'), src, name: file.name, alt: '', used: 'Belum dipakai' }], 'mengunggah', file.name); toast('Gambar diunggah. Lengkapi alt text-nya.'); }
     } catch { toast('Gambar tidak dapat dibaca.'); }
+    setBusy(false);
   };
   return <div className="adm-grid">
     <Card title="Media" className="c24" delay={80}
-      action={rights.C && <label className="adm-b adm-b--primary adm-btn"><Icon name="upload" size={16} width={1.8} />Unggah gambar<input type="file" accept="image/*" className="adm-sr" onChange={upload} /></label>}>
+      action={rights.C && <label className="adm-b adm-b--primary adm-btn" aria-busy={busy}><Icon name="upload" size={16} width={1.8} />{busy ? 'Mengunggah…' : 'Unggah gambar'}<input type="file" accept="image/*" className="adm-sr" onChange={upload} disabled={busy} /></label>}>
       <ul className="adm-media">{cms.media.map((m) => <li key={m.id}>
         <img src={m.src} alt={m.alt || ''} loading="lazy" />
         <div><b title={m.name}>{m.name}</b><span className="adm-muted">{m.used}</span>{!m.alt && <Pill tone="red">Alt text kosong</Pill>}</div>
         <span className="adm-actions">
           <IconBtn icon="export" label={`Salin alamat ${m.name}`} onClick={() => { navigator.clipboard?.writeText(m.src.startsWith('data:') ? m.name : m.src); toast('Alamat gambar disalin.'); }} />
           {rights.U && <IconBtn icon="edit" label={`Ubah alt text ${m.name}`} onClick={() => setEditing(m)} />}
-          {rights.D && m.src.startsWith('data:') && <IconBtn icon="trash" label={`Hapus ${m.name}`} onClick={() => update('media', cms.media.filter((x) => x.id !== m.id), 'menghapus', m.name)} />}
+          {rights.D && !m.src.startsWith('/assets/') && <IconBtn icon="trash" label={`Hapus ${m.name}`} onClick={() => update('media', cms.media.filter((x) => x.id !== m.id), 'menghapus', m.name)} />}
         </span>
       </li>)}</ul>
     </Card>
@@ -429,22 +549,24 @@ export function MediaModule({ data, rights, toast }) {
   </div>;
 }
 
-// ---------------------------------------------------------------- 12. Pengguna & peran
+// ---------------------------------------------------------------- Users and roles
 export function UsersModule({ data, rights, toast }) {
-  const { cms, update } = data;
-  const log = cms.log || [];
+  const { users, commitUsers, activity: log } = data;
+  const userRights = { ...rights, C: rights.C && !data.remote, D: rights.D && !data.remote };
+  const roleOptions = [...ROLES.map((r) => ({ value: r.id, label: r.label })), ...(data.remote ? [{ value: 'pending', label: 'Menunggu peran' }] : [])];
   return <div className="adm-grid">
-    <RecordList title="Pengguna dashboard" label="pengguna" className="c12" delay={80} rights={rights} items={cms.users}
-      onChange={(next, action, target) => { update('users', next, action, target); toast('Pengguna disimpan.'); }}
+    <RecordList title="Pengguna dashboard" label="pengguna" className="c12" delay={80} rights={userRights} items={users}
+      onChange={(next, action, target) => { commitUsers(next, action, target); toast('Pengguna disimpan.'); }}
       blank={{ name: '', email: '', role: 'admin', active: true }}
-      columns={[[(u) => <><b>{u.name}</b><div className="adm-muted">{u.email}</div></>, 'Nama'], [(u) => ROLES.find((r) => r.id === u.role)?.label, 'Peran'], [(u) => <Pill tone={u.active ? 'green' : 'muted'}>{u.active ? 'Aktif' : 'Nonaktif'}</Pill>, 'Status']]}
+      columns={[[(u) => <><b>{u.name}</b><div className="adm-muted">{u.email}</div></>, 'Nama'], [(u) => (u.role === 'pending' ? <Pill tone="gold">Menunggu peran</Pill> : ROLES.find((r) => r.id === u.role)?.label), 'Peran'], [(u) => <Pill tone={u.active ? 'green' : 'muted'}>{u.active ? 'Aktif' : 'Nonaktif'}</Pill>, 'Status']]}
       fields={[
         { key: 'name', label: 'Nama', required: true },
-        { key: 'email', label: 'Email', type: 'email', required: true },
-        { key: 'role', label: 'Peran', type: 'select', options: ROLES.map((r) => ({ value: r.id, label: r.label })) },
+        ...(data.remote ? [] : [{ key: 'email', label: 'Email', type: 'email', required: true }]),
+        { key: 'role', label: 'Peran', type: 'select', options: roleOptions },
         { key: 'active', label: 'Akun aktif', type: 'toggle' },
       ]} />
     <Card title="Matriks hak akses" className="c12" delay={140}>
+      {data.remote && <p className="adm-muted" style={{ marginBottom: 10 }}>Staf baru mendaftar sendiri di halaman masuk dashboard, lalu Owner memberi perannya di tabel sebelah.</p>}
       <div className="adm-table-wrap"><table className="adm-table is-compact">
         <thead><tr><th scope="col">Modul</th>{ROLES.map((r) => <th key={r.id} scope="col">{r.label}</th>)}</tr></thead>
         <tbody>{MODULES.map((m) => <tr key={m.id}><td>{m.label}</td>{ROLES.map((r) => <td key={r.id} className={ACCESS[m.id][r.id] ? '' : 'adm-muted'}>{ACCESS[m.id][r.id] ? ACCESS[m.id][r.id].split('').join('/') : '–'}</td>)}</tr>)}</tbody>
@@ -460,17 +582,16 @@ export function UsersModule({ data, rights, toast }) {
   </div>;
 }
 
-// ---------------------------------------------------------------- 13. Pengaturan situs
+// ---------------------------------------------------------------- Site settings
 export function SiteModule({ data, rights, toast }) {
   const { cms, update } = data;
   return <div className="adm-grid">
     <FormCard title="Pengaturan situs" className="c24" delay={80} value={cms.site} rights={rights}
-      onSave={(d) => { update('site', d, 'mengubah', 'pengaturan situs'); toast('Pengaturan situs disimpan.'); }}
+      onSave={(d) => { update('site', { ...cms.site, ...d }, 'mengubah', 'pengaturan situs'); toast('Pengaturan situs disimpan.'); }}
       fields={[
         { key: 'tagline', label: 'Tagline' },
-        { key: 'accent', label: 'Warna aksen', type: 'select', options: [{ value: '#ffd218', label: 'Kuning Nordeo #FFD218' }, { value: '#1e5566', label: 'Teal Nordeo #1E5566' }, { value: '#c9a227', label: 'Gold Nordeo #C9A227' }] },
-        { key: 'seoTitle', label: 'Judul SEO default' },
-        { key: 'seoDescription', label: 'Deskripsi SEO default', type: 'textarea', rows: 3 },
+        { key: 'seoTitle', label: 'Judul default di Google', hint: 'Tampil sebagai judul tab dan hasil pencarian beranda.' },
+        { key: 'seoDescription', label: 'Deskripsi di Google', type: 'textarea', rows: 3, hint: 'Sekitar 150 karakter.' },
       ]} />
   </div>;
 }
@@ -480,7 +601,8 @@ export function NoAccess({ module, role }) {
 }
 
 export const MODULE_VIEWS = {
-  pages: PagesModule, ecosystems: EcosystemsModule, news: NewsModule, academy: AcademyModule, inbox: InboxModule,
+  pages: PagesModule, ecosystems: EcosystemsModule, news: NewsModule, stories: StoriesModule, comments: CommentsModule,
+  academy: AcademyModule, registrations: RegistrationsModule, promo: PromoModule, subscribers: SubscribersModule,
   profile: ProfileModule, partnership: PartnershipModule, contact: ContactModule, navigation: NavigationModule,
   media: MediaModule, users: UsersModule, site: SiteModule,
 };

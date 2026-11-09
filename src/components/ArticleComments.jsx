@@ -1,11 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { STORE, makeId, read, write } from '../lib/store';
+import { fetchApprovedComments, sendComment } from '../lib/content';
+import { hasDatabase } from '../lib/supabase';
 import { Check, Field, bind, focusFirstError, isEmail } from './forms';
 
 // Reader comments under a NordeoNews article, modelled on the classic "Tinggalkan balasan"
 // pattern: name and email required (email never shown), one level of replies, and an
-// option to remember the reader on this device. There is no comment server yet, so comments
-// are kept in this browser; swap read/write for an API call when one exists.
+// option to remember the reader on this device. Comments go to the database and appear after
+// the NordeoNews editors approve them in the dashboard; without a database they stay in this browser.
 
 const MAX = 1500;
 const EMPTY = { name: '', email: '', comment: '', remember: false };
@@ -25,8 +27,15 @@ function Comment({ item, replies, onReply, replyingTo }) {
   </li>;
 }
 
-export default function ArticleComments({ storyId }) {
-  const [all, setAll] = useState(() => read(STORE.newsComments, {}));
+export default function ArticleComments({ storyId, slug }) {
+  const [all, setAll] = useState(() => (hasDatabase ? {} : read(STORE.newsComments, {})));
+  const [sending, setSending] = useState(false);
+  useEffect(() => {
+    if (!hasDatabase) return undefined;
+    let live = true;
+    fetchApprovedComments(slug).then(rows => { if (live && rows) setAll({ [storyId]: rows }); });
+    return () => { live = false; };
+  }, [slug, storyId]);
   const saved = useMemo(() => read(STORE.commenter, null), []);
   const [form, setForm] = useState(() => ({ ...EMPTY, ...(saved || {}), remember: Boolean(saved) }));
   const [errors, setErrors] = useState({});
@@ -37,8 +46,9 @@ export default function ArticleComments({ storyId }) {
   const repliesOf = id => list.filter(item => item.parentId === id);
   const field = (name, options) => bind(form, setForm, errors, name, options);
 
-  const submit = event => {
+  const submit = async event => {
     event.preventDefault();
+    if (sending) return;
     const found = {};
     if (!form.name.trim()) found.name = 'Tulis nama Anda.';
     if (!isEmail(form.email)) found.email = 'Gunakan alamat email yang valid.';
@@ -46,14 +56,22 @@ export default function ArticleComments({ storyId }) {
     setErrors(found);
     if (Object.keys(found).length) { focusFirstError(found); return; }
     const item = { id: makeId('comment'), name: form.name.trim(), email: form.email.trim(), comment: form.comment.trim().slice(0, MAX), at: new Date().toISOString(), parentId: replyTo?.id || null };
-    const next = { ...all, [storyId]: [...list, item] };
-    write(STORE.newsComments, next);
     if (form.remember) write(STORE.commenter, { name: item.name, email: item.email });
     else write(STORE.commenter, null);
-    setAll(next);
+    if (hasDatabase) {
+      setSending(true);
+      const ok = await sendComment({ slug, name: item.name, email: item.email, body: item.comment, parentId: item.parentId });
+      setSending(false);
+      if (!ok) { setNotice('Komentar belum terkirim. Periksa koneksi, lalu coba lagi.'); return; }
+      setNotice('Terima kasih. Komentar Anda tampil setelah disetujui redaksi.');
+    } else {
+      const next = { ...all, [storyId]: [...list, item] };
+      write(STORE.newsComments, next);
+      setAll(next);
+      setNotice('Komentar Anda sudah tampil.');
+    }
     setForm(current => ({ ...current, comment: '' }));
     setReplyTo(null);
-    setNotice('Komentar Anda sudah tampil.');
   };
 
   const startReply = item => {
@@ -82,10 +100,10 @@ export default function ArticleComments({ storyId }) {
       </div>
       <Check id="remember" checked={form.remember} onChange={remember => setForm(current => ({ ...current, remember }))}>Simpan nama dan email saya di perangkat ini untuk komentar berikutnya.</Check>
       <div className="comment-actions">
-        <button type="submit" className="button button-dark">Kirim komentar</button>
+        <button type="submit" className="button button-dark" disabled={sending}>{sending ? 'Mengirim…' : 'Kirim komentar'}</button>
         <p className="comment-notice" role="status">{notice}</p>
       </div>
-      <p className="form-footnote">Kolom komentar belum terhubung ke server redaksi; untuk sementara komentar tersimpan di perangkat ini.</p>
+      <p className="form-footnote">{hasDatabase ? 'Komentar dimoderasi redaksi NordeoNews sebelum tampil.' : 'Kolom komentar belum terhubung ke server redaksi; untuk sementara komentar tersimpan di perangkat ini.'}</p>
     </form>
   </section>;
 }

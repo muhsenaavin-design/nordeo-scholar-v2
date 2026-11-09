@@ -1,51 +1,68 @@
-// Content store for the admin dashboard. Everything lives in this browser's localStorage until a
-// backend exists. NordeoNews uses the same store as the public site, so an article the Owner
-// approves appears on /news at once (in this browser).
-import { useCallback, useEffect, useState } from 'react';
-import { contact, externalLinks, office, officialSocial } from '../../config/links';
-import { ecosystems, principles, vision } from '../../data/ecosystems';
-import { trainingPrograms } from '../../data/training';
+// Data for the admin dashboard. Signed-in staff work on the Supabase database, so every change
+// reaches the public website and the other staff at once. The demo mode keeps the same screens
+// on this browser's storage for presentations, without touching the database.
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { newsToRow, rowToNews } from '../../lib/content';
+import { seedContent } from '../../lib/content-seed';
 import { STORE, getNews, makeId, read, saveNews, write } from '../../lib/store';
+import { supabase } from '../../lib/supabase';
 
-const CMS_KEY = 'nordeo:admin-cms.v1';
+const CMS_KEY = 'nordeo:admin-cms.v2';
 const today = () => new Date().toISOString().slice(0, 10);
 
-// Modules, their priority (MoSCoW) and the requirement they serve: Table 25 and Table 26 of the report.
-export const MODULES = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'grid', fr: 'FR-10', primary: true },
-  { id: 'pages', label: 'Halaman', icon: 'layout', fr: 'FR-11, FR-12', primary: true },
-  { id: 'ecosystems', label: 'Ekosistem', icon: 'layers', fr: 'FR-13', primary: true },
-  { id: 'news', label: 'NordeoNews', icon: 'news', fr: 'FR-16, FR-17', primary: true },
-  { id: 'academy', label: 'Academy', icon: 'cap', fr: 'FR-07', primary: true },
-  { id: 'inbox', label: 'Pesan', icon: 'mail', fr: 'FR-19', primary: true },
-  { id: 'profile', label: 'Profil Perusahaan', icon: 'building', fr: 'FR-18' },
-  { id: 'partnership', label: 'Kemitraan & Layanan', icon: 'handshake', fr: 'FR-20' },
-  { id: 'contact', label: 'Kontak & Lokasi', icon: 'pin', fr: 'FR-15' },
-  { id: 'navigation', label: 'Navigasi', icon: 'menu', fr: 'FR-14' },
-  { id: 'media', label: 'Media', icon: 'image', fr: 'FR-12' },
-  { id: 'users', label: 'Pengguna & Peran', icon: 'users', fr: 'FR-10, NFR-04' },
-  { id: 'site', label: 'Pengaturan Situs', icon: 'globe', fr: 'NFR-07' },
+// Sidebar groups. Each module names the requirement it serves (report: Functional Requirements).
+export const GROUPS = [
+  { id: 'home', label: 'Ringkasan', tone: 'ink' },
+  { id: 'site', label: 'Konten website', tone: 'blue' },
+  { id: 'news', label: 'NordeoNews', tone: 'yellow' },
+  { id: 'academy', label: 'Academy', tone: 'teal' },
+  { id: 'marketing', label: 'Pemasaran', tone: 'gold' },
+  { id: 'system', label: 'Sistem', tone: 'slate' },
 ];
 
-// C = create, R = read, U = update, D = delete, A = approve, E = export. Table 26.
+export const MODULES = [
+  { id: 'dashboard', group: 'home', label: 'Dashboard', icon: 'grid', fr: 'FR-10', hint: 'Tugas yang menunggu Anda dan aktivitas terbaru.' },
+  { id: 'pages', group: 'site', label: 'Beranda', icon: 'layout', fr: 'FR-11, FR-12', hint: 'Judul hero dan susunan section halaman utama.' },
+  { id: 'ecosystems', group: 'site', label: 'Ekosistem', icon: 'layers', fr: 'FR-02, FR-13', hint: 'Empat ekosistem Nordeo, status, dan link platformnya.' },
+  { id: 'profile', group: 'site', label: 'Profil perusahaan', icon: 'building', fr: 'FR-18, FR-21', hint: 'Visi, misi, nilai, dan layanan di halaman Our Story.' },
+  { id: 'contact', group: 'site', label: 'Kontak & lokasi', icon: 'pin', fr: 'FR-06, FR-15', hint: 'Alamat, email, WhatsApp, Instagram, dan peta.' },
+  { id: 'navigation', group: 'site', label: 'Menu footer', icon: 'menu', fr: 'FR-14', hint: 'Tautan “For scholars” di footer website.' },
+  { id: 'media', group: 'site', label: 'Media', icon: 'image', fr: 'FR-12', hint: 'Gambar dan logo beserta teks alternatifnya.' },
+  { id: 'news', group: 'news', label: 'Artikel', icon: 'news', fr: 'FR-04, FR-16, FR-17, FR-24', hint: 'Tulis, tinjau, dan terbitkan artikel: Draft → In review → Published.' },
+  { id: 'stories', group: 'news', label: 'Kiriman cerita', icon: 'inbox', fr: 'FR-09, FR-19', hint: 'Cerita dari pembaca lewat form “Kirim berita”.' },
+  { id: 'comments', group: 'news', label: 'Komentar', icon: 'chat', fr: 'FR-16', hint: 'Setujui atau sembunyikan komentar pembaca.' },
+  { id: 'academy', group: 'academy', label: 'Program & kalender', icon: 'cap', fr: 'FR-07, FR-25', hint: 'Seminar, konferensi, dan modul yang tampil di kalender Academy.' },
+  { id: 'registrations', group: 'academy', label: 'Peminat program', icon: 'ticket', fr: 'FR-19', hint: 'Orang yang mendaftarkan minat lewat form Academy.' },
+  { id: 'promo', group: 'marketing', label: 'Review, mitra & FAQ', icon: 'star', fr: 'FR-26', hint: 'Review asli, logo mitra, dan pertanyaan umum di beranda.' },
+  { id: 'partnership', group: 'marketing', label: 'Kemitraan', icon: 'handshake', fr: 'FR-05, FR-20', hint: 'Peluang kerja sama dan layanan untuk institusi.' },
+  { id: 'subscribers', group: 'marketing', label: 'Subscriber', icon: 'mail', fr: 'FR-09, FR-19', hint: 'Pelanggan newsletter NordeoNews.' },
+  { id: 'users', group: 'system', label: 'Pengguna & peran', icon: 'users', fr: 'FR-10, NFR-04', hint: 'Akun dashboard, peran, dan log aktivitas.' },
+  { id: 'site', group: 'system', label: 'Pengaturan situs', icon: 'globe', fr: 'FR-28, NFR-07', hint: 'Tagline serta judul dan deskripsi untuk mesin pencari.' },
+];
+
+// C = create, R = read, U = update, D = delete, A = approve, E = export (report: Access Rights Matrix).
 export const ACCESS = {
   dashboard: { owner: 'R', admin: 'R', marketing: 'R' },
   pages: { owner: 'RU', admin: 'CRUD', marketing: '' },
   ecosystems: { owner: 'R', admin: 'CRUD', marketing: '' },
-  news: { owner: 'RA', admin: 'CRUD', marketing: '' },
-  academy: { owner: 'R', admin: 'CRUD', marketing: 'R' },
-  inbox: { owner: 'R', admin: 'R', marketing: 'RE' },
   profile: { owner: 'CRUD', admin: 'RU', marketing: '' },
-  partnership: { owner: 'R', admin: 'RU', marketing: 'CRUD' },
   contact: { owner: 'R', admin: 'CRUD', marketing: 'R' },
   navigation: { owner: '', admin: 'CRUD', marketing: '' },
-  media: { owner: 'R', admin: 'CRUD', marketing: 'RU' },
+  media: { owner: 'R', admin: 'CRUD', marketing: 'CRU' },
+  news: { owner: 'RA', admin: 'CRUD', marketing: '' },
+  stories: { owner: 'R', admin: 'RU', marketing: 'R' },
+  comments: { owner: 'R', admin: 'RUD', marketing: '' },
+  academy: { owner: 'R', admin: 'CRUD', marketing: 'CRUD' },
+  registrations: { owner: 'R', admin: 'RUE', marketing: 'RUE' },
+  promo: { owner: 'R', admin: 'CRUD', marketing: 'CRUD' },
+  partnership: { owner: 'R', admin: 'RU', marketing: 'CRUD' },
+  subscribers: { owner: 'R', admin: 'RE', marketing: 'RDE' },
   users: { owner: 'CRUD', admin: 'R', marketing: '' },
   site: { owner: 'RU', admin: 'RU', marketing: '' },
 };
 
 export const ROLES = [
-  { id: 'owner', label: 'Owner', person: 'Fandi Achmad', initials: 'FA' },
+  { id: 'owner', label: 'Owner', person: 'Owner Nordeo', initials: 'OW' },
   { id: 'admin', label: 'Admin', person: 'Admin Nordeo', initials: 'AD' },
   { id: 'marketing', label: 'Marketing', person: 'Marketing Nordeo', initials: 'MK' },
 ];
@@ -61,122 +78,172 @@ export const NEWS_STATUS = {
   archived: { label: 'Archived', tone: 'muted' },
 };
 
-const ecosystemPlatform = { journals: 'OJS · JETSI, JIEL, JIBDI', news: 'NordeoNews', training: 'Nordeo Academy', books: 'Belum ada platform' };
+// Which content document each module writes (database table site_content).
+const CONTENT_KEYS = ['pages', 'ecosystems', 'profile', 'programs', 'partnerships', 'contact', 'navigation', 'media', 'promo', 'site'];
 
-function seed() {
-  const reviewed = '2026-10-26';
+const initials = (name) => name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('') || '?';
+
+// ---------------------------------------------------------------- shared helpers
+function diffById(before, after) {
+  const old = new Map(before.map((x) => [x.id, x]));
+  const now = new Map(after.map((x) => [x.id, x]));
   return {
-    pages: {
-      heroLine1: 'Advancing Knowledge.',
-      heroLine2: 'Creating Global Impact.',
-      heroCta: 'Discover the ecosystem',
-      vision: `${vision.intro} ${vision.lead} ${vision.accent}`,
-      about: 'Nordeo Scholar is an academic ecosystem that connects research, education, publication, and meaningful collaboration.',
-      sections: [
-        { id: 'hero', label: 'Hero', visible: true },
-        { id: 'vision', label: 'Our Vision', visible: true },
-        { id: 'ecosystems', label: 'Empat ekosistem', visible: true },
-        { id: 'journals', label: 'Jurnal unggulan', visible: true },
-        { id: 'news', label: 'NordeoNews terbaru', visible: true },
-        { id: 'founder', label: 'Catatan founder', visible: true },
-        { id: 'contact', label: 'Peta & alamat', visible: true },
-      ],
-      updatedAt: reviewed, reviewedAt: reviewed,
-    },
-    ecosystems: ecosystems.map((e) => ({
-      id: e.id, title: e.title, short: e.short, description: e.description, cta: e.cta,
-      link: e.ctaHref || `https://${e.domain}`, platform: ecosystemPlatform[e.id] || '', status: e.status === 'Coming Soon' ? 'soon' : 'live',
-      updatedAt: reviewed, reviewedAt: reviewed,
-    })),
-    profile: {
-      vision: `${vision.intro} ${vision.lead} ${vision.accent}`,
-      mission: ['Menerbitkan karya akademik yang bermutu dan terbuka.', 'Mendampingi peneliti dari naskah sampai publikasi.', 'Menghubungkan riset dengan masyarakat dan industri.'],
-      values: principles.map(([name, copy]) => `${name}: ${copy}`),
-      services: ['Journals Publishing', 'Books Publishing', 'Media & News Publishing', 'Academic Training'],
-      updatedAt: reviewed, reviewedAt: reviewed,
-    },
-    programs: trainingPrograms.map((p) => ({ id: p.id, title: p.title, type: p.type, dateLabel: p.dateLabel, mode: p.mode, facilitator: p.facilitator, link: `/training/program/${p.id}`, status: 'published' })),
-    partnerships: [
-      { id: 'p-journal', title: 'Kerja sama pengelolaan jurnal kampus', audience: 'Perguruan tinggi', status: 'open', contact: contact.general },
-      { id: 'p-training', title: 'Pelatihan menulis artikel untuk dosen', audience: 'Fakultas & LPPM', status: 'open', contact: contact.training },
-      { id: 'p-media', title: 'Liputan riset di NordeoNews', audience: 'Peneliti & lembaga', status: 'open', contact: contact.news },
-    ],
-    contact: {
-      address: office.address, email: contact.general, whatsapp: officialSocial.whatsapp, instagram: officialSocial.instagram,
-      mapLink: office.mapLink, updatedAt: reviewed,
-    },
-    navigation: {
-      header: [
-        { id: 'n1', label: 'About', href: '/about' }, { id: 'n2', label: 'Ecosystem', href: '/#ecosystem' },
-        { id: 'n3', label: 'Journals', href: externalLinks.journalPortal }, { id: 'n4', label: 'Contact', href: '/contact' },
-      ],
-      footer: [
-        { id: 'f1', label: 'Publication Ethics', href: '/publication-ethics' }, { id: 'f2', label: 'Author Guide', href: '/author-guide' },
-        { id: 'f3', label: 'Privacy', href: '/privacy-policy' }, { id: 'f4', label: 'Terms of Use', href: '/terms-of-use' },
-      ],
-      news: [
-        { id: 'w1', label: 'Latest', href: '/news/#terbaru' }, { id: 'w2', label: 'Desks', href: '/news/#rubrik' }, { id: 'w3', label: 'Publishing Guide', href: '/news/panduan' },
-      ],
-    },
-    media: [
-      { id: 'm-logo', src: '/assets/logo-transparent.png', name: 'logo-transparent.png', alt: 'Logo Nordeo Scholar Publishing', used: 'Header' },
-      { id: 'm-hero', src: '/assets/hero.webp', name: 'hero.webp', alt: 'Perpustakaan klasik dengan buku terbuka', used: 'Hero' },
-      { id: 'm-eco-j', src: '/assets/ecosystem-journals.webp', name: 'ecosystem-journals.webp', alt: 'Meja editor dengan naskah dan jurnal', used: 'Ekosistem' },
-      { id: 'm-eco-n', src: '/assets/ecosystem-media.webp', name: 'ecosystem-media.webp', alt: 'Studio media akademik', used: 'Ekosistem' },
-      { id: 'm-eco-t', src: '/assets/ecosystem-training.webp', name: 'ecosystem-training.webp', alt: 'Peneliti dalam lokakarya menulis', used: 'Ekosistem' },
-      { id: 'm-eco-b', src: '/assets/ecosystem-books.webp', name: 'ecosystem-books.webp', alt: 'Buku akademik bersampul teal', used: 'Ekosistem' },
-      { id: 'm-jetsi', src: '/assets/journal-jetsi-preview.webp', name: 'journal-jetsi-preview.webp', alt: 'Cuplikan halaman JETSI', used: 'Jurnal' },
-      { id: 'm-jiel', src: '/assets/journal-jiel-preview.webp', name: 'journal-jiel-preview.webp', alt: 'Cuplikan halaman JIEL', used: 'Jurnal' },
-    ],
-    users: [
-      { id: 'u-owner', name: 'Fandi Achmad', email: '[email Owner]', role: 'owner', active: true },
-      { id: 'u-admin', name: '[Nama staf Admin]', email: '[email Admin]', role: 'admin', active: true },
-      { id: 'u-marketing', name: '[Nama staf Marketing]', email: '[email Marketing]', role: 'marketing', active: true },
-    ],
-    site: { tagline: 'Academic Publishing & Research Support', accent: '#ffd218', seoTitle: 'Nordeo Scholar | Advancing Knowledge', seoDescription: 'Nordeo Scholar Publishing — Academic Publishing & Research Support.' },
-    log: [],
+    changed: after.filter((x) => !old.has(x.id) || JSON.stringify(old.get(x.id)) !== JSON.stringify(x)),
+    removed: before.filter((x) => !now.has(x.id)),
   };
 }
 
-// News records from the public store; old items without a status count as published.
-function loadNews() {
-  return getNews().map((n) => ({ ...n, status: n.status || 'published' }));
+function demoState() {
+  const saved = read(CMS_KEY, null);
+  const cms = saved && typeof saved === 'object' ? { ...seedContent(), ...saved } : seedContent();
+  return {
+    cms,
+    news: getNews().map((n) => ({ ...n, status: n.status || 'published' })),
+    submissions: read(STORE.newsSubmissions, []),
+    registrations: read(STORE.trainingRegistrations, []),
+    comments: Object.entries(read(STORE.newsComments, {})).flatMap(([story, list]) => list.map((c) => ({ ...c, slug: story, status: c.status || 'approved' }))),
+    subscribers: [],
+    users: ROLES.map((r) => ({ id: `u-${r.id}`, name: r.person, email: `[email ${r.label}]`, role: r.id, active: true })),
+    activity: cms.log || [],
+  };
 }
 
-export function useAdminData(role) {
-  const [cms, setCms] = useState(() => {
-    const saved = read(CMS_KEY, null);
-    return saved && typeof saved === 'object' ? { ...seed(), ...saved } : seed();
-  });
-  const [news, setNews] = useState(loadNews);
-  const [submissions, setSubmissions] = useState(() => read(STORE.newsSubmissions, []));
-  const [registrations] = useState(() => read(STORE.trainingRegistrations, []));
-  const [saveError, setSaveError] = useState(false);
+const EMPTY = { cms: seedContent(), news: [], submissions: [], registrations: [], comments: [], subscribers: [], users: [], activity: [] };
 
-  useEffect(() => { setSaveError(!write(CMS_KEY, cms)); }, [cms]);
+// ---------------------------------------------------------------- remote loading
+async function loadRemote() {
+  const q = (query) => query.then(({ data, error }) => (error ? [] : data || []));
+  const [content, news, submissions, registrations, comments, subscribers, users, log] = await Promise.all([
+    q(supabase.from('site_content').select('key,value')),
+    q(supabase.from('news').select('*').order('date', { ascending: false })),
+    q(supabase.from('news_submissions').select('*').order('submitted_at', { ascending: false })),
+    q(supabase.from('academy_registrations').select('*').order('submitted_at', { ascending: false })),
+    q(supabase.from('news_comments').select('*').order('created_at', { ascending: false })),
+    q(supabase.from('subscribers').select('*').order('created_at', { ascending: false })),
+    q(supabase.from('profiles').select('*').order('created_at')),
+    q(supabase.from('activity_log').select('*').order('at', { ascending: false }).limit(200)),
+  ]);
+  const seed = seedContent();
+  const stored = Object.fromEntries(content.map((row) => [row.key, row.value]));
+  return {
+    cms: Object.fromEntries(CONTENT_KEYS.map((key) => [key, stored[key] ?? seed[key]])),
+    news: news.map(rowToNews),
+    submissions: submissions.map((s) => ({ ...(s.payload || {}), id: s.id, reference: s.reference, title: s.title, category: s.category, name: s.name, email: s.email, institution: s.institution, mode: s.mode, status: s.status, submittedAt: s.submitted_at })),
+    registrations: registrations.map((r) => ({ ...(r.payload || {}), id: r.id, reference: r.reference, program: r.program, name: r.name, email: r.email, institution: r.institution, role: r.role, status: r.status, submittedAt: r.submitted_at })),
+    comments: comments.map((c) => ({ id: c.id, slug: c.article_slug, name: c.name, email: c.email, comment: c.body, status: c.status, at: c.created_at, parentId: c.parent_id })),
+    subscribers: subscribers.map((s) => ({ id: s.id, email: s.email, topics: (s.topics || []).join(', '), createdAt: s.created_at })),
+    users: users.map((u) => ({ id: u.id, name: u.full_name || u.email, email: u.email, role: u.role, active: u.active })),
+    activity: log.map((l) => ({ id: String(l.id), at: l.at, who: l.who, role: l.role, action: l.action, target: l.target })),
+  };
+}
 
-  const person = ROLES.find((r) => r.id === role) || ROLES[1];
-  const log = useCallback((action, target) => {
-    setCms((c) => ({ ...c, log: [{ id: makeId('log'), at: new Date().toISOString(), who: person.person, role: person.label, action, target }, ...(c.log || [])].slice(0, 200) }));
-  }, [person]);
+/**
+ * mode 'remote': signed in, reads and writes the database.
+ * mode 'demo': this browser only; the role can be switched to show each view.
+ */
+export function useAdminData(role, mode = 'demo', account = null) {
+  const remote = mode === 'remote' && Boolean(supabase);
+  const [state, setState] = useState(() => (remote ? EMPTY : demoState()));
+  const [loading, setLoading] = useState(remote);
+  const [saveError, setSaveError] = useState('');
+  const latest = useRef(state);
+  latest.current = state;
+
+  const refresh = useCallback(async () => {
+    if (!remote) return;
+    setLoading(true);
+    const next = await loadRemote();
+    setState(next);
+    setLoading(false);
+  }, [remote]);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  // Demo mode persists the content documents in this browser.
+  useEffect(() => {
+    if (remote) return;
+    if (!write(CMS_KEY, { ...state.cms, log: state.activity })) setSaveError('Penyimpanan browser penuh atau diblokir.');
+  }, [remote, state.cms, state.activity]);
+
+  const person = account?.name || ROLES.find((r) => r.id === role)?.person || 'Pengguna';
+  const roleLabel = ROLES.find((r) => r.id === role)?.label || role;
+  const fail = useCallback((error) => { setSaveError(error?.message ? `Gagal menyimpan: ${error.message}` : 'Gagal menyimpan ke database.'); }, []);
+
+  const log = useCallback((action, target = '') => {
+    const entry = { id: makeId('log'), at: new Date().toISOString(), who: person, role: roleLabel, action, target };
+    setState((s) => ({ ...s, activity: [entry, ...s.activity].slice(0, 200) }));
+    if (remote) supabase.from('activity_log').insert({ who: person, role: roleLabel, action, target }).then(({ error }) => error && fail(error));
+  }, [person, roleLabel, remote, fail]);
 
   const update = useCallback((key, value, action, target) => {
-    setCms((c) => ({ ...c, [key]: typeof value === 'function' ? value(c[key]) : value }));
+    const next = typeof value === 'function' ? value(latest.current.cms[key]) : value;
+    setState((s) => ({ ...s, cms: { ...s.cms, [key]: next } }));
+    if (remote) {
+      supabase.from('site_content').upsert({ key, value: next, updated_at: new Date().toISOString(), updated_by: account?.id || null })
+        .then(({ error }) => { if (error) fail(error); else setSaveError(''); });
+    }
     if (action) log(action, target);
-  }, [log]);
+  }, [remote, account, log, fail]);
 
   const commitNews = useCallback((next, action, target) => {
-    setNews(next);
-    if (!saveNews(next)) setSaveError(true);
+    const before = latest.current.news;
+    setState((s) => ({ ...s, news: next }));
+    if (remote) {
+      const { changed, removed } = diffById(before, next);
+      Promise.all([
+        ...changed.map((item) => supabase.from('news').upsert(newsToRow(item))),
+        ...removed.map((item) => supabase.from('news').delete().eq('id', item.id)),
+      ]).then((results) => {
+        const error = results.find((r) => r.error)?.error;
+        if (error) { fail(error); refresh(); } else setSaveError('');
+      });
+    } else if (!saveNews(next)) setSaveError('Penyimpanan browser penuh atau diblokir.');
     if (action) log(action, target);
-  }, [log]);
+  }, [remote, log, fail, refresh]);
 
-  const commitSubmissions = useCallback((next) => {
-    setSubmissions(next);
-    write(STORE.newsSubmissions, next);
-  }, []);
+  const commitRows = useCallback((listKey, table, toRow) => (next, action, target) => {
+    const before = latest.current[listKey];
+    setState((s) => ({ ...s, [listKey]: next }));
+    if (remote) {
+      const { changed, removed } = diffById(before, next);
+      Promise.all([
+        ...changed.map((item) => supabase.from(table).update(toRow(item)).eq('id', item.id)),
+        ...removed.map((item) => supabase.from(table).delete().eq('id', item.id)),
+      ]).then((results) => {
+        const error = results.find((r) => r.error)?.error;
+        if (error) { fail(error); refresh(); } else setSaveError('');
+      });
+    } else if (listKey === 'submissions') write(STORE.newsSubmissions, next);
+    else if (listKey === 'registrations') write(STORE.trainingRegistrations, next);
+    if (action) log(action, target);
+  }, [remote, log, fail, refresh]);
 
-  return { cms, update, news, commitNews, submissions, commitSubmissions, registrations, log, saveError, today };
+  const commitSubmissions = useCallback((next, action, target) => commitRows('submissions', 'news_submissions', (s) => ({ status: s.status }))(next, action, target), [commitRows]);
+  const commitRegistrations = useCallback((next, action, target) => commitRows('registrations', 'academy_registrations', (r) => ({ status: r.status || 'baru' }))(next, action, target), [commitRows]);
+  const commitComments = useCallback((next, action, target) => commitRows('comments', 'news_comments', (c) => ({ status: c.status }))(next, action, target), [commitRows]);
+  const commitSubscribers = useCallback((next, action, target) => commitRows('subscribers', 'subscribers', () => ({}))(next, action, target), [commitRows]);
+  const commitUsers = useCallback((next, action, target) => commitRows('users', 'profiles', (u) => ({ role: u.role, active: u.active, full_name: u.name }))(next, action, target), [commitRows]);
+
+  // Media: the database mode stores files in the public "media" bucket.
+  const uploadMedia = useCallback(async (file, dataUrl) => {
+    if (!remote) return dataUrl;
+    const path = `${Date.now()}-${file.name.replace(/[^\w.-]+/g, '_')}`;
+    const { error } = await supabase.storage.from('media').upload(path, file, { contentType: file.type });
+    if (error) { fail(error); return null; }
+    return supabase.storage.from('media').getPublicUrl(path).data.publicUrl;
+  }, [remote, fail]);
+
+  // Signed link to a file sent with a story (private bucket).
+  const fileLink = useCallback(async (path) => {
+    if (!remote || !path) return null;
+    const { data, error } = await supabase.storage.from('submissions').createSignedUrl(path, 600);
+    return error ? null : data.signedUrl;
+  }, [remote]);
+
+  return {
+    ...state, loading, remote, saveError, today, refresh, update, log, commitNews, commitSubmissions, commitRegistrations,
+    commitComments, commitSubscribers, commitUsers, uploadMedia, fileLink, person, initials: initials(person),
+  };
 }
 
 export function toCsv(rows, columns) {
@@ -186,5 +253,5 @@ export function toCsv(rows, columns) {
 
 export function daysSince(date) {
   if (!date) return Infinity;
-  return Math.floor((Date.now() - new Date(`${date}T00:00:00`).getTime()) / 86400000);
+  return Math.floor((Date.now() - new Date(`${String(date).slice(0, 10)}T00:00:00`).getTime()) / 86400000);
 }

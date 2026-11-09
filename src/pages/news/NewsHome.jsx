@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { editorialDesks, newsCategories, newsSteps } from '../../data/news';
 import { publishedNews } from '../../lib/store';
+import { useNewsSource } from '../../lib/content';
 import { siteBase } from '../../lib/site';
 import NewsCard from '../../components/NewsCard';
 import { HeadlineList, StoryCarousel } from '../../components/NewsPortal';
@@ -10,6 +11,7 @@ import { Arrow, EmptyState, useDocumentTitle } from '../../components/parts';
 export default function NewsHome() {
   useDocumentTitle('NordeoNews');
   const base = siteBase('news');
+  useNewsSource();
   const stories = publishedNews();
   const [category, setCategory] = useState('Semua');
   const filtered = category === 'Semua' ? stories : stories.filter(story => story.category === category);

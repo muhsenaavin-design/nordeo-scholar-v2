@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { creditParts, formatDate, getNewsBySlug, publishedNews } from '../../lib/store';
 import { siteBase } from '../../lib/site';
@@ -7,6 +7,8 @@ import { Arrow, useDocumentTitle } from '../../components/parts';
 import { LegalPage } from '../InfoPages';
 import ArticleComments from '../../components/ArticleComments';
 import { sanitizeHtml } from '../../lib/rich-text';
+import { countView, usePublicContent } from '../../lib/content';
+import { hasDatabase } from '../../lib/supabase';
 
 function Block({ block }) {
   if (block.type === 'html') return <div className="article-rich" dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.html) }} />;
@@ -18,11 +20,13 @@ function Block({ block }) {
 
 export default function NewsArticle() {
   const { slug } = useParams();
+  const { news: source, loaded } = usePublicContent();
   const story = getNewsBySlug(slug);
+  useEffect(() => { if (source && story) countView(story.slug); }, [source, story?.slug]); // eslint-disable-line react-hooks/exhaustive-deps
   const base = siteBase('news');
   const [copied, setCopied] = useState(false);
   useDocumentTitle(story?.title || null);
-  if (!story) return <LegalPage />;
+  if (!story) return loaded || !hasDatabase ? <LegalPage /> : <div className="route-loading" aria-busy="true" />;
   const related = publishedNews().filter(item => item.id !== story.id && item.category === story.category).concat(publishedNews().filter(item => item.id !== story.id && item.category !== story.category)).slice(0, 3);
   const credits = creditParts({ writer: story.credits?.writer || story.author, editor: story.credits?.editor, photo: story.credits?.photo });
   const copy = async () => {
@@ -47,7 +51,7 @@ export default function NewsArticle() {
       <div className="article-main">
         <div className="article-body">{story.body.map((block, index) => <Block key={index} block={block} />)}</div>
         {credits.length > 0 && <p className="article-credits">{credits.map(([label, value], index) => <span key={label}>{index > 0 && <i aria-hidden="true">|</i>}{label}: <strong>{value}</strong></span>)}</p>}
-        <ArticleComments storyId={story.id} />
+        <ArticleComments storyId={story.id} slug={story.slug} />
       </div>
       <aside className="article-aside">
         <h2 className="side-heading">Baca juga</h2>

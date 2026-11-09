@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { ecosystems, founder } from '../data/ecosystems';
-import { faqs, indexingServices, partners, testimonials } from '../data/company';
+import { faqs as defaultFaqs, indexingServices, partners as defaultPartners, testimonials as defaultTestimonials } from '../data/company';
 import { newsCategoryEn } from '../data/news';
-import { programTypeEn, trainingPrograms } from '../data/training';
+import { programTypeEn } from '../data/training';
 import { contact } from '../config/links';
 import { ecosystemHref } from '../lib/site';
 import { formatDate, popularNews, publishedNews } from '../lib/store';
+import { useContent, useNewsSource, usePrograms } from '../lib/content';
 import { BlurText, ScrollWords } from './effects';
 import { useAnimationPreference } from './motion-preference';
 import { Arrow, SmartLink } from './parts';
@@ -33,11 +34,14 @@ const heroSlides = [
 
 export function HeroSlideshow({ notice = null }) {
   const { reduced } = useAnimationPreference();
+  // The first slide's headline and button come from the dashboard (Halaman > Konten beranda).
+  const pages = useContent('pages', null);
+  const slides = useMemo(() => heroSlides.map(slide => (slide.id === 'nordeo' && pages ? { ...slide, lead: pages.heroLine1 || slide.lead, accent: pages.heroLine2 || slide.accent, cta: pages.heroCta || slide.cta } : slide)), [pages]);
   const [index, setIndex] = useState(0);
   const [held, setHeld] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [paused, setPaused] = useState(false);
-  const count = heroSlides.length;
+  const count = slides.length;
   const go = next => setIndex((next + count) % count);
   const running = !reduced && !held && !hidden && !paused;
 
@@ -55,12 +59,12 @@ export function HeroSlideshow({ notice = null }) {
 
   return <div className="hero-slides" data-running={running} onPointerEnter={() => setHeld(true)} onPointerLeave={() => setHeld(false)} onFocusCapture={() => setHeld(true)} onBlurCapture={() => setHeld(false)}>
     <div className="hero-visual" aria-hidden="true">
-      {heroSlides.map((slide, i) => <img key={slide.id} className={`hero-image ${i === index ? 'is-active' : ''}`} src={slide.src} alt="" width={slide.width} height={slide.height} decoding="async" {...(i === 0 ? { fetchPriority: 'high' } : { loading: 'lazy' })} />)}
+      {slides.map((slide, i) => <img key={slide.id} className={`hero-image ${i === index ? 'is-active' : ''}`} src={slide.src} alt="" width={slide.width} height={slide.height} decoding="async" {...(i === 0 ? { fetchPriority: 'high' } : { loading: 'lazy' })} />)}
     </div>
     <div className="hero-copy">
       {notice}
       <div className="hero-slide-copies">
-        {heroSlides.map((slide, i) => {
+        {slides.map((slide, i) => {
           const active = i === index;
           const first = i === 0;
           // Slide 1 keeps its h1 in the accessibility tree even while another slide shows.
@@ -80,7 +84,7 @@ export function HeroSlideshow({ notice = null }) {
     <button type="button" className="hero-arrow is-next" aria-label="Next slide" onClick={() => go(index + 1)}><Arrow /></button>
     <div className="hero-rail">
       <div className="hero-rail-items" role="group" aria-label="Slides">
-        {heroSlides.map((slide, i) => {
+        {slides.map((slide, i) => {
           const active = i === index;
           const label = active ? `${slide.label}: ${paused ? 'resume' : 'pause'} slideshow` : `Show ${slide.label}`;
           return <button key={slide.id} type="button" className="hero-rail-item" aria-current={active ? 'true' : undefined} aria-pressed={active && !reduced ? paused : undefined} aria-label={label} onClick={() => railClick(i)}>
@@ -125,6 +129,7 @@ export function CompanyOverview() {
    Pattern: an editorial lead beside a numbered "most read" list. The order comes from
    popularNews(): pinned by editors first, then by views. */
 export function NewsSpotlight() {
+  useNewsSource();
   const stories = popularNews(publishedNews()).slice(0, 5);
   if (!stories.length) return null;
   const [lead, ...rest] = stories;
@@ -183,8 +188,9 @@ function monthCells(month) {
 
 export function AcademyCalendar() {
   const today = isoDay(new Date());
-  const dated = useMemo(() => trainingPrograms.filter(program => program.date).sort((a, b) => a.date.localeCompare(b.date)), []);
-  const undated = trainingPrograms.filter(program => !program.date);
+  const programs = usePrograms();
+  const dated = useMemo(() => programs.filter(program => program.date).sort((a, b) => a.date.localeCompare(b.date)), [programs]);
+  const undated = programs.filter(program => !program.date);
   const firstUpcoming = dated.find(program => program.date >= today) || dated[0];
   const [month, setMonth] = useState(() => { const start = parseDay(firstUpcoming?.date || today); return new Date(start.getFullYear(), start.getMonth(), 1); });
   const [selected, setSelected] = useState(firstUpcoming?.date || null);
@@ -293,7 +299,7 @@ function ReviewCard({ item }) {
    beside the heading, then two slow rows of cards drifting in opposite directions that pause
    on hover or focus. The second row is a decorative echo, hidden from assistive tech.
    Reduced motion shows one static grid. */
-function ReviewWall() {
+function ReviewWall({ testimonials }) {
   const { reduced } = useAnimationPreference();
   const count = testimonials.length;
   const average = (testimonials.reduce((sum, item) => sum + (item.rating || 5), 0) / count).toFixed(1);
@@ -319,10 +325,16 @@ function ReviewWall() {
 }
 
 export function TrustAndFaq() {
+  // Partners, reviews, and questions are managed by Marketing in the dashboard. Sample reviews
+  // written only to design the section are never shown as if real people wrote them.
+  const promo = useContent('promo', null);
+  const partners = promo?.partners ?? defaultPartners;
+  const testimonials = (promo?.testimonials ?? defaultTestimonials).filter(item => !item.sample && item.quote);
+  const faqs = promo?.faqs ?? defaultFaqs;
   return <section className="trust-section section-space" aria-labelledby="faq-heading">
     {partners.length > 0 && <LogoTicker items={partners} label="Our partners" still={partners.length < 5} />}
     <LogoTicker items={indexingServices} label="Registered and indexed with" />
-    {testimonials.length > 0 && <ReviewWall />}
+    {testimonials.length > 0 && <ReviewWall testimonials={testimonials} />}
     <div className="container faq-grid">
       <div className="faq-aside" data-reveal>
         <h2 id="faq-heading">Questions, <em>answered.</em></h2>

@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router';
-import { trainingPrograms } from '../../data/training';
+import { usePrograms } from '../../lib/content';
 import { siteBase } from '../../lib/site';
 import { Arrow, CheckIcon, StatusPill, useDocumentTitle } from '../../components/parts';
 import { LegalPage } from '../InfoPages';
@@ -7,6 +7,7 @@ import { ProgramCard } from './TrainingHome';
 
 export default function TrainingProgram() {
   const { id } = useParams();
+  const trainingPrograms = usePrograms();
   const program = trainingPrograms.find(item => item.id === id);
   const base = siteBase('training');
   useDocumentTitle(program?.title || null);

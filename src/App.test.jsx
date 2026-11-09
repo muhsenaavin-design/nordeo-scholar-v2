@@ -204,13 +204,13 @@ test('news articles show the credit line and accept reader comments', async () =
   expect(screen.getByRole('heading', { level: 3, name: /balas rina/i })).toBeInTheDocument();
 });
 
-test('homepage shows the partner logos and the review wall', () => {
+test('homepage shows the partner logos and hides the sample reviews', () => {
   render(<MemoryRouter><App /></MemoryRouter>);
   expect(screen.getByRole('img', { name: 'Institut Teknologi Bandung' })).toHaveAttribute('src', '/assets/partners/itb.svg');
   expect(screen.getByRole('img', { name: 'Politeknik META Industri' })).toHaveAttribute('src', '/assets/partners/politeknik-meta.webp');
-  expect(screen.getByRole('heading', { level: 2, name: /trusted by the people/i })).toBeInTheDocument();
-  expect(screen.getByText('5.0')).toBeInTheDocument();
-  expect(screen.getAllByText(/rated 5 out of 5/i).length).toBeGreaterThanOrEqual(6);
+  // The built-in reviews are samples written to design the section, so they stay hidden
+  // until Marketing adds real, approved reviews in the dashboard.
+  expect(screen.queryByRole('heading', { level: 2, name: /trusted by the people/i })).not.toBeInTheDocument();
 });
 
 test('academy lists placeholder programs and records interest for a chosen program', async () => {
@@ -232,7 +232,7 @@ test('academy registration preselects the program and confirms with a reference'
   fireEvent.change(screen.getByLabelText(/institusi/i), { target: { value: 'Universitas Contoh' } });
   fireEvent.click(screen.getByLabelText(/setuju dihubungi/i));
   fireEvent.click(screen.getByRole('button', { name: /daftarkan minat/i }));
-  expect(screen.getByRole('heading', { level: 1, name: /terima kasih, ayu/i })).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { level: 1, name: /terima kasih, ayu/i })).toBeInTheDocument();
   expect(screen.getByRole('link', { name: /kirim ke academy@nordeoscholar.com/i }).getAttribute('href')).toMatch(/^mailto:academy@nordeoscholar\.com/);
 });
 

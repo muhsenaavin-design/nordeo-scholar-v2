@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { newsCategories, newsTypes } from '../../data/news';
 import { contact, newsTemplate } from '../../config/links';
 import { aiMode, draftChecks, generateNewsDraft, wordCount } from '../../lib/news-ai';
+import { sendStorySubmission } from '../../lib/content';
 import { STORE, creditParts, formatDate, humanSize, makeId, makeReference, read, readImage, remove, write } from '../../lib/store';
 import { siteBase } from '../../lib/site';
 import { Arrow, CheckIcon, DownloadIcon, ImageIcon, useDocumentTitle } from '../../components/parts';
@@ -299,10 +300,10 @@ function Success({ record, onReset }) {
   return <section className="submit-success" aria-labelledby="success-heading" tabIndex="-1" ref={node => node?.focus()}>
     <span className="success-mark" aria-hidden="true"><CheckIcon /></span>
     <p className="success-ref">Nomor referensi <strong>{record.reference}</strong></p>
-    <h1 id="success-heading">Terima kasih. <em>Kabar Anda sudah tercatat.</em></h1>
-    <p className="page-intro">{record.mode === 'word' ? 'Satu langkah lagi: kirim email ke meja redaksi dengan formulir Word dan gambar highlight terlampir.' : 'Satu langkah lagi: kirim ringkasan ke meja redaksi lewat email beserta gambar highlight Anda.'} Simpan nomor referensi untuk korespondensi.</p>
+    <h1 id="success-heading">Terima kasih. <em>{record.saved ? 'Kabar Anda sudah sampai di redaksi.' : 'Kabar Anda sudah tercatat.'}</em></h1>
+    <p className="page-intro">{record.saved ? 'Kiriman, gambar, dan berkas Anda sudah masuk ke meja redaksi NordeoNews.' : record.mode === 'word' ? 'Satu langkah lagi: kirim email ke meja redaksi dengan formulir Word dan gambar highlight terlampir.' : 'Satu langkah lagi: kirim ringkasan ke meja redaksi lewat email beserta gambar highlight Anda.'} Simpan nomor referensi untuk korespondensi.</p>
     <div className="button-row">
-      <a href={mailto} className="button button-dark">Kirim ke {contact.news}</a>
+      <a href={mailto} className={`button ${record.saved ? 'button-outline' : 'button-dark'}`}>{record.saved ? 'Kirim salinan lewat email' : `Kirim ke ${contact.news}`}</a>
       <button type="button" className="button button-outline" onClick={onReset}>Kirim berita lain</button>
     </div>
     <ol className="success-timeline">
@@ -310,7 +311,7 @@ function Success({ record, onReset }) {
       <li><strong>2–5 hari kerja</strong><span>Penyuntingan bersama. Naskah tayang hanya setelah Anda menyetujui versi akhir.</span></li>
       {record.publishDate && <li><strong>{formatDate(record.publishDate)}</strong><span>Tanggal tayang yang Anda usulkan{record.embargo ? ', setelah embargo dibuka' : ''}.</span></li>}
     </ol>
-    <p className="form-footnote">Formulir ini belum terhubung ke server redaksi. Kiriman disimpan di perangkat ini dan diteruskan melalui email di atas.</p>
+    {!record.saved && <p className="form-footnote">Kiriman belum sampai ke server redaksi (koneksi terputus). Kirim lewat email di atas agar tetap diterima.</p>}
   </section>;
 }
 
@@ -354,13 +355,20 @@ export default function NewsSubmit() {
     go(step + 1);
   };
 
-  const submit = () => {
+  const [sending, setSending] = useState(false);
+  const submit = async () => {
+    if (sending) return;
     const entry = { id: makeId('news-submission'), reference: makeReference('NWS'), submittedAt: new Date().toISOString(), status: 'baru', ...form, bodyHtml: sanitizeHtml(form.bodyHtml) };
-    const list = read(STORE.newsSubmissions, []);
-    // Large files may not fit in storage; keep the record and drop the file contents.
-    if (!write(STORE.newsSubmissions, [entry, ...list])) write(STORE.newsSubmissions, [{ ...entry, image: entry.image && { ...entry.image, dataUrl: null }, docFile: entry.docFile && { ...entry.docFile, dataUrl: null } }, ...list]);
+    setSending(true);
+    const saved = await sendStorySubmission(entry).catch(() => false);
+    setSending(false);
+    if (!saved) {
+      // No database: keep the record in this browser (dropping file contents that do not fit).
+      const list = read(STORE.newsSubmissions, []);
+      if (!write(STORE.newsSubmissions, [entry, ...list])) write(STORE.newsSubmissions, [{ ...entry, image: entry.image && { ...entry.image, dataUrl: null }, docFile: entry.docFile && { ...entry.docFile, dataUrl: null } }, ...list]);
+    }
     remove(STORE.newsDraft);
-    setRecord(entry);
+    setRecord({ ...entry, saved });
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -557,7 +565,7 @@ export default function NewsSubmit() {
 
         <div className="form-nav">
           {step > 0 ? <button type="button" className="button button-outline" onClick={() => go(step - 1)}>Kembali</button> : <span />}
-          <button type="submit" className="button button-dark">{step === STEPS.length - 1 ? 'Kirim ke redaksi' : `Lanjut: ${STEPS[step + 1].title}`}</button>
+          <button type="submit" className="button button-dark" disabled={sending}>{sending ? 'Mengirim…' : step === STEPS.length - 1 ? 'Kirim ke redaksi' : `Lanjut: ${STEPS[step + 1].title}`}</button>
         </div>
       </form>
     </div>}
