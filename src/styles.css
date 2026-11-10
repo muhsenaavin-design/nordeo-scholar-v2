@@ -756,6 +756,14 @@ html[data-motion="full"] .hero-footer { animation-delay: .5s; }
 .footer-main > div:not(.footer-brand) > a { display: flex; align-items: center; gap: 8px; width: fit-content; min-height: 44px; font-size: 14px; color: rgba(226, 236, 238, .86); }
 .footer-main a:hover { color: var(--accent-bright); }
 .footer-main .arrow { width: 14px; height: 14px; flex-basis: 14px; }
+.footer-newsletter { margin-top: 22px; max-width: 360px; }
+.footer-newsletter label { display: block; margin-bottom: 8px; font: 600 12.5px/1.4 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: #fff; }
+.footer-newsletter > div { display: flex; gap: 8px; }
+.footer-newsletter input { flex: 1 1 auto; min-width: 0; min-height: 44px; padding: 0 14px; border: 1px solid rgba(255, 255, 255, .24); border-radius: 999px; background: rgba(255, 255, 255, .06); color: #fff; font-size: 14px; }
+.footer-newsletter input::placeholder { color: rgba(226, 236, 238, .55); }
+.footer-newsletter button { min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--accent-bright, #ffd218); color: #142a32; font-weight: 600; cursor: pointer; }
+.footer-newsletter button:disabled { opacity: .6; cursor: progress; }
+.footer-newsletter p { margin-top: 8px !important; font-size: 12.5px !important; line-height: 1.5 !important; }
 .footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px 0; border-top: 1px solid rgba(255, 255, 255, .14); font-size: 13px; color: rgba(206, 222, 226, .88); }
 .footer-bottom > span { font: 500 15px/1.4 var(--serif); color: var(--accent-soft); }
 .footer-bottom > div { display: flex; gap: 24px; }

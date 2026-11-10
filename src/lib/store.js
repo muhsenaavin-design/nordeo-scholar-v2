@@ -1,4 +1,5 @@
 import { seedNews } from '../data/news';
+import { cachedNews } from './content';
 
 const prefix = 'nordeo:';
 
@@ -60,6 +61,10 @@ export function clearSession(key) {
 }
 
 export function getNews() {
+  // Published articles from the database once loaded; the dashboard's demo mode and the
+  // first render fall back to this browser's copy or the articles built into the site.
+  const remote = cachedNews();
+  if (remote) return remote;
   const stored = read(STORE.news, null);
   return Array.isArray(stored) ? stored : seedNews;
 }

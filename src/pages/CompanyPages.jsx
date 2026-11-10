@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { companyOverview, coreValues, founderProfile, mission, storyChapters } from '../data/company';
 import { ecosystems, founder, vision } from '../data/ecosystems';
+import { useContent } from '../lib/content';
 import { ecosystemHref } from '../lib/site';
 import { Arrow, JournalMark, SmartLink, useDocumentTitle } from '../components/parts';
 
@@ -14,6 +15,7 @@ function BackLink() {
 // milestone rail that reads left to right, followed by vision, mission, and values.
 export function StoryPage() {
   useDocumentTitle('Our Story');
+  const profile = useContent('profile', null);
   return <div lang="en" className="company-page">
     <section className="container inner-page story-hero" data-reveal>
       <BackLink />
@@ -45,11 +47,11 @@ export function StoryPage() {
     <section className="container story-pillars" aria-label="Vision and mission">
       <article data-reveal>
         <p className="vision-label">Our Vision</p>
-        <p className="story-vision">{vision.intro} {vision.lead} <mark>{vision.accent}</mark></p>
+        <p className="story-vision">{profile?.vision || <>{vision.intro} {vision.lead} <mark>{vision.accent}</mark></>}</p>
       </article>
       <article data-reveal style={{ '--reveal-delay': '100ms' }}>
         <p className="vision-label">Our Mission</p>
-        <ol className="story-mission">{mission.map((item, i) => <li key={item}><span>{pad(i + 1)}</span>{item}</li>)}</ol>
+        <ol className="story-mission">{(profile?.mission?.length ? profile.mission : mission).map((item, i) => <li key={item}><span>{pad(i + 1)}</span>{item}</li>)}</ol>
       </article>
     </section>
 

@@ -5,6 +5,8 @@ import { SITES, ecosystemHref, mainHref, micrositeNavHref, siteBase, siteHome } 
 import { contact, officialSocial } from '../config/links';
 import { Arrow, SmartLink, StatusPill } from './parts';
 import NordeoNewsBrand from './NordeoNewsBrand';
+import { sendSubscriber, useContent } from '../lib/content';
+import { subscribeMailto } from '../lib/subscribe';
 
 function Chevron() {
   return <svg aria-hidden="true" viewBox="0 0 16 16" className="chevron" fill="none"><path d="m3.5 6 4.5 4 4.5-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
@@ -177,9 +179,36 @@ const footerCopy = {
   training: 'Skills that carry research to its readers — from first draft to reviewer response.',
 };
 
+// NordeoNews newsletter (FR-09): the address goes to the subscriber list Marketing reads in the dashboard.
+// Only on the NordeoNews pages: the Owner replaced the homepage newsletter block with the map (Feedback 1).
+function NewsletterForm() {
+  const [email, setEmail] = useState('');
+  const [state, setState] = useState('idle');
+  const submit = async event => {
+    event.preventDefault();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) { setState('invalid'); return; }
+    setState('sending');
+    const result = await sendSubscriber(email).catch(() => 'error');
+    if (result === 'offline') { window.location.href = subscribeMailto(email); setState('idle'); return; }
+    setState(result);
+    if (result === 'saved' || result === 'exists') setEmail('');
+  };
+  const message = { invalid: 'Use a valid email address.', saved: 'Thank you. You are on the Nordeo mailing list.', exists: 'This address is already on the list.', error: 'We could not save your address. Please try again.' }[state];
+  return <form className="footer-newsletter" noValidate onSubmit={submit}>
+    <label htmlFor="footer-newsletter-email">Subscribe to NordeoNews</label>
+    <div><input id="footer-newsletter-email" type="email" autoComplete="email" placeholder="you@university.ac.id" value={email} onChange={event => { setEmail(event.target.value); setState('idle'); }} aria-describedby="footer-newsletter-status" /><button type="submit" disabled={state === 'sending'}>{state === 'sending' ? '…' : 'Subscribe'}</button></div>
+    <p id="footer-newsletter-status" aria-live="polite">{message || 'News, calls for papers, and Academy dates. No spam.'}</p>
+  </form>;
+}
+
 export function SiteFooter({ siteKey = 'main' }) {
   const site = siteKey === 'main' ? null : SITES[siteKey];
-  const email = site ? contact[siteKey] : contact.general;
+  const reach = useContent('contact', null);
+  const email = site ? contact[siteKey] : (reach?.email || contact.general);
+  const instagram = reach?.instagram || officialSocial.instagram;
+  const whatsapp = reach?.whatsapp || officialSocial.whatsapp;
+  const nav = useContent('navigation', null);
+  const footerLinks = Array.isArray(nav?.footer) && nav.footer.length ? nav.footer : null;
   return <footer lang="en" className="site-footer">
     <div className="container">
       <div className="footer-main">
@@ -187,6 +216,7 @@ export function SiteFooter({ siteKey = 'main' }) {
           <Link to={siteHome(siteKey)} aria-label="Nordeo Scholar home"><img src="/assets/logo-light.png" width="240" height="65" alt="Nordeo Scholar Publishing" decoding="async" /></Link>
           <p>{site ? footerCopy[siteKey] : <>A place for knowledge, publishing,<br />{' '}and academic collaboration to grow.</>}</p>
           {site && <p className="footer-site-domain">{site.host}</p>}
+          {siteKey === 'news' && <NewsletterForm />}
         </div>
         <div>
           <h3>Ecosystem</h3>
@@ -194,17 +224,19 @@ export function SiteFooter({ siteKey = 'main' }) {
         </div>
         <div>
           <h3>For scholars</h3>
-          <SmartLink href={mainHref('/author-guide')}>Author Guide</SmartLink>
-          <SmartLink href={mainHref('/publication-ethics')}>Publication Ethics</SmartLink>
-          <SmartLink href={ecosystemHref('news', '/panduan')}>News Publishing Guide</SmartLink>
-          <SmartLink href={mainHref('/about')}>About Nordeo</SmartLink>
+          {footerLinks ? footerLinks.map(item => <SmartLink key={item.id || item.href} href={/^https?:/.test(item.href) ? item.href : item.href.startsWith('/news') ? ecosystemHref('news', item.href.replace(/^\/news/, '')) : mainHref(item.href)}>{item.label}</SmartLink>) : <>
+            <SmartLink href={mainHref('/author-guide')}>Author Guide</SmartLink>
+            <SmartLink href={mainHref('/publication-ethics')}>Publication Ethics</SmartLink>
+            <SmartLink href={ecosystemHref('news', '/panduan')}>News Publishing Guide</SmartLink>
+            <SmartLink href={mainHref('/about')}>About Nordeo</SmartLink>
+          </>}
         </div>
         <div>
           <h3>Let's connect</h3>
           <a href={`mailto:${email}`}>{email}</a>
           <SmartLink href={mainHref('/contact')}>Contact & Collaboration <Arrow /></SmartLink>
-          <a href={officialSocial.instagram}>Instagram @nordeoscholar <Arrow /></a>
-          <a href={officialSocial.whatsapp}>WhatsApp Editorial <Arrow /></a>
+          <a href={instagram}>Instagram @nordeoscholar <Arrow /></a>
+          <a href={whatsapp}>WhatsApp Editorial <Arrow /></a>
         </div>
       </div>
       <div className="footer-bottom">

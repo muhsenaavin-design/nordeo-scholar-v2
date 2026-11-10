@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import './admin.css';
 import './admin-modules.css';
-import { MODULES, ROLES, can, useAdminData } from './admin-store';
+import './admin-shell.css';
+import { GROUPS, MODULES, ROLES, can, useAdminData } from './admin-store';
 import { MODULE_VIEWS, NoAccess, Overview, useRights } from './modules';
 import { Card, Icon, Toast } from './ui';
 
@@ -23,6 +24,16 @@ const ACCENTS = {
   yellow: { color: '#ffd218', ink: '#142a32', soft: 'rgba(255, 210, 24, 0.24)', label: 'Kuning' },
   teal: { color: '#1e5566', ink: '#ffffff', soft: 'rgba(30, 85, 102, 0.14)', label: 'Teal' },
   gold: { color: '#c9a227', ink: '#142a32', soft: 'rgba(201, 162, 39, 0.2)', label: 'Gold' },
+};
+
+// One colour per sidebar group, so NordeoNews, Academy, and Marketing are told apart at a glance.
+const TONES = {
+  ink: { light: ['#142a32', 'rgba(20, 42, 50, .08)'], dark: ['#f2f7f7', 'rgba(242, 247, 247, .10)'] },
+  blue: { light: ['#1f5f9e', 'rgba(31, 95, 158, .10)'], dark: ['#8fc0f0', 'rgba(143, 192, 240, .14)'] },
+  yellow: { light: ['#8a6a00', 'rgba(255, 210, 24, .28)'], dark: ['#ffd218', 'rgba(255, 210, 24, .16)'] },
+  teal: { light: ['#0f7470', 'rgba(15, 116, 112, .12)'], dark: ['#6fd6cf', 'rgba(111, 214, 207, .14)'] },
+  gold: { light: ['#8a5a0a', 'rgba(201, 162, 39, .20)'], dark: ['#e3c76a', 'rgba(227, 199, 106, .16)'] },
+  slate: { light: ['#4f6470', 'rgba(79, 100, 112, .12)'], dark: ['#b3c4cb', 'rgba(179, 196, 203, .14)'] },
 };
 
 const UI_STORE = 'nordeo-admin-ui';
@@ -63,34 +74,40 @@ function JournalCard({ t, isDark }) {
   </section>;
 }
 
-export default function AdminDashboard() {
+/**
+ * The dashboard shell: a labelled sidebar grouped by area, a header that says where you are
+ * and what the module is for, and the module itself.
+ * mode 'remote' = signed in to the database; mode 'demo' = this browser only.
+ */
+export default function AdminDashboard({ mode = 'demo', account = null, onSignOut = null }) {
   const saved = useRef(readUi()).current;
   const location = useLocation();
   const navigate = useNavigate();
-  const [nav, setNav] = useState(saved.nav === 'left' ? 'left' : 'top');
+  const remote = mode === 'remote';
+  const [compact, setCompact] = useState(saved.nav === 'compact');
+  const [mobileNav, setMobileNav] = useState(false);
   const [theme, setTheme] = useState(saved.theme === 'dark' ? 'dark' : 'light');
   const [accentId, setAccentId] = useState(ACCENTS[saved.accent] ? saved.accent : 'yellow');
   const [motion, setMotion] = useState(saved.motion === 'off' ? 'off' : 'on');
-  const [role, setRole] = useState(ROLES.some((r) => r.id === saved.role) ? saved.role : 'admin');
+  const [demoRole, setDemoRole] = useState(ROLES.some((r) => r.id === saved.role) ? saved.role : 'admin');
+  const role = remote ? account?.role : demoRole;
   const [settings, setSettings] = useState(false);
-  const [more, setMore] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
-  const [wipe, setWipe] = useState({ phase: 'idle', color: '#ffd218' });
-  const timers = useRef([]);
   const systemReduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const still = motion === 'off' || systemReduced;
-  const data = useAdminData(role);
+  const data = useAdminData(role, mode, account);
 
   const segment = location.pathname.replace(/^\/admin\/?/, '').split('/')[0] || 'dashboard';
   const visible = MODULES.filter((m) => can(m.id, role, 'R'));
   const current = MODULES.find((m) => m.id === segment) || MODULES[0];
-  const go = useCallback((id) => { setMore(false); navigate(id === 'dashboard' ? '/admin' : `/admin/${id}`); }, [navigate]);
+  const group = GROUPS.find((g) => g.id === current.group);
+  const go = useCallback((id) => { setMobileNav(false); navigate(id === 'dashboard' ? '/admin' : `/admin/${id}`); }, [navigate]);
   const toast = useCallback((m) => setToastMsg(m), []);
   const rights = useRights(current.id, role);
 
   useEffect(() => {
-    try { localStorage.setItem(UI_STORE, JSON.stringify({ nav, theme, accent: accentId, motion, role })); } catch { /* settings still work without storage */ }
-  }, [nav, theme, accentId, motion, role]);
+    try { localStorage.setItem(UI_STORE, JSON.stringify({ nav: compact ? 'compact' : 'full', theme, accent: accentId, motion, role: demoRole })); } catch { /* settings still work without storage */ }
+  }, [compact, theme, accentId, motion, demoRole]);
 
   useEffect(() => {
     const title = document.title;
@@ -98,30 +115,21 @@ export default function AdminDashboard() {
     robots.name = 'robots';
     robots.content = 'noindex, nofollow';
     document.head.appendChild(robots);
-    return () => { document.title = title; robots.remove(); timers.current.forEach(clearTimeout); };
+    return () => { document.title = title; robots.remove(); };
   }, []);
   useEffect(() => { document.title = `${current.label} · Admin | Nordeo Scholar`; }, [current]);
 
   useEffect(() => {
-    if (!settings && !more) return undefined;
-    const onKey = (e) => { if (e.key === 'Escape') { setSettings(false); setMore(false); } };
+    if (!settings && !mobileNav) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') { setSettings(false); setMobileNav(false); } };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [settings, more]);
-
-  const transition = useCallback((apply, color) => {
-    if (still) { apply(); return; }
-    timers.current.forEach(clearTimeout);
-    timers.current = [];
-    setWipe({ phase: 'in', color });
-    timers.current.push(setTimeout(() => { apply(); setWipe({ phase: 'out', color }); }, 460));
-    timers.current.push(setTimeout(() => setWipe({ phase: 'idle', color }), 980));
-  }, [still]);
+  }, [settings, mobileNav]);
 
   const t = THEMES[theme];
   const a = ACCENTS[accentId];
   const isDark = theme === 'dark';
-  const person = ROLES.find((r) => r.id === role);
+  const roleInfo = ROLES.find((r) => r.id === role) || ROLES[1];
   const logo = isDark ? '/assets/logo-light.png' : '/assets/logo-transparent.png';
   const vars = {
     '--bg': t.bg, '--panel': t.panel, '--card': t.card, '--chip': t.chip, '--ink': t.ink, '--ink2': t.ink2, '--line': t.line,
@@ -129,25 +137,17 @@ export default function AdminDashboard() {
     '--focus': isDark ? '#6fb3c4' : '#1e5566', '--gold-ink': isDark ? '#e3c76a' : '#7a5a0e', '--green-ink': isDark ? '#6fd39b' : '#1a7a45',
     '--red-ink': isDark ? '#f3a29b' : '#b3261e', '--teal-ink': isDark ? '#8cc8d6' : '#1e5566',
   };
+  const toneVars = (tone) => { const [ink, soft] = TONES[tone][isDark ? 'dark' : 'light']; return { '--tone': ink, '--tone-soft': soft }; };
 
-  const changeNav = (value) => { if (value !== nav) transition(() => setNav(value), value === 'left' ? '#1e5566' : a.color); };
-  const changeTheme = (value) => { if (value !== theme) transition(() => setTheme(value), THEMES[value].panel); };
-  const changeRole = (value) => { setRole(value); if (!can(current.id, value, 'R')) go('dashboard'); };
-
-  const primary = visible.filter((m) => m.primary);
-  const secondary = visible.filter((m) => !m.primary);
-  const activeInPrimary = primary.findIndex((m) => m.id === current.id);
-  const tabW = 104;
-
-  const themeSwitch = <div className="adm-seg" role="group" aria-label="Tema">
-    <div aria-hidden="true" className="adm-seg__thumb adm-glide" style={{ transform: `translateX(${isDark ? 40 : 0}px)` }} />
-    <button type="button" className="adm-seg__btn adm-btn" onClick={() => changeTheme('light')} aria-label="Tema terang" aria-pressed={!isDark} style={{ color: isDark ? t.ink2 : t.onDark }}><Icon name="sun" size={17} width={1.8} /></button>
-    <button type="button" className="adm-seg__btn adm-btn" onClick={() => changeTheme('dark')} aria-label="Tema gelap" aria-pressed={isDark} style={{ color: isDark ? t.onDark : t.ink2 }}><Icon name="moon" size={17} width={1.8} /></button>
-  </div>;
+  // Badges: what is waiting in each module.
   const pendingReview = data.news.filter((n) => n.status === 'review').length;
-  const bell = <button type="button" className="adm-circle is-lg adm-btn" aria-label={`Notifikasi: ${pendingReview} konten menunggu persetujuan`} title={`${pendingReview} konten menunggu persetujuan`} onClick={() => go(can('news', role, 'R') ? 'news' : 'dashboard')} style={{ position: 'relative' }}><Icon name="bell" />{pendingReview > 0 && <span aria-hidden="true" className="adm-dot" />}</button>;
-  const gear = (lg) => <button type="button" className={`adm-circle adm-btn${lg ? ' is-lg' : ''}`} onClick={() => setSettings(true)} aria-label="Pengaturan tampilan" title="Pengaturan"><Icon name="gear" /></button>;
-  const avatar = <button type="button" className="adm-avatar adm-btn" onClick={() => setSettings(true)} aria-label={`${person.person}, ${person.label}. Ganti peran`} title={`${person.person} · ${person.label}`}>{person.initials}</button>;
+  const counts = {
+    news: role === 'owner' ? pendingReview : data.news.filter((n) => n.status === 'draft' && n.reviewNote).length,
+    stories: data.submissions.filter((s) => (s.status || 'baru') === 'baru').length,
+    comments: data.comments.filter((c) => c.status === 'pending').length,
+    registrations: data.registrations.filter((r) => (r.status || 'baru') === 'baru').length,
+  };
+  const waiting = Object.entries(counts).filter(([id]) => can(id, role, 'R')).reduce((sum, [, n]) => sum + n, 0);
 
   const option = (currentValue, value, label, swatch, pick) => {
     const on = currentValue === value;
@@ -156,80 +156,98 @@ export default function AdminDashboard() {
       <span style={{ fontSize: 14, fontWeight: 500 }}>{label}</span>
     </button>;
   };
+  const changeDemoRole = (value) => { setDemoRole(value); if (!can(current.id, value, 'R')) go('dashboard'); };
   const settingGroups = [
-    { title: 'Masuk sebagai', note: 'Menu dan tombol mengikuti hak akses peran (prototipe; belum ada login).', cols: 3, options: ROLES.map((r) => option(role, r.id, r.label, null, changeRole)) },
-    { title: 'Posisi navigasi', note: 'Menu di atas seperti tab, atau rail ikon di kiri.', cols: 2, options: [option(nav, 'top', 'Atas', t.dark, changeNav), option(nav, 'left', 'Kiri', t.dark, changeNav)] },
-    { title: 'Warna aksen', note: 'Dari palet Nordeo; latar tetap putih.', cols: 3, options: Object.keys(ACCENTS).map((k) => option(accentId, k, ACCENTS[k].label, ACCENTS[k].color, setAccentId)) },
-    { title: 'Tema', note: 'Terang atau gelap.', cols: 2, options: [option(theme, 'light', 'Terang', THEMES.light.panel, changeTheme), option(theme, 'dark', 'Gelap', THEMES.dark.panel, changeTheme)] },
+    ...(remote ? [] : [{ title: 'Lihat sebagai (mode demo)', note: 'Menu dan tombol mengikuti hak akses peran ini.', cols: 3, options: ROLES.map((r) => option(demoRole, r.id, r.label, null, changeDemoRole)) }]),
+    { title: 'Sidebar', note: 'Lengkap dengan nama menu, atau ringkas berisi ikon saja.', cols: 2, options: [option(compact ? 'compact' : 'full', 'full', 'Lengkap', t.dark, () => setCompact(false)), option(compact ? 'compact' : 'full', 'compact', 'Ringkas', t.chip, () => setCompact(true))] },
+    { title: 'Warna aksen', note: 'Dari palet Nordeo.', cols: 3, options: Object.keys(ACCENTS).map((k) => option(accentId, k, ACCENTS[k].label, ACCENTS[k].color, setAccentId)) },
+    { title: 'Tema', note: 'Terang atau gelap.', cols: 2, options: [option(theme, 'light', 'Terang', THEMES.light.panel, setTheme), option(theme, 'dark', 'Gelap', THEMES.dark.panel, setTheme)] },
     { title: 'Animasi', note: 'Matikan bila terasa berlebihan.', cols: 2, options: [option(motion, 'on', 'Aktif', a.color, setMotion), option(motion, 'off', 'Kurangi', t.chip, setMotion)] },
   ];
 
   const stats = [
-    { label: 'Konten terbit', value: data.news.filter((n) => n.status === 'published').length },
+    { label: 'Artikel terbit', value: data.news.filter((n) => n.status === 'published').length },
     { label: 'Menunggu persetujuan', value: pendingReview, tone: pendingReview ? '#c9a227' : null },
-    { label: 'Masukan baru', value: data.submissions.filter((s) => (s.status || 'baru') === 'baru').length + data.registrations.length },
+    { label: 'Masukan baru', value: counts.stories + counts.registrations + counts.comments },
   ];
 
   const View = MODULE_VIEWS[current.id];
   const viewProps = { data, role, rights, toast, go, t, a, isDark };
   let body;
-  if (!can(current.id, role, 'R')) body = <div className="adm-grid"><NoAccess module={current} role={role} /></div>;
+  if (data.loading) body = <div className="adm-grid"><Card className="c24"><p className="adm-muted" aria-busy="true">Memuat data dari database…</p></Card></div>;
+  else if (!can(current.id, role, 'R')) body = <div className="adm-grid"><NoAccess module={current} role={role} /></div>;
   else if (current.id === 'dashboard') body = <Overview {...viewProps} journalCard={<JournalCard t={t} isDark={isDark} />} />;
   else body = <View key={current.id + role} {...viewProps} />;
 
+  const sidebar = <aside className={`adm-side${compact ? ' is-compact' : ''}${mobileNav ? ' is-open' : ''}`} aria-label="Navigasi dashboard">
+    <div className="adm-side__brand">
+      <a href="/" className="adm-side__logo" aria-label="Nordeo Scholar Publishing, buka website"><img src={logo} alt="" /></a>
+      <button type="button" className="adm-circle is-sm adm-btn adm-side__close" onClick={() => setMobileNav(false)} aria-label="Tutup menu"><Icon name="close" size={14} width={2} /></button>
+    </div>
+    <div className="adm-side__me">
+      <span className="adm-avatar" aria-hidden="true">{remote ? data.initials : roleInfo.initials}</span>
+      <span className="adm-side__who"><b>{remote ? data.person : roleInfo.person}</b><span>{roleInfo.label}{!remote && ' · Demo'}</span></span>
+    </div>
+    <nav className="adm-side__nav">
+      {GROUPS.map((g) => {
+        const items = visible.filter((m) => m.group === g.id);
+        if (!items.length) return null;
+        return <div key={g.id} className="adm-side__group" style={toneVars(g.tone)}>
+          {g.id !== 'home' && <p className="adm-side__label"><i aria-hidden="true" />{g.label}</p>}
+          <ul>{items.map((m) => {
+            const on = m.id === current.id;
+            const n = counts[m.id] || 0;
+            return <li key={m.id}><button type="button" className={`adm-side__item adm-btn${on ? ' is-on' : ''}`} onClick={() => go(m.id)} aria-current={on ? 'page' : undefined} title={compact ? `${m.label} — ${m.hint}` : m.hint}>
+              <span className="adm-side__tile" aria-hidden="true"><Icon name={m.icon} size={17} width={1.8} /></span>
+              <span className="adm-side__text">{m.label}</span>
+              {n > 0 && <span className="adm-side__count" aria-label={`${n} menunggu`}>{n}</span>}
+            </button></li>;
+          })}</ul>
+        </div>;
+      })}
+    </nav>
+    <div className="adm-side__foot">
+      <button type="button" className="adm-side__item adm-btn" onClick={() => setSettings(true)} title="Tampilan dan peran"><span className="adm-side__tile" aria-hidden="true"><Icon name="gear" size={17} width={1.8} /></span><span className="adm-side__text">Pengaturan</span></button>
+      <button type="button" className="adm-side__item adm-btn is-collapse" onClick={() => setCompact((v) => !v)} aria-pressed={compact} title={compact ? 'Tampilkan nama menu' : 'Ringkas sidebar'}><span className="adm-side__tile" aria-hidden="true"><Icon name="panel" size={17} width={1.8} /></span><span className="adm-side__text">{compact ? 'Perlebar' : 'Ringkas sidebar'}</span></button>
+      {onSignOut && <button type="button" className="adm-side__item adm-btn" onClick={onSignOut} title={remote ? 'Keluar dari dashboard' : 'Keluar dari mode demo'}><span className="adm-side__tile" aria-hidden="true"><Icon name="logout" size={17} width={1.8} /></span><span className="adm-side__text">{remote ? 'Keluar' : 'Keluar demo'}</span></button>}
+    </div>
+  </aside>;
+
   return <div className={`adm${still ? ' is-still' : ''}`} style={vars}>
-    <div className={`adm-frame${nav === 'left' ? ' is-left' : ''}`}>
-      {nav === 'left' && <aside className="adm-rail adm-rise" aria-label="Navigasi">
-        <a href="/" className="adm-rail__mark" aria-label="Nordeo Scholar, ke beranda">N</a>
-        <nav className="adm-rail__list">
-          <div aria-hidden="true" className="adm-rail__pill adm-glide" style={{ transform: `translateY(${Math.max(0, visible.findIndex((m) => m.id === current.id)) * 52}px)` }} />
-          {visible.map((m) => <button key={m.id} type="button" className="adm-rail__btn adm-btn" onClick={() => go(m.id)} aria-label={m.label} title={m.label} aria-current={m.id === current.id ? 'page' : undefined} style={{ color: m.id === current.id ? t.onDark : t.ink2 }}><Icon name={m.icon} size={19} /></button>)}
-        </nav>
-        <div className="adm-rail__foot">{gear(false)}{avatar}</div>
-      </aside>}
-
+    <div className={`adm-shell${compact ? ' is-compact' : ''}`}>
+      {sidebar}
+      {mobileNav && <button type="button" className="adm-side__scrim" aria-label="Tutup menu" onClick={() => setMobileNav(false)} />}
       <div className="adm-main">
-        {nav === 'top' ? <header className="adm-top adm-rise">
-          <a className="adm-logo" href="/" aria-label="Nordeo Scholar Publishing, ke beranda"><img src={logo} alt="" /></a>
-          <nav className="adm-tabs-wrap" aria-label="Menu utama">
-            <div className="adm-tabs">
-              {activeInPrimary >= 0 && <div aria-hidden="true" className="adm-tabs__pill adm-glide" style={{ width: tabW, transform: `translateX(${activeInPrimary * (tabW + 2)}px)` }} />}
-              {primary.map((m) => <button key={m.id} type="button" className="adm-tab adm-btn" onClick={() => go(m.id)} aria-current={m.id === current.id ? 'page' : undefined} style={{ width: tabW, color: m.id === current.id ? t.onDark : t.ink }}>{m.label}</button>)}
-              {secondary.length > 0 && <button type="button" className="adm-tab adm-btn" aria-expanded={more} aria-haspopup="menu" onClick={() => setMore((v) => !v)}
-                style={{ padding: '0 16px', background: activeInPrimary < 0 ? t.dark : 'transparent', color: activeInPrimary < 0 ? t.onDark : t.ink }}>
-                {activeInPrimary < 0 ? current.label : 'Lainnya'} <Icon name="chevron" size={14} width={2} /></button>}
+        <header className="adm-bar-top">
+          <button type="button" className="adm-circle adm-btn adm-burger" onClick={() => setMobileNav(true)} aria-label="Buka menu"><Icon name="menu" /></button>
+          <p className="adm-crumbs" style={toneVars(group.tone)}><i aria-hidden="true" />{group.id === 'home' ? 'Dashboard' : <>{group.label}<span aria-hidden="true">›</span><b>{current.label}</b></>}</p>
+          <div className="adm-tools">
+            {!remote && <span className="adm-mode" title="Data hanya tersimpan di browser ini">Mode demo</span>}
+            {remote && <button type="button" className="adm-circle adm-btn" onClick={() => data.refresh()} aria-label="Muat ulang data" title="Muat ulang data"><Icon name="refresh" /></button>}
+            <div className="adm-seg" role="group" aria-label="Tema">
+              <div aria-hidden="true" className="adm-seg__thumb adm-glide" style={{ transform: `translateX(${isDark ? 40 : 0}px)` }} />
+              <button type="button" className="adm-seg__btn adm-btn" onClick={() => setTheme('light')} aria-label="Tema terang" aria-pressed={!isDark} style={{ color: isDark ? t.ink2 : t.onDark }}><Icon name="sun" size={17} width={1.8} /></button>
+              <button type="button" className="adm-seg__btn adm-btn" onClick={() => setTheme('dark')} aria-label="Tema gelap" aria-pressed={isDark} style={{ color: isDark ? t.onDark : t.ink2 }}><Icon name="moon" size={17} width={1.8} /></button>
             </div>
-            {more && <>
-              <button type="button" className="adm-menu__scrim" aria-label="Tutup menu" tabIndex={-1} onClick={() => setMore(false)} />
-              <div className="adm-menu adm-pop" role="menu">
-                {secondary.map((m) => <button key={m.id} type="button" role="menuitem" className="adm-menu__item adm-btn" aria-current={m.id === current.id ? 'page' : undefined} onClick={() => go(m.id)}><Icon name={m.icon} size={17} />{m.label}</button>)}
-              </div>
-            </>}
-          </nav>
-          <div className="adm-tools">{themeSwitch}{bell}{gear(true)}{avatar}</div>
-        </header> : <header className="adm-top adm-rise">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <a href="/" aria-label="Nordeo Scholar Publishing, ke beranda"><img src={logo} alt="" style={{ height: 30, width: 'auto', display: 'block' }} /></a>
-            <span aria-hidden="true" style={{ width: 1, height: 28, background: t.line }} />
-            <span style={{ fontSize: 18, fontWeight: 500 }}>{current.label}</span>
+            <button type="button" className="adm-circle is-lg adm-btn" aria-label={`Notifikasi: ${waiting} hal menunggu`} title={`${waiting} hal menunggu`} onClick={() => go('dashboard')} style={{ position: 'relative' }}><Icon name="bell" />{waiting > 0 && <span aria-hidden="true" className="adm-dot" />}</button>
           </div>
-          <div className="adm-tools">{themeSwitch}{bell}</div>
-        </header>}
+        </header>
 
-        <section className="adm-hero adm-rise" style={{ animationDelay: '80ms' }}>
+        <section className="adm-hero adm-rise" style={{ animationDelay: '60ms' }}>
           <div>
-            <p className="adm-muted">{person.person} · {person.label}</p>
-            <h1 className="adm-title">{current.id === 'dashboard' ? `Halo, ${person.person.split(' ')[0]}` : current.label}</h1>
+            <h1 className="adm-title">{current.id === 'dashboard' ? `Halo, ${(remote ? data.person : roleInfo.person).split(' ')[0]}` : current.label}</h1>
+            <p className="adm-hint">{current.hint}</p>
           </div>
-          <div className="adm-stats">
+          {current.id === 'dashboard' && <div className="adm-stats">
             {stats.map((s) => <div key={s.label}>
               <div className="adm-stat__label">{s.label}</div>
               <div className="adm-stat__row"><span className="adm-stat__value">{s.value}</span>{s.tone && <span aria-hidden="true" className="adm-stat__dot" style={{ background: s.tone }} />}</div>
             </div>)}
-          </div>
+          </div>}
         </section>
 
-        {data.saveError && <Card className="c24"><p className="adm-error" role="alert">Penyimpanan browser penuh atau diblokir. Perubahan terakhir mungkin tidak tersimpan.</p></Card>}
+        {!remote && <Card className="c24"><p className="adm-demo-note"><Icon name="key" size={16} /> Mode demo: perubahan hanya tersimpan di browser ini dan tidak tampil di website. Masuk dengan akun staf untuk mengelola website sungguhan.</p></Card>}
+        {data.saveError && <Card className="c24"><p className="adm-error" role="alert">{data.saveError}</p></Card>}
         {body}
       </div>
     </div>
@@ -248,6 +266,5 @@ export default function AdminDashboard() {
     </div>}
 
     <Toast message={toastMsg} onDone={() => setToastMsg('')} />
-    {wipe.phase !== 'idle' && <div aria-hidden="true" className={`adm-wipe is-${wipe.phase}`} style={{ background: wipe.color }} />}
   </div>;
 }
