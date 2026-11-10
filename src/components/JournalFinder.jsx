@@ -105,9 +105,11 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, layou
     onResetFilters={resetArticleFilters}
     wrapperId={split ? undefined : 'artikel'}
     wrapperRef={split ? undefined : articleRef}
+    featured={split}
   />;
 
   const directory = <JournalDirectory
+    split={split}
     side={side}
     combined={!split}
     query={query}

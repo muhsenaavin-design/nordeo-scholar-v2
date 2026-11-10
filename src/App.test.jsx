@@ -115,15 +115,22 @@ test('keeps the homepage focused: no discovery logo wall, official social links 
   expect(screen.queryByRole('button', { name: /jeda animasi/i })).not.toBeInTheDocument();
 });
 
-test('journal finder on the homepage filters journals only and keeps articles separate', () => {
+test('homepage journal finder is a split index that switches the detail panel', () => {
   render(<MemoryRouter><App /></MemoryRouter>);
-  const search = screen.getByRole('searchbox', { name: /search journals/i });
-  fireEvent.change(search, { target: { value: 'Shopee' } });
-  expect(screen.getByText('1 journal')).toBeInTheDocument();
-  expect(screen.getByText('4 of 14 articles · JETSI')).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: /Clear/ }));
-  fireEvent.click(screen.getByRole('button', { name: /^JIEL/ }));
-  expect(screen.getByRole('heading', { name: /jiel is open for its first submissions/i })).toBeInTheDocument();
+  const finder = within(document.getElementById('jurnal'));
+  expect(finder.queryByRole('searchbox')).not.toBeInTheDocument();
+  expect(finder.getByRole('link', { name: /visit jetsi/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jetsi');
+  fireEvent.click(finder.getByRole('button', { name: /journal of integrated education and learning/i }));
+  expect(finder.getByRole('link', { name: /visit jiel/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jiel');
+  expect(finder.queryByRole('link', { name: /visit jetsi/i })).not.toBeInTheDocument();
+});
+
+test('homepage articles lead with a featured article and mark empty journals as soon', () => {
+  render(<MemoryRouter><App /></MemoryRouter>);
+  const articles = within(document.getElementById('artikel'));
+  expect(articles.getByRole('link', { name: /shopee live among generation z/i })).toHaveAttribute('href', 'https://doi.org/10.68627/742989');
+  expect(articles.getByText('Showing 5 of 14 JETSI articles.')).toBeInTheDocument();
+  expect(articles.getByRole('button', { name: /^JIEL/ })).toBeDisabled();
 });
 
 test('homepage keeps the journal finder and published articles as separate sections', () => {

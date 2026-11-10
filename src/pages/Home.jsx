@@ -89,7 +89,7 @@ const SECTIONS = {
   hero: () => <Hero />,
   about: () => <CompanyOverview />,
   ecosystems: () => <EcosystemShowcase />,
-  journals: () => <div className="journals-section section-space container" id="journals"><JournalFinder limit={4} layout="split" /></div>,
+  journals: () => <div className="journals-section section-space container" id="journals"><JournalFinder limit={5} layout="split" /></div>,
   news: () => <NewsSpotlight />,
   academy: () => <AcademyCalendar />,
   trust: () => <TrustAndFaq />,
