@@ -1,16 +1,10 @@
 import { useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router';
-import { articleTopics, directoryJournals, journalArticles, journalCategories } from '../data/journal-directory';
-import { formatAuthors } from '../lib/store';
-import { Arrow, CloseIcon, EmptyState, JournalMark, SearchIcon, SmartLink, StatusPill } from './parts';
-import Carousel from './Carousel';
+import { articleTopics, directoryJournals, journalArticles } from '../data/journal-directory';
+import JournalDirectory from './JournalDirectory';
+import PublishedArticles from './PublishedArticles';
 
 const ALL_TOPICS = articleTopics[0];
 const normalize = value => String(value).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
-
-function categoryCount(id) {
-  return id === 'all' ? directoryJournals.length : directoryJournals.filter(journal => journal.category === id).length;
-}
 
 function articleMatches(article, query) {
   if (!query) return true;
@@ -24,61 +18,20 @@ function journalMatches(journal, query) {
   return journalArticles.some(article => article.journal === journal.id && articleMatches(article, query));
 }
 
-function visitLabel(journal) {
-  return journal.id === 'pengmas' ? 'Visit Jurnal Pengmas' : `Visit ${journal.short}`;
-}
-
-// Cards carry only "Visit <journal>": guidelines, templates, and articles live on each
-// journal's own site, so visitors go there directly (journal traffic counts toward
-// accreditation — Nordeo, Feedback 2).
-function DirectoryCard({ journal, selected, onShowArticles }) {
-  const external = /^https?:/i.test(journal.url);
-  return <article className={`directory-card ${selected ? 'is-selected' : ''}`} id={journal.id}>
-    <div className="directory-card-top">
-      <JournalMark id={journal.id} label={journal.short} />
-      <StatusPill tone={journal.statusTone}>{journal.status}</StatusPill>
-    </div>
-    <h3>{journal.name}</h3>
-    <p className="directory-meta"><span>{journal.categoryLabel}</span>{journal.eissn !== '—' && <span>E-ISSN {journal.eissn}</span>}</p>
-    <p className="directory-description">{journal.description}</p>
-    <div className="directory-footer">
-      {onShowArticles && <button type="button" className="finder-text-button" aria-pressed={selected} onClick={() => onShowArticles(journal.id)}>{selected ? 'Articles shown below' : 'See articles'}</button>}
-      <SmartLink href={journal.url} className="text-link directory-visit" {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-        {visitLabel(journal)} <Arrow />{external && <span className="sr-only"> (opens in a new tab)</span>}
-      </SmartLink>
-    </div>
-    {journal.indexing.length > 0 && <p className="directory-indexing">{journal.indexing.join(' · ')}</p>}
-  </article>;
-}
-
-function ArticleCard({ article }) {
-  const journal = directoryJournals.find(item => item.id === article.journal);
-  return <a className="article-card" href={article.url} target="_blank" rel="noopener noreferrer">
-    <div className="article-meta">
-      <span className={`article-journal article-journal-${article.journal}`}>{journal?.short}</span>
-      <span>{article.volume}</span>
-      <span>{article.year}</span>
-      {article.pages && <span>pp. {article.pages}</span>}
-    </div>
-    <h4>{article.title}</h4>
-    <p className="article-authors">{formatAuthors(article.authors)}</p>
-    <p className="article-excerpt">{article.excerpt}</p>
-    <div className="article-footer">
-      <span className="article-link">{article.doi ? 'DOI' : 'Read article'} <Arrow /></span>
-    </div>
-  </a>;
-}
-
 export default function JournalFinder({ limit = 6, showArchiveLink = true, layout = 'carousel' }) {
-  const side = layout === 'sidebar';
+  const split = layout === 'split';
+  const side = split || layout === 'sidebar';
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
   const [selectedJournal, setSelectedJournal] = useState('jetsi');
   const [topic, setTopic] = useState(ALL_TOPICS);
   const articleRef = useRef(null);
   const search = useMemo(() => normalize(query.trim()), [query]);
+  // Split layout: the sidebar search belongs to the journal finder only, so the
+  // article list below keeps its own journal tabs and focus-area filters.
+  const articleSearch = split ? '' : search;
 
-  const searchPool = useMemo(() => journalArticles.filter(article => articleMatches(article, search)), [search]);
+  const searchPool = useMemo(() => journalArticles.filter(article => articleMatches(article, articleSearch)), [articleSearch]);
   const filteredJournals = useMemo(
     () => directoryJournals.filter(journal => (category === 'all' || journal.category === category) && journalMatches(journal, search)),
     [category, search],
@@ -97,7 +50,7 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, layou
     return counts;
   }, [searchJournalPool]);
 
-  const hasArticleFilters = Boolean(search) || topic !== ALL_TOPICS;
+  const hasArticleFilters = Boolean(articleSearch) || topic !== ALL_TOPICS;
 
   function chooseCategory(id) {
     setCategory(id);
@@ -110,9 +63,13 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, layou
     }
   }
 
-  function showArticles(id) {
+  function selectJournal(id) {
     setSelectedJournal(id);
     setTopic(ALL_TOPICS);
+  }
+
+  function showArticles(id) {
+    selectJournal(id);
     articleRef.current?.scrollIntoView({ behavior: document.documentElement.dataset.motion === 'reduced' ? 'auto' : 'smooth', block: 'start' });
   }
 
@@ -122,185 +79,60 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, layou
     setTopic(ALL_TOPICS);
   }
 
+  function resetArticleFilters() {
+    if (split) {
+      setTopic(ALL_TOPICS);
+      return;
+    }
+    resetFilters();
+  }
+
+  const articleBlock = <PublishedArticles
+    headingLevel={split ? 2 : 3}
+    showLead={split}
+    journal={activeJournal}
+    journals={directoryJournals}
+    articles={articles}
+    visibleArticles={visibleArticles}
+    searchPool={searchPool}
+    topic={topic}
+    topicCounts={topicCounts}
+    onSelectJournal={selectJournal}
+    onSelectTopic={setTopic}
+    limit={limit}
+    showArchiveLink={showArchiveLink}
+    hasArticleFilters={hasArticleFilters}
+    onResetFilters={resetArticleFilters}
+    wrapperId={split ? undefined : 'artikel'}
+    wrapperRef={split ? undefined : articleRef}
+  />;
+
+  const directory = <JournalDirectory
+    side={side}
+    combined={!split}
+    query={query}
+    onQueryChange={setQuery}
+    category={category}
+    onChooseCategory={chooseCategory}
+    journals={filteredJournals}
+    selectedJournal={selectedJournal}
+    onShowArticles={showArticles}
+    articleCount={searchPool.length}
+    onReset={resetFilters}
+  >{split ? null : articleBlock}</JournalDirectory>;
+
+  if (split) {
+    return <>
+      <section className="journal-finder is-sidebar" id="jurnal" aria-labelledby="journal-finder-heading">
+        {directory}
+      </section>
+      <section className="articles-section" id="artikel" aria-labelledby="published-articles-heading" ref={articleRef}>
+        {articleBlock}
+      </section>
+    </>;
+  }
+
   return <section className={`journal-finder${side ? ' is-sidebar' : ''}`} id="jurnal" aria-labelledby="journal-finder-heading">
-    <div className="finder-head" data-reveal>
-      <div>
-        <h2 id="journal-finder-heading">Find the journal that fits <em>your research field.</em></h2>
-      </div>
-      <div className="finder-head-aside">
-        <p>Choose a field, compare scopes, then visit the journal to submit and read its full archive.</p>
-      </div>
-    </div>
-
-    {side ? <div className="finder-layout">
-    <aside className="finder-side" aria-label="Filter journals">
-      <div className="finder-search" role="search">
-        <SearchIcon />
-        <label className="sr-only" htmlFor="journal-search">Search journals, topics, or article titles</label>
-        <input id="journal-search" type="search" value={query} placeholder="Search journals or topics…" onChange={event => setQuery(event.target.value)} />
-        {query && <button type="button" className="search-clear" onClick={() => setQuery('')}><CloseIcon /><span>Clear</span></button>}
-      </div>
-      <div className="finder-fields" role="group" aria-label="Filter journals by field">
-        <span className="filter-label">Field</span>
-        {journalCategories.map(item => <button key={item.id} type="button" className={`finder-field ${category === item.id ? 'is-active' : ''}`} aria-pressed={category === item.id} onClick={() => chooseCategory(item.id)}>
-          <span>{item.label}</span><span className="filter-count">{categoryCount(item.id)}</span>
-        </button>)}
-      </div>
-      <p className="finder-result" role="status" aria-live="polite">{filteredJournals.length} {filteredJournals.length === 1 ? 'journal' : 'journals'} · {searchPool.length} {searchPool.length === 1 ? 'article' : 'articles'}</p>
-      <ul className="finder-facts">
-        <li>Open access, free to read</li>
-        <li>Double-blind peer review</li>
-        <li>Crossref DOI · prefix 10.68627</li>
-      </ul>
-    </aside>
-    <div className="finder-main">
-    {filteredJournals.length === 0 && searchPool.length === 0
-      ? <EmptyState title="No results" copy="No journal or article matches your search. Try another keyword, or return to all fields and focus areas." action={<button className="button button-dark" type="button" onClick={resetFilters}>Reset search</button>} />
-      : <>
-        {filteredJournals.length > 0 && side && <section className="finder-cards" aria-label="Nordeo journals">{filteredJournals.map(journal => <DirectoryCard key={journal.id} journal={journal} selected={selectedJournal === journal.id} onShowArticles={showArticles} />)}</section>}
-        {filteredJournals.length > 0 && !side && <Carousel
-          className="journal-carousel"
-          label="Nordeo journals"
-          prevLabel="Previous journals"
-          nextLabel="More journals"
-          items={filteredJournals}
-          renderItem={journal => <DirectoryCard journal={journal} selected={selectedJournal === journal.id} />}
-        />}
-        {filteredJournals.length === 0 && <EmptyState title="No journal in this field" copy="Matching articles are still listed below. Clear the field filter to see the matching journals." action={<button className="button button-dark" type="button" onClick={resetFilters}>Show all fields</button>} />}
-
-        <div className="article-preview" id="artikel" ref={articleRef}>
-          <div className="article-preview-head">
-            <div>
-              <h3>Published articles</h3>
-            </div>
-            <p className="result-count">{visibleArticles.length < articles.length ? `${visibleArticles.length} of ${articles.length} articles` : `${articles.length} ${articles.length === 1 ? 'article' : 'articles'}`} · {activeJournal.short}</p>
-          </div>
-
-          <div className="journal-tabs" role="group" aria-label="Choose a journal">
-            {directoryJournals.map(journal => {
-              const count = searchPool.filter(article => article.journal === journal.id).length;
-              return <button key={journal.id} type="button" aria-pressed={selectedJournal === journal.id} className={`journal-tab ${selectedJournal === journal.id ? 'is-active' : ''}`} onClick={() => { setSelectedJournal(journal.id); setTopic(ALL_TOPICS); }}>
-                <JournalMark id={journal.id} label={journal.short} size="sm" /><span>{journal.short}</span><small>{count} {count === 1 ? 'article' : 'articles'}</small>
-              </button>;
-            })}
-          </div>
-
-          {searchJournalPool.length > 0 && <div className="filter-row topic-row" role="group" aria-label={`Filter ${activeJournal.short} by focus area`}>
-            <span className="filter-label">Focus area</span>
-            {articleTopics.map(item => {
-              const count = topicCounts.get(item) || 0;
-              return <button key={item} type="button" className={`filter-chip ${topic === item ? 'is-active' : ''} ${count === 0 && item !== ALL_TOPICS ? 'is-empty' : ''}`} aria-pressed={topic === item} disabled={count === 0 && item !== ALL_TOPICS} onClick={() => setTopic(item)}>
-                {item} <span className="filter-count">{count}</span>
-              </button>;
-            })}
-          </div>}
-
-          {visibleArticles.length > 0 && <div className="article-grid">
-            {visibleArticles.map(article => <ArticleCard key={article.id} article={article} />)}
-          </div>}
-
-          {visibleArticles.length === 0 && <div className="article-empty">
-            <div>
-              <h4>{hasArticleFilters ? 'No matching articles yet' : `${activeJournal.short} is open for its first submissions`}</h4>
-              <p>{hasArticleFilters
-                ? 'Try another focus area or keyword, or choose a different journal above.'
-                : `${activeJournal.name} has no published articles yet. Its profile, scope, and call for papers are on the journal platform.`}</p>
-              <div className="article-empty-actions">
-                {hasArticleFilters && <button type="button" className="text-link finder-text-button" onClick={() => { setQuery(''); setTopic(ALL_TOPICS); }}>Reset filters</button>}
-                <SmartLink href={activeJournal.url} className="text-link" {...(/^https?:/i.test(activeJournal.url) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>Open the {activeJournal.short} platform <Arrow /></SmartLink>
-              </div>
-            </div>
-          </div>}
-
-          {showArchiveLink && <div className="article-preview-footer">
-            <p>{limit < articles.length ? `Showing ${visibleArticles.length} of ${articles.length} ${activeJournal.short} articles.` : ''}</p>
-            <Link to="/journals" className="text-link">All journals and articles <Arrow /></Link>
-          </div>}
-        </div>
-      </>}
-    </div>
-    </div> : <>
-    <div className="finder-toolbar">
-      <div className="finder-search" role="search">
-        <SearchIcon />
-        <label className="sr-only" htmlFor="journal-search">Search journals, topics, or article titles</label>
-        <input id="journal-search" type="search" value={query} placeholder="Search journals, topics, or article titles…" onChange={event => setQuery(event.target.value)} />
-        {query && <button type="button" className="search-clear" onClick={() => setQuery('')}><CloseIcon /><span>Clear</span></button>}
-      </div>
-      <p className="finder-result" role="status" aria-live="polite">{filteredJournals.length} {filteredJournals.length === 1 ? 'journal' : 'journals'} · {searchPool.length} {searchPool.length === 1 ? 'article' : 'articles'}</p>
-    </div>
-
-    <div className="filter-row" role="group" aria-label="Filter journals by field">
-      <span className="filter-label">Field</span>
-      {journalCategories.map(item => <button key={item.id} type="button" className={`filter-chip ${category === item.id ? 'is-active' : ''}`} aria-pressed={category === item.id} onClick={() => chooseCategory(item.id)}>
-        {item.label} <span className="filter-count">{categoryCount(item.id)}</span>
-      </button>)}
-    </div>
-
-    {filteredJournals.length === 0 && searchPool.length === 0
-      ? <EmptyState title="No results" copy="No journal or article matches your search. Try another keyword, or return to all fields and focus areas." action={<button className="button button-dark" type="button" onClick={resetFilters}>Reset search</button>} />
-      : <>
-        {filteredJournals.length > 0 && side && <section className="finder-cards" aria-label="Nordeo journals">{filteredJournals.map(journal => <DirectoryCard key={journal.id} journal={journal} selected={selectedJournal === journal.id} onShowArticles={showArticles} />)}</section>}
-        {filteredJournals.length > 0 && !side && <Carousel
-          className="journal-carousel"
-          label="Nordeo journals"
-          prevLabel="Previous journals"
-          nextLabel="More journals"
-          items={filteredJournals}
-          renderItem={journal => <DirectoryCard journal={journal} selected={selectedJournal === journal.id} />}
-        />}
-        {filteredJournals.length === 0 && <EmptyState title="No journal in this field" copy="Matching articles are still listed below. Clear the field filter to see the matching journals." action={<button className="button button-dark" type="button" onClick={resetFilters}>Show all fields</button>} />}
-
-        <div className="article-preview" id="artikel" ref={articleRef}>
-          <div className="article-preview-head">
-            <div>
-              <h3>Published articles</h3>
-            </div>
-            <p className="result-count">{visibleArticles.length < articles.length ? `${visibleArticles.length} of ${articles.length} articles` : `${articles.length} ${articles.length === 1 ? 'article' : 'articles'}`} · {activeJournal.short}</p>
-          </div>
-
-          <div className="journal-tabs" role="group" aria-label="Choose a journal">
-            {directoryJournals.map(journal => {
-              const count = searchPool.filter(article => article.journal === journal.id).length;
-              return <button key={journal.id} type="button" aria-pressed={selectedJournal === journal.id} className={`journal-tab ${selectedJournal === journal.id ? 'is-active' : ''}`} onClick={() => { setSelectedJournal(journal.id); setTopic(ALL_TOPICS); }}>
-                <JournalMark id={journal.id} label={journal.short} size="sm" /><span>{journal.short}</span><small>{count} {count === 1 ? 'article' : 'articles'}</small>
-              </button>;
-            })}
-          </div>
-
-          {searchJournalPool.length > 0 && <div className="filter-row topic-row" role="group" aria-label={`Filter ${activeJournal.short} by focus area`}>
-            <span className="filter-label">Focus area</span>
-            {articleTopics.map(item => {
-              const count = topicCounts.get(item) || 0;
-              return <button key={item} type="button" className={`filter-chip ${topic === item ? 'is-active' : ''} ${count === 0 && item !== ALL_TOPICS ? 'is-empty' : ''}`} aria-pressed={topic === item} disabled={count === 0 && item !== ALL_TOPICS} onClick={() => setTopic(item)}>
-                {item} <span className="filter-count">{count}</span>
-              </button>;
-            })}
-          </div>}
-
-          {visibleArticles.length > 0 && <div className="article-grid">
-            {visibleArticles.map(article => <ArticleCard key={article.id} article={article} />)}
-          </div>}
-
-          {visibleArticles.length === 0 && <div className="article-empty">
-            <div>
-              <h4>{hasArticleFilters ? 'No matching articles yet' : `${activeJournal.short} is open for its first submissions`}</h4>
-              <p>{hasArticleFilters
-                ? 'Try another focus area or keyword, or choose a different journal above.'
-                : `${activeJournal.name} has no published articles yet. Its profile, scope, and call for papers are on the journal platform.`}</p>
-              <div className="article-empty-actions">
-                {hasArticleFilters && <button type="button" className="text-link finder-text-button" onClick={() => { setQuery(''); setTopic(ALL_TOPICS); }}>Reset filters</button>}
-                <SmartLink href={activeJournal.url} className="text-link" {...(/^https?:/i.test(activeJournal.url) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>Open the {activeJournal.short} platform <Arrow /></SmartLink>
-              </div>
-            </div>
-          </div>}
-
-          {showArchiveLink && <div className="article-preview-footer">
-            <p>{limit < articles.length ? `Showing ${visibleArticles.length} of ${articles.length} ${activeJournal.short} articles.` : ''}</p>
-            <Link to="/journals" className="text-link">All journals and articles <Arrow /></Link>
-          </div>}
-        </div>
-      </>}
-    </>}
+    {directory}
   </section>;
 }

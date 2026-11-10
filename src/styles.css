@@ -603,7 +603,7 @@ html[data-motion="full"] .hero-footer { animation-delay: .5s; }
 .article-preview:focus, #jurnal:focus { outline: none; }
 .article-preview-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; }
 .article-preview-head .eyebrow { margin-bottom: 12px; color: var(--teal); }
-.article-preview-head h3 { font: 500 clamp(26px, 2.7vw, 34px)/1.1 var(--serif); letter-spacing: -.02em; }
+.article-preview-head :is(h2, h3) { font: 500 clamp(26px, 2.7vw, 34px)/1.1 var(--serif); letter-spacing: -.02em; }
 .result-count { flex: 0 0 auto; padding-bottom: 4px; font-size: 13px; color: var(--ink-2); white-space: nowrap; }
 .journal-tabs { display: inline-flex; gap: 4px; margin-top: 24px; padding: 4px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
 .journal-tab { display: inline-flex; align-items: baseline; gap: 9px; min-height: 44px; padding: 10px 16px; border: 0; border-radius: 4px; background: transparent; color: var(--ink-2); font-size: 14px; font-weight: 600; }
@@ -623,10 +623,10 @@ html[data-motion="full"] .hero-footer { animation-delay: .5s; }
   transition: border-color .25s, box-shadow .25s, transform .25s cubic-bezier(.22, .61, .36, 1);
 }
 .article-card:hover { border-color: var(--line-strong); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.article-card:hover h4 { color: var(--teal); }
+.article-card:hover :is(h3, h4) { color: var(--teal); }
 .article-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
 .article-journal { font-weight: 600; color: var(--teal); }
-.article-card h4 { margin-top: 10px; font: 500 21px/1.28 var(--serif); letter-spacing: -.012em; text-wrap: pretty; transition: color .2s; }
+.article-card :is(h3, h4) { margin-top: 10px; font: 500 21px/1.28 var(--serif); letter-spacing: -.012em; text-wrap: pretty; transition: color .2s; }
 .article-authors { margin-top: 8px; font-size: 13px; line-height: 1.6; color: var(--ink-2); }
 .article-excerpt {
   display: -webkit-box;
@@ -645,7 +645,7 @@ html[data-motion="full"] .hero-footer { animation-delay: .5s; }
 .article-link .arrow { width: 14px; height: 14px; flex-basis: 14px; }
 .article-empty { display: flex; align-items: flex-start; gap: 18px; margin-top: 22px; padding: 30px; border: 1px dashed var(--line-strong); border-radius: var(--r-md); background: var(--surface); }
 .article-empty-mark { font: 500 30px/1 var(--serif); color: var(--ink-3); }
-.article-empty h4 { font: 500 23px/1.2 var(--serif); letter-spacing: -.02em; }
+.article-empty :is(h3, h4) { font: 500 23px/1.2 var(--serif); letter-spacing: -.02em; }
 .article-empty p { max-width: 660px; margin-top: 8px; font-size: 14.5px; line-height: 1.7; color: var(--ink-2); }
 .article-empty-actions { display: flex; flex-wrap: wrap; gap: 6px 24px; margin-top: 10px; }
 .article-empty-actions .text-link { min-height: 44px; font-size: 14px; }
@@ -983,7 +983,7 @@ html[data-motion="reduced"] [data-reveal] { opacity: 1; }
   .finder-search { flex-basis: 100%; }
   .finder-result { margin-left: auto; }
   .directory-grid { grid-template-columns: 1fr; }
-  .article-preview-head h3 { font-size: clamp(24px, 4vw, 30px); }
+  .article-preview-head :is(h2, h3) { font-size: clamp(24px, 4vw, 30px); }
   .article-grid { grid-template-columns: 1fr; }
   .publishing-steps > li { padding-right: 22px; }
   .publishing-steps > li + li { padding-left: 22px; }
@@ -1053,11 +1053,11 @@ html[data-motion="reduced"] [data-reveal] { opacity: 1; }
   .journal-tab { flex: 1; justify-content: center; padding: 10px 8px; }
   .journal-tab small { display: none; }
   .article-card { padding: 20px; }
-  .article-card h4 { font-size: 19px; }
+  .article-card :is(h3, h4) { font-size: 19px; }
   .article-excerpt { -webkit-line-clamp: 4; }
   .article-empty { flex-direction: column; gap: 8px; padding: 22px 20px; }
   .article-empty-mark { display: none; }
-  .article-empty h4 { font-size: 21px; }
+  .article-empty :is(h3, h4) { font-size: 21px; }
   .article-preview-footer { flex-direction: column; align-items: flex-start; gap: 10px; }
   .journals-intro-meta { gap: 16px 30px; }
   .journals-intro-meta strong { font-size: 28px; }

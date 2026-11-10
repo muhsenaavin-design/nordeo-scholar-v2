@@ -115,15 +115,24 @@ test('keeps the homepage focused: no discovery logo wall, official social links 
   expect(screen.queryByRole('button', { name: /jeda animasi/i })).not.toBeInTheDocument();
 });
 
-test('journal finder filters audited JETSI articles and handles the JIEL call for papers', () => {
+test('journal finder on the homepage filters journals only and keeps articles separate', () => {
   render(<MemoryRouter><App /></MemoryRouter>);
   const search = screen.getByRole('searchbox', { name: /search journals/i });
   fireEvent.change(search, { target: { value: 'Shopee' } });
-  expect(screen.getByText('1 journal · 2 articles')).toBeInTheDocument();
-  expect(screen.getAllByRole('link', { name: /shopee/i })).toHaveLength(2);
+  expect(screen.getByText('1 journal')).toBeInTheDocument();
+  expect(screen.getByText('4 of 14 articles · JETSI')).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /Clear/ }));
   fireEvent.click(screen.getByRole('button', { name: /^JIEL/ }));
   expect(screen.getByRole('heading', { name: /jiel is open for its first submissions/i })).toBeInTheDocument();
+});
+
+test('homepage keeps the journal finder and published articles as separate sections', () => {
+  render(<MemoryRouter><App /></MemoryRouter>);
+  const finder = screen.getByRole('heading', { level: 2, name: /find the journal that fits/i });
+  const articles = screen.getByRole('heading', { level: 2, name: /published articles/i });
+  expect(finder.closest('section')).toHaveAttribute('id', 'jurnal');
+  expect(articles.closest('section')).toHaveAttribute('id', 'artikel');
+  expect(document.getElementById('jurnal')).not.toContainElement(articles);
 });
 
 test('journal finder exposes every audited JETSI article on the journals page', () => {
