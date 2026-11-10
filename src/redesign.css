@@ -1,0 +1,93 @@
+/* Redesign (Nov 2026): layouts the team chose from the mockup canvas, per menu.
+   Landing page sections are unchanged; these rules cover NordeoNews, Academy, Our Story, and Books. */
+
+/* ── NordeoNews home: magazine grid (lead + two stories, then a three-column grid) ── */
+.news-mag { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: clamp(24px, 3vw, 40px); padding-top: clamp(28px, 3.5vw, 44px); border-top: 1px solid var(--line); }
+.news-mag.is-single { grid-template-columns: minmax(0, 1fr); }
+.news-mag-side { display: grid; align-content: start; gap: clamp(24px, 3vw, 36px); }
+.news-mag-side .story-card h3 { font-size: 21px; }
+.news-mag-side .story-dek { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.news-mag-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 3vw, 36px); margin-top: clamp(36px, 4vw, 56px); padding-top: clamp(28px, 3vw, 40px); border-top: 1px solid var(--line); }
+.news-mag-grid .story-card h3 { font-size: 20px; }
+.news-mag-grid .story-dek { display: none; }
+.news-latest-strip { margin-top: clamp(36px, 4vw, 56px); }
+.news-latest-strip .side-heading { padding-bottom: 12px; border-bottom: 2px solid var(--ink); font-size: 18px; }
+.news-latest-strip .headline-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 28px; }
+.news-latest-strip .headline-list li + li { border-top: 0; }
+
+/* ── Article: table of contents in the sticky sidebar ── */
+.article-toc { margin-bottom: 28px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.article-toc ol { display: grid; gap: 4px; margin: 8px 0 0; padding: 0; list-style: none; counter-reset: toc; }
+.article-toc li { counter-increment: toc; }
+.article-toc a { display: grid; grid-template-columns: 26px 1fr; gap: 6px; padding: 8px 0; font-size: 14.5px; line-height: 1.4; color: var(--ink-2); }
+.article-toc a::before { content: counter(toc, decimal-leading-zero); font-size: 12px; font-weight: 600; color: var(--teal); padding-top: 2px; }
+.article-toc a:hover { color: var(--teal); }
+.article-body h2[id] { scroll-margin-top: 120px; }
+
+/* ── Academy: agenda in month columns ── */
+.agenda-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; align-items: start; }
+.agenda-column { display: grid; gap: 14px; }
+.agenda-month { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--ink); font: 600 20px/1.2 var(--sans); letter-spacing: -.015em; }
+.agenda-month small { font-size: 13px; font-weight: 500; letter-spacing: 0; color: var(--ink-2); }
+.agenda-stack { display: grid; gap: 14px; }
+.agenda-stack .program-cover { aspect-ratio: 16 / 7; }
+
+/* ── Academy registration: programme summary beside the form ── */
+.register-layout { display: grid; grid-template-columns: minmax(280px, .9fr) minmax(0, 1.25fr); gap: clamp(28px, 4vw, 56px); align-items: start; margin-top: 36px; }
+.register-layout .register-form { margin-top: 0; max-width: none; }
+.register-summary { position: sticky; top: 104px; overflow: hidden; border-radius: 18px; background: var(--deep); color: #fff; }
+.register-summary.is-empty { padding: 28px; display: grid; gap: 12px; }
+.register-summary.is-empty .text-link { color: #ffd218; }
+.register-summary > img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.register-summary-body { display: grid; gap: 14px; padding: clamp(22px, 2.6vw, 32px); }
+.register-summary h2 { font: 600 clamp(24px, 2.4vw, 32px)/1.12 var(--sans); letter-spacing: -.025em; color: #fff; }
+.register-summary p { font-size: 15px; line-height: 1.65; color: rgba(226, 236, 238, .86); }
+.register-summary-kicker { font-size: 12px !important; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #ffd218 !important; }
+.register-summary dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; margin: 0; padding: 16px 0; border-block: 1px solid rgba(255, 255, 255, .16); }
+.register-summary dt { font-size: 12px; color: rgba(226, 236, 238, .72); }
+.register-summary dd { margin: 2px 0 0; font-weight: 600; }
+.register-summary ul { display: grid; gap: 8px; margin: 0; padding-left: 18px; font-size: 15px; line-height: 1.55; }
+.register-summary .text-link { color: #ffd218; }
+
+/* ── Our Story: vertical timeline ── */
+.story-timeline { grid-template-columns: minmax(0, 1fr); gap: 0; max-width: 760px; margin-top: 36px; padding: 0 0 0 40px; }
+.story-timeline::before { left: 7px; right: auto; top: 6px; bottom: 6px; width: 2px; height: auto; background: linear-gradient(180deg, #ffd218, var(--line-strong)); }
+.story-timeline li { padding-bottom: 40px; }
+.story-timeline li:last-child { padding-bottom: 0; }
+.story-dot { top: 2px; left: -40px; }
+.story-timeline h3 { font-size: clamp(22px, 2.2vw, 28px); }
+.story-timeline p:not(.story-step) { max-width: 62ch; font-size: 16px; }
+
+/* ── Books: services, process, contact ── */
+.books-services, .books-process { margin-top: clamp(48px, 6vw, 80px); }
+.books-services h2, .books-process h2 { font: 600 clamp(28px, 3vw, 40px)/1.08 var(--sans); letter-spacing: -.03em; }
+.books-service-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 28px 0 0; padding: 0; list-style: none; }
+.books-service-grid li { display: grid; align-content: start; gap: 10px; padding: 24px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.books-service-grid span { font-size: 13px; font-weight: 600; letter-spacing: .14em; color: var(--teal); }
+.books-service-grid h3 { font: 600 21px/1.2 var(--sans); letter-spacing: -.02em; }
+.books-service-grid p { font-size: 15px; line-height: 1.65; color: var(--ink-2); }
+.books-process ol { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 28px 0 0; padding: 0; list-style: none; border-top: 1.5px solid var(--ink); }
+.books-process li { display: grid; align-content: start; gap: 8px; padding: 22px 20px 0 0; }
+.books-process li span { font: 500 36px/1 var(--sans); letter-spacing: -.03em; }
+.books-process li p { font-size: 14.5px; line-height: 1.6; color: var(--ink-2); }
+.books-contact { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(220px, 1fr); gap: 20px 40px; align-items: start; }
+.books-contact > div:first-child p { margin-top: 10px; }
+.books-contact dl { display: grid; gap: 12px; margin: 0; }
+.books-contact dt { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.books-contact dd { margin: 2px 0 0; font-weight: 600; }
+.books-contact .button-row { grid-column: 1 / -1; }
+
+@media (max-width: 980px) {
+  .news-mag, .register-layout, .books-contact { grid-template-columns: minmax(0, 1fr); }
+  .news-mag-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .news-latest-strip .headline-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .register-summary { position: static; }
+  .books-service-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .books-process ol { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 24px; }
+}
+@media (max-width: 640px) {
+  .news-mag-grid, .news-latest-strip .headline-list, .books-service-grid, .books-process ol { grid-template-columns: minmax(0, 1fr); }
+  .register-summary dl { grid-template-columns: minmax(0, 1fr); }
+  .story-timeline { padding-left: 32px; }
+  .story-dot { left: -32px; }
+}

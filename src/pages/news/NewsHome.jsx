@@ -5,7 +5,7 @@ import { publishedNews } from '../../lib/store';
 import { useNewsSource } from '../../lib/content';
 import { siteBase } from '../../lib/site';
 import NewsCard from '../../components/NewsCard';
-import { HeadlineList, StoryCarousel } from '../../components/NewsPortal';
+import { HeadlineList } from '../../components/NewsPortal';
 import { Arrow, EmptyState, useDocumentTitle } from '../../components/parts';
 
 export default function NewsHome() {
@@ -16,7 +16,10 @@ export default function NewsHome() {
   const [category, setCategory] = useState('Semua');
   const filtered = category === 'Semua' ? stories : stories.filter(story => story.category === category);
   const lead = filtered.find(story => story.featured) || filtered[0];
-  const latest = filtered.filter(story => story.id !== lead?.id).slice(0, 6);
+  const rest = filtered.filter(story => story.id !== lead?.id);
+  const secondary = rest.slice(0, 2);
+  const grid = rest.slice(2, 8);
+  const latest = rest.slice(0, 6);
 
   return <>
     <section className="news-masthead container" aria-labelledby="news-heading">
@@ -40,14 +43,15 @@ export default function NewsHome() {
       <p className="sr-only" role="status">{filtered.length} cerita</p>
 
       {lead ? <>
-        {filtered.length > 1 && <StoryCarousel key={category} stories={filtered} base={base} label={category === 'Semua' ? 'Cerita pilihan' : `Cerita ${category}`} />}
-        <div className="news-split">
-          <NewsCard story={lead} base={base} featured />
-          <aside className="news-latest-list" aria-labelledby="newest-heading">
-            <h3 id="newest-heading" className="side-heading">Terbaru</h3>
-            {latest.length > 0 ? <HeadlineList stories={latest} base={base} /> : <p className="headline-empty">Belum ada cerita lain di rubrik ini.</p>}
-          </aside>
+        <div className={`news-mag${secondary.length ? '' : ' is-single'}`}>
+          <div className="news-mag-lead"><NewsCard story={lead} base={base} featured /></div>
+          {secondary.length > 0 && <div className="news-mag-side">{secondary.map(story => <NewsCard key={story.id} story={story} base={base} />)}</div>}
         </div>
+        {grid.length > 0 && <section className="news-mag-grid" aria-label="Cerita lainnya">{grid.map(story => <NewsCard key={story.id} story={story} base={base} />)}</section>}
+        {latest.length > 0 && <aside className="news-latest-strip" aria-labelledby="newest-heading">
+          <h3 id="newest-heading" className="side-heading">Terbaru</h3>
+          <HeadlineList stories={latest.slice(0, 4)} base={base} />
+        </aside>}
       </> : <EmptyState
         title={`Belum ada cerita ${category}`}
         copy="Rubrik ini baru dibuka. Punya kabar yang cocok? Kirimkan ke redaksi."

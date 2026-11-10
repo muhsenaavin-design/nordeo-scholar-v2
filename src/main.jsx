@@ -4,5 +4,6 @@ import App from './App';
 import './styles.css';
 import './ecosystem.css';
 import './feedback2.css';
+import './redesign.css';
 
 createRoot(document.getElementById('root')).render(<BrowserRouter><App /></BrowserRouter>);

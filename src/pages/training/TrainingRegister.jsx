@@ -18,6 +18,28 @@ function validate(form) {
   return errors;
 }
 
+// Left column: what the chosen programme is, so people register knowing what they asked for.
+function ProgramSummary({ program, base }) {
+  if (!program) return <aside className="register-summary is-empty" aria-label="Ringkasan program">
+    <p className="register-summary-kicker">Ringkasan program</p>
+    <h2>Pilih program di formulir.</h2>
+    <p>Tanggal, format, fasilitator, dan hal yang Anda pelajari akan tampil di sini.</p>
+    <Link to={`${base}/#jadwal`} className="text-link">Lihat agenda program <Arrow /></Link>
+  </aside>;
+  const facts = [['Jadwal', program.date ? `${program.dateLabel}${program.time ? ` · ${program.time}` : ''}` : program.dateLabel], ['Durasi', program.duration], ['Format', program.mode], ['Fasilitator', program.facilitator], ['Kuota', program.seats], ['Level', program.level]].filter(([, value]) => value);
+  return <aside className="register-summary" aria-label="Ringkasan program">
+    {program.cover && <img src={program.cover} alt="" width="640" height="400" loading="lazy" decoding="async" />}
+    <div className="register-summary-body">
+      <p className="register-summary-kicker">{program.type}{program.date ? ' · tanggal tentatif' : ''}</p>
+      <h2>{program.title}</h2>
+      {program.summary && <p>{program.summary}</p>}
+      <dl>{facts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+      {program.outcomes?.length > 0 && <><p className="register-summary-kicker">Yang Anda bawa pulang</p><ul>{program.outcomes.map(item => <li key={item}>{item}</li>)}</ul></>}
+      <Link to={`${base}/program/${program.id}`} className="text-link">Detail program <Arrow /></Link>
+    </div>
+  </aside>;
+}
+
 export default function TrainingRegister() {
   useDocumentTitle('Daftar Minat Academy');
   const [params] = useSearchParams();
@@ -67,6 +89,8 @@ export default function TrainingRegister() {
       <h1>Satu langkah <em>menuju kelas pertama.</em></h1>
       <p className="page-intro">Jadwal program masih tentatif. Daftarkan minat Anda, dan kami kabari lebih dulu saat tanggal, fasilitator, dan biaya ditetapkan.</p>
     </header>
+    <div className="register-layout">
+    <ProgramSummary program={programs.find(item => item.id === form.program)} base={base} />
     <form className="submit-form register-form" noValidate onSubmit={submit}>
       {Object.keys(errors).length > 0 && <p className="form-error-summary" role="alert">Ada {Object.keys(errors).length} isian yang perlu dilengkapi.</p>}
       <Field id="program" label="Program" error={errors.program}>
@@ -86,5 +110,6 @@ export default function TrainingRegister() {
       <Check id="consent" checked={form.consent} onChange={consent => setForm(current => ({ ...current, consent }))} error={errors.consent}>Saya setuju dihubungi tim Nordeo Academy melalui email terkait program ini.</Check>
       <div className="form-nav"><span /><button type="submit" className="button button-dark" disabled={sending}>{sending ? 'Mengirim…' : 'Daftarkan minat'}</button></div>
     </form>
+    </div>
   </div>;
 }

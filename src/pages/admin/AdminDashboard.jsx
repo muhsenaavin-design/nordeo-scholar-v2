@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router';
 import './admin.css';
 import './admin-modules.css';
 import './admin-shell.css';
+import './admin-redesign.css';
 import { GROUPS, MODULES, ROLES, can, useAdminData } from './admin-store';
 import { MODULE_VIEWS, NoAccess, Overview, useRights } from './modules';
 import { Card, Icon, Toast } from './ui';

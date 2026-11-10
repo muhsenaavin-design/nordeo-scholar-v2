@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router';
 import { pages } from '../data/pages';
 import { contact, officialSocial } from '../config/links';
 import { ecosystems } from '../data/ecosystems';
+import { bookProcessEn, bookServicesEn } from '../data/books';
 import { ecosystemHref } from '../lib/site';
 import { Arrow, SmartLink, StatusPill, useDocumentTitle } from '../components/parts';
 
@@ -119,10 +120,24 @@ export function BooksPage() {
       </div>
       <figure className="page-art"><img src={books.image} alt={books.alt} width="1600" height="1195" decoding="async" /></figure>
     </div>
-    <div className="information-panel">
-      <h2>A new room is being prepared.</h2>
-      <p>The catalogue, manuscript proposal process, and book publishing services will be announced when ready. To discuss a monograph or an edited volume early, write to our team.</p>
-      <div className="button-row"><a className="button button-dark" href={`mailto:${contact.books}?subject=Book%20publishing%20enquiry`}>Discuss a book manuscript</a><Link className="button button-outline" to="/journals">Explore Journals</Link></div>
+    <section className="books-services" aria-labelledby="books-services-heading">
+      <h2 id="books-services-heading">Four kinds of books we publish.</h2>
+      <ol className="books-service-grid">{bookServicesEn.map((item, i) => <li key={item.title}><span>{String(i + 1).padStart(2, '0')}</span><h3>{item.title}</h3><p>{item.copy}</p></li>)}</ol>
+    </section>
+    <section className="books-process" aria-labelledby="books-process-heading">
+      <h2 id="books-process-heading">From proposal to publication.</h2>
+      <ol>{bookProcessEn.map(step => <li key={step.number}><span>{step.number}</span><strong>{step.title}</strong><p>{step.copy}</p></li>)}</ol>
+    </section>
+    <div className="information-panel books-contact">
+      <div>
+        <h2>Tell us about the book you want to publish.</h2>
+        <p>The catalogue and the online proposal form open when Nordeo Books launches. Until then, send your proposal by email: the idea, the intended readers, a chapter list, and a writing sample.</p>
+      </div>
+      <dl>
+        <div><dt>Email</dt><dd><a href={`mailto:${contact.books}`}>{contact.books}</a></dd></div>
+        <div><dt>WhatsApp</dt><dd><a href={officialSocial.whatsapp} target="_blank" rel="noreferrer">Chat with our team</a></dd></div>
+      </dl>
+      <div className="button-row"><a className="button button-dark" href={`mailto:${contact.books}?subject=Book%20proposal`}>Send a book proposal</a><Link className="button button-outline" to="/journals">Explore Journals</Link></div>
     </div>
   </section>;
 }
