@@ -11,7 +11,7 @@ const open = (path) => render(<MemoryRouter initialEntries={[path]}><App /></Mem
 
 test.each(MODULES.map((m) => [m.id, m.label]))('admin menu %s renders its screen', async (id, label) => {
   open(id === 'dashboard' ? '/admin' : `/admin/${id}`);
-  expect(await screen.findByRole('heading', { level: 1, name: id === 'dashboard' ? /halo/i : label })).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { level: 1, name: id === 'dashboard' ? /selamat/i : label })).toBeInTheDocument();
   expect(screen.queryByText(/tidak punya akses/i)).not.toBeInTheDocument();
 });
 

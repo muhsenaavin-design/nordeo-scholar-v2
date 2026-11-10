@@ -4,6 +4,7 @@ import './admin.css';
 import './admin-modules.css';
 import './admin-shell.css';
 import './admin-redesign.css';
+import './admin-mockup.css';
 import { GROUPS, MODULES, ROLES, can, useAdminData } from './admin-store';
 import { MODULE_VIEWS, NoAccess, Overview, useRights } from './modules';
 import { Card, Icon, Toast } from './ui';
@@ -17,7 +18,7 @@ const JOURNALS = {
 };
 
 const THEMES = {
-  light: { bg: '#efeee9', panel: '#fbf9f5', card: '#ffffff', chip: '#f5f2ea', ink: '#142a32', ink2: '#5e7278', line: '#e5e1d6', hatch: 'rgba(30, 85, 102, 0.16)', dark: '#0f3038', onDark: '#ffffff' },
+  light: { bg: '#f3f1ea', panel: '#ffffff', card: '#ffffff', chip: '#f5f3ec', ink: '#0f3038', ink2: '#5a6b70', line: '#e4e1d6', hatch: 'rgba(30, 85, 102, 0.16)', dark: '#0f3038', onDark: '#ffffff' },
   dark: { bg: '#06191e', panel: '#0a242b', card: '#0f3038', chip: '#17414f', ink: '#f2f7f7', ink2: '#9db2b7', line: 'rgba(226, 236, 238, 0.14)', hatch: 'rgba(226, 236, 238, 0.16)', dark: '#f2f7f7', onDark: '#0f3038' },
 };
 
@@ -93,6 +94,8 @@ export default function AdminDashboard({ mode = 'demo', account = null, onSignOu
   const [demoRole, setDemoRole] = useState(ROLES.some((r) => r.id === saved.role) ? saved.role : 'admin');
   const role = remote ? account?.role : demoRole;
   const [settings, setSettings] = useState(false);
+  const [menuQuery, setMenuQuery] = useState('');
+  const searchRef = useRef(null);
   const [toastMsg, setToastMsg] = useState('');
   const systemReduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const still = motion === 'off' || systemReduced;
@@ -119,6 +122,13 @@ export default function AdminDashboard({ mode = 'demo', account = null, onSignOu
     return () => { document.title = title; robots.remove(); };
   }, []);
   useEffect(() => { document.title = `${current.label} · Admin | Nordeo Scholar`; }, [current]);
+
+  // Ctrl K (or Cmd K) jumps to the menu search in the sidebar.
+  useEffect(() => {
+    const onKey = (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setMobileNav(true); searchRef.current?.focus(); } };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   useEffect(() => {
     if (!settings && !mobileNav) return undefined;
@@ -166,6 +176,9 @@ export default function AdminDashboard({ mode = 'demo', account = null, onSignOu
     { title: 'Animasi', note: 'Matikan bila terasa berlebihan.', cols: 2, options: [option(motion, 'on', 'Aktif', a.color, setMotion), option(motion, 'off', 'Kurangi', t.chip, setMotion)] },
   ];
 
+  const hour = new Date().getHours();
+  const greeting = hour < 11 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 19 ? 'Selamat sore' : 'Selamat malam';
+  const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const stats = [
     { label: 'Artikel terbit', value: data.news.filter((n) => n.status === 'published').length },
     { label: 'Menunggu persetujuan', value: pendingReview, tone: pendingReview ? '#c9a227' : null },
@@ -185,13 +198,16 @@ export default function AdminDashboard({ mode = 'demo', account = null, onSignOu
       <a href="/" className="adm-side__logo" aria-label="Nordeo Scholar Publishing, buka website"><img src={logo} alt="" /></a>
       <button type="button" className="adm-circle is-sm adm-btn adm-side__close" onClick={() => setMobileNav(false)} aria-label="Tutup menu"><Icon name="close" size={14} width={2} /></button>
     </div>
-    <div className="adm-side__me">
-      <span className="adm-avatar" aria-hidden="true">{remote ? data.initials : roleInfo.initials}</span>
-      <span className="adm-side__who"><b>{remote ? data.person : roleInfo.person}</b><span>{roleInfo.label}{!remote && ' · Demo'}</span></span>
-    </div>
+    <label className="adm-side__search">
+      <Icon name="search" size={16} width={2} />
+      <span className="adm-sr">Cari menu</span>
+      <input ref={searchRef} type="search" placeholder="Cari menu" value={menuQuery} onChange={(e) => setMenuQuery(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { const hit = visible.find((m) => `${m.label} ${m.hint}`.toLowerCase().includes(menuQuery.trim().toLowerCase())); if (hit) { go(hit.id); setMenuQuery(''); } } }} />
+      <kbd aria-hidden="true">Ctrl K</kbd>
+    </label>
     <nav className="adm-side__nav">
       {GROUPS.map((g) => {
-        const items = visible.filter((m) => m.group === g.id);
+        const q = menuQuery.trim().toLowerCase();
+        const items = visible.filter((m) => m.group === g.id && (!q || `${m.label} ${m.hint}`.toLowerCase().includes(q)));
         if (!items.length) return null;
         return <div key={g.id} className="adm-side__group" style={toneVars(g.tone)}>
           {g.id !== 'home' && <p className="adm-side__label"><i aria-hidden="true" />{g.label}</p>}
@@ -210,7 +226,11 @@ export default function AdminDashboard({ mode = 'demo', account = null, onSignOu
     <div className="adm-side__foot">
       <button type="button" className="adm-side__item adm-btn" onClick={() => setSettings(true)} title="Tampilan dan peran"><span className="adm-side__tile" aria-hidden="true"><Icon name="gear" size={17} width={1.8} /></span><span className="adm-side__text">Pengaturan</span></button>
       <button type="button" className="adm-side__item adm-btn is-collapse" onClick={() => setCompact((v) => !v)} aria-pressed={compact} title={compact ? 'Tampilkan nama menu' : 'Ringkas sidebar'}><span className="adm-side__tile" aria-hidden="true"><Icon name="panel" size={17} width={1.8} /></span><span className="adm-side__text">{compact ? 'Perlebar' : 'Ringkas sidebar'}</span></button>
-      {onSignOut && <button type="button" className="adm-side__item adm-btn" onClick={onSignOut} title={remote ? 'Keluar dari dashboard' : 'Keluar dari mode demo'}><span className="adm-side__tile" aria-hidden="true"><Icon name="logout" size={17} width={1.8} /></span><span className="adm-side__text">{remote ? 'Keluar' : 'Keluar demo'}</span></button>}
+      <div className="adm-side__me">
+        <span className="adm-avatar" aria-hidden="true">{remote ? data.initials : roleInfo.initials}</span>
+        <span className="adm-side__who"><b>{remote ? data.person : roleInfo.person}</b><span>{roleInfo.label}{!remote && ' · Demo'}</span></span>
+        {onSignOut && <button type="button" className="adm-circle is-sm adm-btn" onClick={onSignOut} aria-label={remote ? 'Keluar dari dashboard' : 'Keluar dari mode demo'} title={remote ? 'Keluar' : 'Keluar demo'}><Icon name="logout" size={16} width={1.9} /></button>}
+      </div>
     </div>
   </aside>;
 
@@ -219,33 +239,30 @@ export default function AdminDashboard({ mode = 'demo', account = null, onSignOu
       {sidebar}
       {mobileNav && <button type="button" className="adm-side__scrim" aria-label="Tutup menu" onClick={() => setMobileNav(false)} />}
       <div className="adm-main">
-        <header className="adm-bar-top">
+        <header className="adm-head">
           <button type="button" className="adm-circle adm-btn adm-burger" onClick={() => setMobileNav(true)} aria-label="Buka menu"><Icon name="menu" /></button>
-          <p className="adm-crumbs" style={toneVars(group.tone)}><i aria-hidden="true" />{group.id === 'home' ? 'Dashboard' : <>{group.label}<span aria-hidden="true">›</span><b>{current.label}</b></>}</p>
+          <div className="adm-head__titles">
+            <p className="adm-crumbs" style={toneVars(group.tone)}><i aria-hidden="true" />{current.id === 'dashboard' ? today : <>{group.label}<span aria-hidden="true">·</span>{current.label}</>}</p>
+            <h1 className="adm-title">{current.id === 'dashboard' ? `${greeting}, ${(remote ? data.person : roleInfo.person).split(' ')[0]}` : current.label}</h1>
+            <p className="adm-hint">{current.hint}</p>
+          </div>
           <div className="adm-tools">
             {!remote && <span className="adm-mode" title="Data hanya tersimpan di browser ini">Mode demo</span>}
             {remote && <button type="button" className="adm-circle adm-btn" onClick={() => data.refresh()} aria-label="Muat ulang data" title="Muat ulang data"><Icon name="refresh" /></button>}
             <div className="adm-seg" role="group" aria-label="Tema">
-              <div aria-hidden="true" className="adm-seg__thumb adm-glide" style={{ transform: `translateX(${isDark ? 40 : 0}px)` }} />
-              <button type="button" className="adm-seg__btn adm-btn" onClick={() => setTheme('light')} aria-label="Tema terang" aria-pressed={!isDark} style={{ color: isDark ? t.ink2 : t.onDark }}><Icon name="sun" size={17} width={1.8} /></button>
-              <button type="button" className="adm-seg__btn adm-btn" onClick={() => setTheme('dark')} aria-label="Tema gelap" aria-pressed={isDark} style={{ color: isDark ? t.onDark : t.ink2 }}><Icon name="moon" size={17} width={1.8} /></button>
+              <div aria-hidden="true" className="adm-seg__thumb adm-glide" style={{ transform: `translateX(${isDark ? 36 : 0}px)` }} />
+              <button type="button" className="adm-seg__btn adm-btn" onClick={() => setTheme('light')} aria-label="Tema terang" aria-pressed={!isDark} style={{ color: isDark ? t.ink2 : t.onDark }}><Icon name="sun" size={16} width={1.8} /></button>
+              <button type="button" className="adm-seg__btn adm-btn" onClick={() => setTheme('dark')} aria-label="Tema gelap" aria-pressed={isDark} style={{ color: isDark ? t.onDark : t.ink2 }}><Icon name="moon" size={16} width={1.8} /></button>
             </div>
-            <button type="button" className="adm-circle is-lg adm-btn" aria-label={`Notifikasi: ${waiting} hal menunggu`} title={`${waiting} hal menunggu`} onClick={() => go('dashboard')} style={{ position: 'relative' }}><Icon name="bell" />{waiting > 0 && <span aria-hidden="true" className="adm-dot" />}</button>
+            <button type="button" className="adm-circle adm-btn" aria-label={`Notifikasi: ${waiting} hal menunggu`} title={`${waiting} hal menunggu`} onClick={() => go('dashboard')} style={{ position: 'relative' }}><Icon name="bell" />{waiting > 0 && <span aria-hidden="true" className="adm-dot" />}</button>
           </div>
         </header>
-
-        <section className="adm-hero adm-rise" style={{ animationDelay: '60ms' }}>
-          <div>
-            <h1 className="adm-title">{current.id === 'dashboard' ? `Halo, ${(remote ? data.person : roleInfo.person).split(' ')[0]}` : current.label}</h1>
-            <p className="adm-hint">{current.hint}</p>
-          </div>
-          {current.id === 'dashboard' && <div className="adm-stats">
-            {stats.map((s) => <div key={s.label}>
-              <div className="adm-stat__label">{s.label}</div>
-              <div className="adm-stat__row"><span className="adm-stat__value">{s.value}</span>{s.tone && <span aria-hidden="true" className="adm-stat__dot" style={{ background: s.tone }} />}</div>
-            </div>)}
-          </div>}
-        </section>
+        {current.id === 'dashboard' && <div className="adm-stats">
+          {stats.map((s) => <div key={s.label} className="adm-stat">
+            <div className="adm-stat__label">{s.label}</div>
+            <div className="adm-stat__row"><span className="adm-stat__value">{s.value}</span>{s.tone && <span aria-hidden="true" className="adm-stat__dot" style={{ background: s.tone }} />}</div>
+          </div>)}
+        </div>}
 
         {!remote && <Card className="c24"><p className="adm-demo-note"><Icon name="key" size={16} /> Mode demo: perubahan hanya tersimpan di browser ini dan tidak tampil di website. Masuk dengan akun staf untuk mengelola website sungguhan.</p></Card>}
         {data.saveError && <Card className="c24"><p className="adm-error" role="alert">{data.saveError}</p></Card>}
