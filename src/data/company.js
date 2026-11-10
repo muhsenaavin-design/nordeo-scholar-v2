@@ -84,18 +84,19 @@ export const founderProfile = {
 // Logo strip. These are the services the journals are registered with today. Add partner
 // institutions to `partners` (name + logo path) once Nordeo confirms them and their consent.
 export const indexingServices = [
-  { name: 'Crossref', note: 'DOI registration' },
-  { name: 'Google Scholar', note: 'Indexed' },
-  { name: 'GARUDA', note: 'Indexed' },
-  { name: 'Open Journal Systems', note: 'Journal platform' },
-  { name: 'Open Access', note: 'Free to read' },
-  { name: 'Double-blind review', note: 'Peer review' },
+  { name: 'Crossref', note: 'DOI registration', logo: '/assets/platforms/crossref.svg' },
+  { name: 'Google Scholar', note: 'Indexed', logo: '/assets/platforms/google-scholar.png' },
+  { name: 'GARUDA', note: 'Indexed', logo: '/assets/platforms/garuda.png' },
+  { name: 'Dimensions', note: 'Indexed', logo: '/assets/platforms/dimensions.png' },
+  { name: 'ResearchGate', note: 'Listed', logo: '/assets/platforms/researchgate.svg', scale: 0.55 },
+  { name: 'Neliti', note: 'Indexed', logo: '/assets/platforms/neliti.png' },
 ];
 
-// Logos: ITB from Indonesian Wikipedia (Indonesian government work, public domain);
+// Logos: ITB's round emblem, vectorised from "Logo Institut Teknologi Bandung.png" on Indonesian
+// Wikipedia (Indonesian government work, public domain);
 // Politeknik META Industri from the header of politeknikmeta.ac.id.
 export const partners = [
-  { name: 'Institut Teknologi Bandung', logo: '/assets/partners/itb.svg', scale: 1.3 },
+  { name: 'Institut Teknologi Bandung', logo: '/assets/partners/itb.svg', scale: 1.5 },
   { name: 'Politeknik META Industri', logo: '/assets/partners/politeknik-meta.webp' },
 ];
 

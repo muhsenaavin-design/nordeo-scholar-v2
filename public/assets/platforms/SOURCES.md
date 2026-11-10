@@ -8,3 +8,6 @@ Retrieved 19 October 2026 from assets linked on https://nordeoscholar.com/journa
 - ResearchGate: https://nordeoscholar.com/journal/public/site/images/adminjournal/reseachgate-indexing-cad6725f896279f86ce2a55899873837.png
 - Dimensions: https://nordeoscholar.com/journal/public/site/images/fandiachmad/dimensions-logo-8fcafaa2a26aa6b750c114ab88174551.png
 - Neliti: https://nordeoscholar.com/journal/public/site/images/fandiachmad/neliti-blue.png
+Vector versions added 10 November 2026 (sharp at any size):
+- Crossref (crossref.svg): official landscape logo, https://assets.crossref.org/logo/crossref-logo-landscape-200.svg
+- ResearchGate (researchgate.svg): Wikimedia Commons "File:ResearchGate logo.svg" (public domain)
