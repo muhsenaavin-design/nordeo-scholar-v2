@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { htmlToText, sanitizeHtml } from '../lib/rich-text';
 
-// A small Word-style editor for the news submission form: block style, bold, italic,
-// underline, strike, alignment (incl. justify), lists, quote, link, and clear formatting.
+// A small Word-style editor for the news submission form: paragraph styles (Normal,
+// Heading 1-2, quote), bold, italic, underline, strike, superscript, subscript, highlight,
+// alignment (incl. justify), lists with indent, link, clear formatting, and a word count.
 // It runs on contentEditable and the browser's editing commands, so it needs no extra
 // dependency. Pasted content (also from Word) is cleaned to the same short tag list the
 // article page renders. The parent receives { html, text } on every change.
@@ -24,14 +25,22 @@ const ICONS = {
   quote: path('M7 7h4v4c0 3-1.5 5-4 6M14 7h4v4c0 3-1.5 5-4 6'),
   link: path('M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1'),
   clear: path('M6 5h11M11 5 8 19M4 20 20 4'),
+  sup: path('M4 18 11 8M4 8l7 10M15 9.5c.3-1 1.2-1.5 2.2-1.5 1.1 0 1.9.7 1.9 1.7 0 1.6-2.4 2.3-4.1 4.3h4.3'),
+  sub: path('M4 16 11 6M4 6l7 10M15 15.5c.3-1 1.2-1.5 2.2-1.5 1.1 0 1.9.7 1.9 1.7 0 1.6-2.4 2.3-4.1 4.3h4.3'),
+  highlight: path('m9 15-3 3h6l1.5-1.5M14.5 4.5l5 5L12 17l-5-5zM4 21h16'),
+  indent: path('M4 5h16M10 10h10M10 14h10M4 19h16M4 9.5l3 2.5-3 2.5'),
+  outdent: path('M4 5h16M10 10h10M10 14h10M4 19h16M7 9.5 4 12l3 2.5'),
 };
 
 const TOGGLES = [
   [['bold', 'Tebal (Ctrl+B)', 'bold'], ['italic', 'Miring (Ctrl+I)', 'italic'], ['underline', 'Garis bawah (Ctrl+U)', 'underline'], ['strikeThrough', 'Coret', 'strike']],
+  [['superscript', 'Superskrip (mis. m²)', 'sup'], ['subscript', 'Subskrip (mis. CO₂)', 'sub']],
   [['justifyLeft', 'Rata kiri', 'left'], ['justifyCenter', 'Rata tengah', 'center'], ['justifyRight', 'Rata kanan', 'right'], ['justifyFull', 'Rata kiri-kanan (justify)', 'justify']],
   [['insertUnorderedList', 'Daftar berpoin', 'bullets'], ['insertOrderedList', 'Daftar bernomor', 'numbers']],
 ];
-const BLOCK_STYLES = [['p', 'Paragraf'], ['h2', 'Subjudul'], ['h3', 'Subjudul kecil'], ['blockquote', 'Kutipan']];
+// Word-style names; Heading 1 and 2 are stored as h2 and h3 because the article title is the h1.
+const BLOCK_STYLES = [['p', 'Normal'], ['h2', 'Heading 1'], ['h3', 'Heading 2'], ['blockquote', 'Kutipan']];
+const countWords = text => (text.trim() ? text.trim().split(/\s+/).length : 0);
 
 const exec = (command, value = null) => {
   try { return typeof document.execCommand === 'function' && document.execCommand(command, false, value); } catch { return false; }
@@ -49,13 +58,16 @@ export default function RichTextEditor({ id, value, onChange, labelId, described
   const [linking, setLinking] = useState(false);
   const [url, setUrl] = useState('https://');
   const [empty, setEmpty] = useState(!value);
+  const [words, setWords] = useState(0);
 
   // Load the stored draft, and accept replacements from outside (the AI draft, undo).
   useEffect(() => {
     if (!area.current || value === emitted.current) return;
     area.current.innerHTML = value || '';
     emitted.current = value;
-    setEmpty(!htmlToText(value || ''));
+    const text = htmlToText(value || '');
+    setEmpty(!text);
+    setWords(countWords(text));
   }, [value]);
 
   const emit = useCallback(() => {
@@ -63,6 +75,7 @@ export default function RichTextEditor({ id, value, onChange, labelId, described
     const text = htmlToText(html);
     emitted.current = html;
     setEmpty(!text);
+    setWords(countWords(text));
     onChange({ html, text });
   }, [onChange]);
 
@@ -86,6 +99,16 @@ export default function RichTextEditor({ id, value, onChange, labelId, described
     exec(command, value);
     emit();
     refresh();
+  };
+
+  // Highlight like Word's marker pen. The browser writes a background colour; sanitizeHtml()
+  // turns it into <mark> when the story is saved.
+  const highlight = () => {
+    area.current?.focus();
+    exec('styleWithCSS', true);
+    exec('hiliteColor', '#fff1a8');
+    exec('styleWithCSS', false);
+    emit();
   };
 
   const onPaste = event => {
@@ -135,6 +158,11 @@ export default function RichTextEditor({ id, value, onChange, labelId, described
         {group.map(([command, label, icon]) => <button key={command} type="button" onMouseDown={keep} onClick={() => run(command)} aria-label={label} title={label} aria-pressed={Boolean(active[command])}>{ICONS[icon]}</button>)}
       </div>)}
       <div className="rte-group">
+        <button type="button" onMouseDown={keep} onClick={() => run('outdent')} aria-label="Kurangi indentasi" title="Kurangi indentasi">{ICONS.outdent}</button>
+        <button type="button" onMouseDown={keep} onClick={() => run('indent')} aria-label="Tambah indentasi" title="Tambah indentasi">{ICONS.indent}</button>
+      </div>
+      <div className="rte-group">
+        <button type="button" onMouseDown={keep} onClick={highlight} aria-label="Stabilo (sorot teks)" title="Stabilo (sorot teks)">{ICONS.highlight}</button>
         <button type="button" onMouseDown={keep} onClick={() => run('formatBlock', block === 'blockquote' ? 'p' : 'blockquote')} aria-label="Kutipan" title="Kutipan" aria-pressed={block === 'blockquote'}>{ICONS.quote}</button>
         <button type="button" onMouseDown={keep} onClick={openLink} aria-label="Sisipkan tautan" title="Sisipkan tautan" aria-expanded={linking}>{ICONS.link}</button>
         <button type="button" onMouseDown={keep} onClick={() => { run('removeFormat'); run('unlink'); }} aria-label="Hapus format" title="Hapus format">{ICONS.clear}</button>
@@ -166,5 +194,6 @@ export default function RichTextEditor({ id, value, onChange, labelId, described
       onMouseUp={refresh}
       onPaste={onPaste}
     />
+    <p className="rte-status" aria-live="polite">{words} kata · Ctrl+B tebal · Ctrl+I miring · Ctrl+U garis bawah</p>
   </div>;
 }

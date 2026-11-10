@@ -173,3 +173,8 @@
 /* ── Logo strips: partner logos in full colour; per-logo scale evens out optical size ── */
 .ticker img { height: calc(40px * var(--logo-scale, 1)); }
 .ticker.is-partners img { filter: none; opacity: 1; }
+
+/* ── News submission editor: highlight and the word-count line ── */
+.rte-area mark, .article-rich mark { padding: 0 .12em; border-radius: 3px; background: #fff1a8; color: inherit; }
+.rte-area sup, .rte-area sub, .article-rich sup, .article-rich sub { font-size: .72em; line-height: 0; }
+.rte-status { margin: 0; padding: 8px 14px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--ink-3); }
