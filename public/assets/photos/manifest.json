@@ -1,0 +1,268 @@
+[
+  {
+    "name": "research-library",
+    "author": "Yan Krukau",
+    "page": "https://www.pexels.com/photo/people-studying-in-library-8199762/",
+    "download": "https://images.pexels.com/photos/8199762/pexels-photo-8199762.jpeg",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "originalSize": [
+      6000,
+      4000
+    ],
+    "variants": [
+      {
+        "src": "/assets/photos/research-library-640.webp",
+        "width": 640,
+        "height": 360,
+        "bytes": 22268
+      },
+      {
+        "src": "/assets/photos/research-library-1280.webp",
+        "width": 1280,
+        "height": 720,
+        "bytes": 52604
+      },
+      {
+        "src": "/assets/photos/research-library-1920.webp",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 89938
+      },
+      {
+        "src": "/assets/photos/research-library-3840.webp",
+        "width": 3840,
+        "height": 2160,
+        "bytes": 489060
+      }
+    ]
+  },
+  {
+    "name": "writing-desk",
+    "author": "Negative Space",
+    "page": "https://www.pexels.com/photo/coffee-notebook-writing-computer-34607/",
+    "download": "https://images.pexels.com/photos/34607/pexels-photo.jpg",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "originalSize": [
+      5472,
+      3648
+    ],
+    "variants": [
+      {
+        "src": "/assets/photos/writing-desk-640.webp",
+        "width": 640,
+        "height": 360,
+        "bytes": 11462
+      },
+      {
+        "src": "/assets/photos/writing-desk-1280.webp",
+        "width": 1280,
+        "height": 720,
+        "bytes": 26418
+      },
+      {
+        "src": "/assets/photos/writing-desk-1920.webp",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 44080
+      },
+      {
+        "src": "/assets/photos/writing-desk-3840.webp",
+        "width": 3840,
+        "height": 2160,
+        "bytes": 188804
+      }
+    ]
+  },
+  {
+    "name": "peer-discussion",
+    "author": "Startup Stock Photos",
+    "page": "https://www.pexels.com/photo/group-of-people-having-a-meeting-7097/",
+    "download": "https://images.pexels.com/photos/7097/people-coffee-tea-meeting.jpg",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "originalSize": [
+      5472,
+      3648
+    ],
+    "variants": [
+      {
+        "src": "/assets/photos/peer-discussion-640.webp",
+        "width": 640,
+        "height": 360,
+        "bytes": 22174
+      },
+      {
+        "src": "/assets/photos/peer-discussion-1280.webp",
+        "width": 1280,
+        "height": 720,
+        "bytes": 55362
+      },
+      {
+        "src": "/assets/photos/peer-discussion-1920.webp",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 96944
+      },
+      {
+        "src": "/assets/photos/peer-discussion-3840.webp",
+        "width": 3840,
+        "height": 2160,
+        "bytes": 293768
+      }
+    ]
+  },
+  {
+    "name": "conference-hall",
+    "author": "Mitchel Onwuchuruba",
+    "page": "https://www.pexels.com/photo/vast-indoor-conference-hall-with-large-audience-31584584/",
+    "download": "https://images.pexels.com/photos/31584584/pexels-photo-31584584.jpeg",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "originalSize": [
+      4000,
+      3000
+    ],
+    "variants": [
+      {
+        "src": "/assets/photos/conference-hall-640.webp",
+        "width": 640,
+        "height": 360,
+        "bytes": 61852
+      },
+      {
+        "src": "/assets/photos/conference-hall-1280.webp",
+        "width": 1280,
+        "height": 720,
+        "bytes": 204264
+      },
+      {
+        "src": "/assets/photos/conference-hall-1920.webp",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 407650
+      },
+      {
+        "src": "/assets/photos/conference-hall-3840.webp",
+        "width": 3840,
+        "height": 2160,
+        "bytes": 1564932
+      }
+    ]
+  },
+  {
+    "name": "research-presentation",
+    "author": "Felicity Tai",
+    "page": "https://www.pexels.com/photo/woman-writing-on-a-whiteboard-7964167/",
+    "download": "https://images.pexels.com/photos/7964167/pexels-photo-7964167.jpeg",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "originalSize": [
+      6000,
+      4000
+    ],
+    "variants": [
+      {
+        "src": "/assets/photos/research-presentation-640.webp",
+        "width": 640,
+        "height": 360,
+        "bytes": 15134
+      },
+      {
+        "src": "/assets/photos/research-presentation-1280.webp",
+        "width": 1280,
+        "height": 720,
+        "bytes": 52326
+      },
+      {
+        "src": "/assets/photos/research-presentation-1920.webp",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 105814
+      },
+      {
+        "src": "/assets/photos/research-presentation-3840.webp",
+        "width": 3840,
+        "height": 2160,
+        "bytes": 635216
+      }
+    ]
+  },
+  {
+    "name": "evidence-review",
+    "author": "Yan Krukau",
+    "page": "https://www.pexels.com/photo/two-people-discussing-graphs-on-printouts-7691673/",
+    "download": "https://images.pexels.com/photos/7691673/pexels-photo-7691673.jpeg",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "originalSize": [
+      6000,
+      4000
+    ],
+    "variants": [
+      {
+        "src": "/assets/photos/evidence-review-640.webp",
+        "width": 640,
+        "height": 360,
+        "bytes": 26046
+      },
+      {
+        "src": "/assets/photos/evidence-review-1280.webp",
+        "width": 1280,
+        "height": 720,
+        "bytes": 70022
+      },
+      {
+        "src": "/assets/photos/evidence-review-1920.webp",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 123674
+      },
+      {
+        "src": "/assets/photos/evidence-review-3840.webp",
+        "width": 3840,
+        "height": 2160,
+        "bytes": 465036
+      }
+    ]
+  },
+  {
+    "name": "community-study",
+    "author": "Ludovic Delot",
+    "page": "https://www.pexels.com/photo/a-group-of-students-sitting-in-a-library-and-studying-16420473/",
+    "download": "https://images.pexels.com/photos/16420473/pexels-photo-16420473.jpeg",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "originalSize": [
+      6000,
+      4000
+    ],
+    "variants": [
+      {
+        "src": "/assets/photos/community-study-640.webp",
+        "width": 640,
+        "height": 360,
+        "bytes": 27014
+      },
+      {
+        "src": "/assets/photos/community-study-1280.webp",
+        "width": 1280,
+        "height": 720,
+        "bytes": 81692
+      },
+      {
+        "src": "/assets/photos/community-study-1920.webp",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 152868
+      },
+      {
+        "src": "/assets/photos/community-study-3840.webp",
+        "width": 3840,
+        "height": 2160,
+        "bytes": 518332
+      }
+    ]
+  }
+]

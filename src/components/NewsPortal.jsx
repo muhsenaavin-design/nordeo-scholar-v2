@@ -1,3 +1,4 @@
+import EditorialPhoto from './EditorialPhoto';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { formatDate } from '../lib/store';
@@ -40,7 +41,7 @@ export function StoryCarousel({ stories, base = '/news', label = 'Cerita pilihan
       {stories.map(story => <li key={story.id} className="carousel-slide">
         <Link className="carousel-card" to={`${base}/${story.slug}`}>
           <figure className="carousel-cover">
-            <img src={story.cover} alt={story.coverAlt} width="1600" height="1000" loading="lazy" decoding="async" />
+            <EditorialPhoto src={story.cover} alt={story.coverAlt} width="1600" height="1000" loading="lazy" decoding="async" />
             <span className="story-category">{story.category}</span>
           </figure>
           <p className="story-meta"><span>{formatDate(story.date)}</span><span>{story.readTime}</span></p>

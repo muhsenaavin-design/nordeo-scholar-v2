@@ -1,3 +1,4 @@
+import EditorialPhoto from '../../components/EditorialPhoto';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { programTypes, publicationPath, trainingFaq, trainingTracks, writingModules } from '../../data/training';
@@ -9,7 +10,7 @@ import { Arrow, useDocumentTitle } from '../../components/parts';
 
 export function ProgramCard({ program, base }) {
   return <Link to={`${base}/program/${program.id}`} className="program-card">
-    <div className="program-cover"><img src={program.cover} alt="" width="640" height="400" loading="lazy" decoding="async" /><span className="program-type">{program.type}</span></div>
+    <div className="program-cover"><EditorialPhoto sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" src={program.cover} alt="" width="640" height="400" loading="lazy" decoding="async" /><span className="program-type">{program.type}</span></div>
     <div className="program-body">
       <p className="program-date">{program.dateLabel} · {program.mode}</p>
       <h3>{program.title}</h3>

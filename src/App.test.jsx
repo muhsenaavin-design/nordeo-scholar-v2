@@ -189,7 +189,7 @@ test('news submission can go through the Word template instead', async () => {
 
 test('news articles show the credit line and accept reader comments', async () => {
   render(<MemoryRouter initialEntries={['/news/riset-terbuka-masa-depan-penerbitan']}><App /></MemoryRouter>);
-  expect((await screen.findByText(/penulis:/i)).closest('.article-credits')).toHaveTextContent('Penulis: Redaksi Nordeo|Editor: Redaksi NordeoNews|Foto: Dok. Nordeo Scholar');
+  expect((await screen.findByText(/penulis:/i)).closest('.article-credits')).toHaveTextContent('Penulis: Redaksi Nordeo|Editor: Redaksi NordeoNews|Foto: Ilustrasi: Yan Krukau / Pexels');
   expect(screen.getByRole('heading', { level: 2, name: /komentar \(0\)/i })).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /kirim komentar/i }));
   expect(screen.getByLabelText(/komentar \*/i)).toHaveAttribute('aria-invalid', 'true');

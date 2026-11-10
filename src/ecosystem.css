@@ -605,6 +605,7 @@ html[data-motion="full"] .hero h1 .line-mask + .line-mask > span { animation-del
 .program-lead .status { margin-top: 22px; }
 .program-art { overflow: hidden; border-radius: 16px; background: var(--deep); }
 .program-art img { width: 100%; aspect-ratio: 10 / 7; object-fit: cover; }
+.program-art figcaption { margin: 0; padding: 10px 16px; color: var(--ink-2); background: var(--surface-2); }
 .program-detail { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, 1fr); gap: clamp(32px, 5vw, 72px); margin-top: clamp(40px, 5vw, 64px); padding-top: 32px; border-top: 1px solid var(--line); }
 .program-detail h2 { font-size: clamp(26px, 2.6vw, 32px); }
 .program-facts { padding: 26px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--line); }

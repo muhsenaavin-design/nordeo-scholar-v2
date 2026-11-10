@@ -4,6 +4,7 @@
 import { useEffect, useSyncExternalStore } from 'react';
 import { supabase } from './supabase';
 import { trainingPrograms } from '../data/training';
+import { upgradeEditorialPhoto } from './editorial-photos';
 
 let state = { loaded: false, content: {}, news: null };
 let started = false;
@@ -75,7 +76,7 @@ export function mergePrograms(records) {
   if (!Array.isArray(records)) return trainingPrograms;
   return records
     .filter((record) => record.status !== 'draft')
-    .map((record) => ({ ...PROGRAM_DEFAULTS, ...(trainingPrograms.find((program) => program.id === record.id) || {}), ...record }));
+    .map((record) => upgradeEditorialPhoto({ ...PROGRAM_DEFAULTS, ...(trainingPrograms.find((program) => program.id === record.id) || {}), ...record }));
 }
 
 export function usePrograms() {

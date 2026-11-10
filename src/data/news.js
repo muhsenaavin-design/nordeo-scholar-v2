@@ -1,3 +1,5 @@
+import { editorialPhoto } from '../lib/editorial-photos';
+
 export const newsCategories = ['Berita', 'Pendidikan', 'Bisnis', 'Teknologi', 'Lifestyle', 'Opini'];
 
 // Older rubrics stay mapped so stories saved before the rename still get an English label.
@@ -18,11 +20,10 @@ export const seedNews = [
     authorRole: 'Editorial desk',
     date: '2026-10-22',
     readTime: '6 menit',
-    cover: '/assets/art/news/open-science.svg',
-    coverAlt: 'Ilustrasi orbit pengetahuan di atas latar teal gelap',
+    ...editorialPhoto('research-library'),
     featured: true,
     status: 'published',
-    credits: { editor: 'Redaksi NordeoNews', photo: 'Dok. Nordeo Scholar' },
+    credits: { editor: 'Redaksi NordeoNews', photo: editorialPhoto('research-library').photoCredit },
     body: [
       { type: 'p', text: 'Selama puluhan tahun, kualitas sebuah riset diukur dari tempat ia terbit. Semakin tinggi dinding langganan, semakin bergengsi jurnalnya. Logika itu memberi insentif yang jelas, tetapi juga menjauhkan pengetahuan dari orang-orang yang paling membutuhkannya.' },
       { type: 'h2', text: 'Akses bukan akhir dari cerita' },
@@ -97,11 +98,10 @@ export const seedNews = [
     authorRole: 'Community desk',
     date: '2026-10-07',
     readTime: '5 menit',
-    cover: '/assets/generated/ecosystem-training-v1.webp',
-    coverAlt: 'Peneliti berdiskusi dengan warga dalam workshop komunitas',
+    ...editorialPhoto('community-study'),
     featured: false,
     status: 'published',
-    credits: { editor: 'Redaksi NordeoNews', photo: 'Dok. Nordeo Scholar' },
+    credits: { editor: 'Redaksi NordeoNews', photo: editorialPhoto('community-study').photoCredit },
     body: [
       { type: 'p', text: 'Pengabdian masyarakat sering dinilai dari jumlah kegiatan, bukan dari perubahan yang ditinggalkan. Padahal, pertanyaan yang paling penting justru sederhana: apa yang berbeda setelah program selesai?' },
       { type: 'h2', text: 'Mulai dari data yang sudah ada' },
@@ -122,11 +122,10 @@ export const seedNews = [
     authorRole: 'Policy desk',
     date: '2026-10-01',
     readTime: '7 menit',
-    cover: '/assets/art/news/evidence-table.svg',
-    coverAlt: 'Ilustrasi tangga data di atas latar rust',
+    ...editorialPhoto('evidence-review'),
     featured: false,
     status: 'published',
-    credits: { editor: 'Redaksi NordeoNews', photo: 'Dok. Nordeo Scholar' },
+    credits: { editor: 'Redaksi NordeoNews', photo: editorialPhoto('evidence-review').photoCredit },
     body: [
       { type: 'p', text: 'Di ruang rapat, riset sering hadir sebagai dokumen tebal yang dibaca pada menit terakhir. Bukan karena pembuat kebijakan mengabaikan bukti, tetapi karena bahasa keduanya jarang dipertemukan.' },
       { type: 'h2', text: 'Ringkas bukan berarti dangkal' },
@@ -147,11 +146,10 @@ export const seedNews = [
     authorRole: 'Editorial desk',
     date: '2026-10-01',
     readTime: '3 menit',
-    cover: '/assets/generated/hero-editorial-v1.webp',
-    coverAlt: 'Ilustrasi buku terbuka dengan cahaya keemasan',
+    ...editorialPhoto('writing-desk'),
     featured: false,
     status: 'published',
-    credits: { editor: 'Redaksi NordeoNews', photo: 'Dok. Nordeo Scholar' },
+    credits: { editor: 'Redaksi NordeoNews', photo: editorialPhoto('writing-desk').photoCredit },
     body: [
       { type: 'p', text: 'Ada ketegangan yang sehat antara mengikuti standar internasional dan menulis dari tempat kita berdiri. Menghilangkan salah satunya membuat riset kehilangan presisi atau relevansi.' },
       { type: 'p', text: 'Konteks lokal bukan hiasan etnografis. Ia bagian dari metode: siapa yang diwawancarai, bagaimana data dibaca, dan mengapa sebuah temuan mungkin tidak dapat dipindahkan begitu saja ke tempat lain.' },
@@ -162,9 +160,9 @@ export const seedNews = [
 ];
 
 export const editorialDesks = [
-  { title: 'Research Notes', copy: 'Catatan singkat dari riset yang sedang berjalan, ditulis oleh penelitinya sendiri.', image: '/assets/art/news/open-science.svg', alt: 'Ilustrasi orbit pengetahuan' },
-  { title: 'Campus & Community', copy: 'Kabar dari kampus, program pengabdian, dan kerja bersama masyarakat.', image: '/assets/art/news/community.svg', alt: 'Ilustrasi lengkungan komunitas' },
-  { title: 'Policy Brief', copy: 'Ringkasan bukti untuk pembaca yang mengambil keputusan di ruang publik.', image: '/assets/art/news/evidence-table.svg', alt: 'Ilustrasi tangga data kebijakan' },
+  { title: 'Research Notes', copy: 'Catatan singkat dari riset yang sedang berjalan, ditulis oleh penelitinya sendiri.', image: editorialPhoto('research-library').cover, alt: editorialPhoto('research-library').coverAlt },
+  { title: 'Campus & Community', copy: 'Kabar dari kampus, program pengabdian, dan kerja bersama masyarakat.', image: editorialPhoto('community-study').cover, alt: editorialPhoto('community-study').coverAlt },
+  { title: 'Policy Brief', copy: 'Ringkasan bukti untuk pembaca yang mengambil keputusan di ruang publik.', image: editorialPhoto('evidence-review').cover, alt: editorialPhoto('evidence-review').coverAlt },
 ];
 
 // Publishing workflow for contributed news. Synthesised from the audited references in

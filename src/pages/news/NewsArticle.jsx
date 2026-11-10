@@ -1,3 +1,4 @@
+import EditorialPhoto from '../../components/EditorialPhoto';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { creditParts, formatDate, getNewsBySlug, publishedNews } from '../../lib/store';
@@ -50,7 +51,7 @@ export default function NewsArticle() {
         <button type="button" className="text-link finder-text-button" onClick={copy}>{copied ? 'Tautan disalin' : 'Salin tautan'}</button>
       </div>
     </header>
-    <figure className="article-cover container"><img src={story.cover} alt={story.coverAlt} width="1600" height="1000" decoding="async" /></figure>
+    <figure className="article-cover container"><EditorialPhoto sizes="(max-width: 1200px) 100vw, 1200px" src={story.cover} alt={story.coverAlt} width="1600" height="1000" decoding="async" /></figure>
     <div className="container article-layout">
       <div className="article-main">
         <div className="article-body">{story.body.map((block, index) => <Block key={index} block={block} />)}</div>

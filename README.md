@@ -24,6 +24,8 @@ Open `http://127.0.0.1:5180`. The same browser check can verify this build: open
 
 Generated editorial images live in `public/assets/generated/`. Their subjects are illustrative; actual journal previews and covers remain separate. Fonts load from Fontshare (General Sans), with local fallback families.
 
+Licensed editorial stock photos live in `public/assets/photos/`: seven native UHD (3840 × 2160) WebPs with responsive 640/1280/1920 variants. Source pages and usage rights are in [SOURCES.md](public/assets/photos/SOURCES.md); originals are preserved in `assets-src/photos/`. Regenerate with `py -3 scripts/prepare-editorial-photos.py`. The [placeholder audit](docs/design/2026-11-10-placeholder-photo-audit.md) records what was replaced and which content still needs confirmation. Run `scripts/check-editorial-photos.js` in a Playwright CLI session for desktop/mobile image checks.
+
 `py -3 scripts/prepare-assets.py` regenerates transparent logos and optimized WebP images from the preserved originals (requires Pillow).
 
 For browser checks, start `npm run dev -- --host 127.0.0.1 --port 5177`, then:

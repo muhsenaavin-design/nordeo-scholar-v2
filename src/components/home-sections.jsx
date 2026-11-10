@@ -1,3 +1,4 @@
+import EditorialPhoto from './EditorialPhoto';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { ecosystems, founder } from '../data/ecosystems';
@@ -150,7 +151,7 @@ export function NewsSpotlight() {
     <div className="nn-simple-grid">
       <article className="nn-simple-lead" data-reveal>
         <SmartLink href={href(lead)}>
-          <figure><img src={lead.cover} alt={lead.coverAlt || ''} width="1600" height="1000" loading="lazy" decoding="async" /></figure>
+          <figure><EditorialPhoto src={lead.cover} alt={lead.coverAlt || ''} width="1600" height="1000" loading="lazy" decoding="async" /></figure>
           <p className="nn-meta">{meta(lead)}</p>
           <h3>{lead.titleEn || lead.title}</h3>
           {lead.dekEn && <p className="nn-dek">{lead.dekEn}</p>}

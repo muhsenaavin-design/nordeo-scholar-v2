@@ -1,3 +1,4 @@
+import EditorialPhoto from '../../components/EditorialPhoto';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { editorialDesks, newsCategories, newsSteps } from '../../data/news';
@@ -63,7 +64,7 @@ export default function NewsHome() {
     <section className="news-desks container" id="rubrik" aria-labelledby="desks-heading">
       <div className="section-heading" data-reveal><div><h2 id="desks-heading">Tiga meja, <em>satu standar.</em></h2></div><p>Setiap rubrik punya pembaca yang berbeda, tetapi diperiksa dengan cara yang sama: sumber jelas, kutipan disetujui, gambar berlisensi.</p></div>
       <div className="desk-grid">{editorialDesks.map((desk, index) => <article key={desk.title} className="desk-card" data-reveal style={{ '--reveal-delay': `${index * 90}ms` }}>
-        <img src={desk.image} alt={desk.alt} width="800" height="500" loading="lazy" decoding="async" />
+        <EditorialPhoto sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" src={desk.image} alt={desk.alt} width="800" height="500" loading="lazy" decoding="async" />
         <h3>{desk.title}</h3><p>{desk.copy}</p>
       </article>)}</div>
     </section>

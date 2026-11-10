@@ -1,3 +1,5 @@
+import EditorialPhoto from '../../components/EditorialPhoto';
+import { stockPhotoCredit } from '../../lib/editorial-photos';
 import { Link, useParams } from 'react-router';
 import { usePrograms } from '../../lib/content';
 import { siteBase } from '../../lib/site';
@@ -24,7 +26,7 @@ export default function TrainingProgram() {
           <p className="page-intro">{program.summary}</p>
           <StatusPill tone="preview">Jadwal tentatif</StatusPill>
         </div>
-        <figure className="program-art"><img src={program.cover} alt={program.coverAlt} width="800" height="560" decoding="async" /></figure>
+        <figure className="program-art"><EditorialPhoto src={program.cover} alt={program.coverAlt} width="800" height="560" decoding="async" />{stockPhotoCredit(program.cover) && <figcaption className="field-hint">{stockPhotoCredit(program.cover)}</figcaption>}</figure>
       </div>
       <div className="program-detail">
         <div>

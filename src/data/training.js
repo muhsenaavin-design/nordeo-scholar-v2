@@ -1,3 +1,5 @@
+import { editorialPhoto } from '../lib/editorial-photos';
+
 // Nordeo Academy content. Every program below is a placeholder until the Academy team
 // confirms dates, facilitators, and fees — the UI labels them "Jadwal tentatif".
 export const trainingTracks = [
@@ -59,8 +61,7 @@ export const trainingPrograms = [
     seats: 'Kuota menyusul',
     level: 'Dasar–menengah',
     focus: 'Penulisan & submission',
-    cover: '/assets/art/training/seminar-draft.svg',
-    coverAlt: 'Ilustrasi tangga menuju submission',
+    ...editorialPhoto('writing-desk'),
     outcomes: ['Memetakan struktur IMRaD pada draf Anda sendiri', 'Membaca author guidelines dan template jurnal tujuan', 'Menyusun daftar periksa sebelum submit'],
   },
   {
@@ -78,8 +79,7 @@ export const trainingPrograms = [
     seats: 'Kuota menyusul',
     level: 'Menengah',
     focus: 'Revisi & respons',
-    cover: '/assets/art/training/seminar-review.svg',
-    coverAlt: 'Ilustrasi gelombang respons reviewer',
+    ...editorialPhoto('peer-discussion'),
     outcomes: ['Mengelompokkan komentar mayor dan minor', 'Menulis response letter poin demi poin', 'Menolak saran dengan argumen yang sopan dan berbasis bukti'],
   },
   {
@@ -96,8 +96,7 @@ export const trainingPrograms = [
     seats: 'Kuota menyusul',
     level: 'Semua level',
     focus: 'Konferensi tahunan',
-    cover: '/assets/art/training/conference-2026.svg',
-    coverAlt: 'Ilustrasi lengkungan konferensi akademik',
+    ...editorialPhoto('conference-hall'),
     outcomes: ['Sesi pleno tentang integritas dan akses terbuka', 'Workshop paralel penulisan dan metodologi', 'Sesi presentasi makalah peserta'],
   },
   {
@@ -114,8 +113,7 @@ export const trainingPrograms = [
     seats: 'Kuota menyusul',
     level: 'Dasar',
     focus: 'Komunikasi riset',
-    cover: '/assets/art/training/conference-poster.svg',
-    coverAlt: 'Ilustrasi bintang presentasi akademik',
+    ...editorialPhoto('research-presentation'),
     outcomes: ['Hierarki visual poster akademik', 'Menyusun presentasi 7 menit', 'Menjawab pertanyaan audiens'],
   },
   {
@@ -132,8 +130,7 @@ export const trainingPrograms = [
     seats: 'Kuota terbatas',
     level: 'Menengah',
     focus: 'Pendampingan naskah',
-    cover: '/assets/art/training/module-scopus.svg',
-    coverAlt: 'Ilustrasi grid modul publikasi',
+    ...editorialPhoto('research-library'),
     outcomes: ['Satu draf utuh yang sudah dibaca editor', 'Pemilihan jurnal yang sesuai ruang lingkup', 'Paket submission: naskah, cover letter, metadata'],
   },
   {
@@ -150,8 +147,7 @@ export const trainingPrograms = [
     seats: 'Kuota terbatas',
     level: 'Semua level',
     focus: 'Etika & integritas',
-    cover: '/assets/art/training/module-ethics.svg',
-    coverAlt: 'Ilustrasi lingkaran integritas akademik',
+    ...editorialPhoto('evidence-review'),
     outcomes: ['Mengenali plagiarisme, duplikasi, dan salami slicing', 'Menulis pernyataan penggunaan AI', 'Mengenali jurnal predator'],
   },
 ];
