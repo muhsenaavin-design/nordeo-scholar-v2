@@ -10,9 +10,12 @@ import { sanitizeHtml } from '../../lib/rich-text';
 import { countView, usePublicContent } from '../../lib/content';
 import { hasDatabase } from '../../lib/supabase';
 
+// Anchor for an article heading, used by the "Di artikel ini" list in the sticky sidebar.
+const sectionId = text => `bagian-${String(text).toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').slice(0, 60)}`;
+
 function Block({ block }) {
   if (block.type === 'html') return <div className="article-rich" dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.html) }} />;
-  if (block.type === 'h2') return <h2>{block.text}</h2>;
+  if (block.type === 'h2') return <h2 id={sectionId(block.text)}>{block.text}</h2>;
   if (block.type === 'quote') return <blockquote><p>{block.text}</p></blockquote>;
   if (block.type === 'list') return <ul>{block.items.map(item => <li key={item}>{item}</li>)}</ul>;
   return <p>{block.text}</p>;
@@ -28,6 +31,7 @@ export default function NewsArticle() {
   useDocumentTitle(story?.title || null);
   if (!story) return loaded || !hasDatabase ? <LegalPage /> : <div className="route-loading" aria-busy="true" />;
   const related = publishedNews().filter(item => item.id !== story.id && item.category === story.category).concat(publishedNews().filter(item => item.id !== story.id && item.category !== story.category)).slice(0, 3);
+  const sections = (story.body || []).filter(block => block.type === 'h2' && block.text).map(block => block.text);
   const credits = creditParts({ writer: story.credits?.writer || story.author, editor: story.credits?.editor, photo: story.credits?.photo });
   const copy = async () => {
     try { await navigator.clipboard.writeText(window.location.href); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { setCopied(false); }
@@ -54,6 +58,10 @@ export default function NewsArticle() {
         <ArticleComments storyId={story.id} slug={story.slug} />
       </div>
       <aside className="article-aside">
+        {sections.length > 1 && <nav className="article-toc" aria-labelledby="toc-heading">
+          <h2 id="toc-heading" className="side-heading">Di artikel ini</h2>
+          <ol>{sections.map(text => <li key={text}><a href={`#${sectionId(text)}`}>{text}</a></li>)}</ol>
+        </nav>}
         <h2 className="side-heading">Baca juga</h2>
         {related.map(item => <SideStory key={item.id} story={item} base={base} />)}
         <div className="aside-cta"><strong>Punya kabar riset?</strong><p>Kirim ke redaksi lewat formulir lima langkah.</p><Link to={`${base}/kirim`} className="text-link">Kirim berita <Arrow /></Link></div>

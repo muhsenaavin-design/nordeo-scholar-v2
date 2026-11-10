@@ -67,3 +67,20 @@ export const bookProcess = [
   { number: '04', title: 'Desain', copy: 'Sampul, tata letak, dan format baca disiapkan untuk cetak maupun digital.' },
   { number: '05', title: 'Terbit', copy: 'Buku didistribusikan, diarsipkan, dan diperkenalkan melalui kanal Nordeo.' },
 ];
+
+// English copy for the Books page on the main (English) site: the four book types and the
+// path from proposal to publication, translated from bookTypes and bookProcess above.
+export const bookServicesEn = [
+  { title: 'Monographs', copy: 'One long argument developed in full, ideal for a dissertation or years of research.' },
+  { title: 'Edited volumes', copy: 'Chapters edited to speak to one another, with an introduction that ties the perspectives together.' },
+  { title: 'Practice guides', copy: 'Workbooks for practitioners and students: concise, applicable, and grounded in evidence.' },
+  { title: 'Reference works', copy: 'Systematically organised references for researchers and teachers to use again and again.' },
+];
+
+export const bookProcessEn = [
+  { number: '01', title: 'Proposal', copy: 'Send a summary of the idea, the intended readers, a chapter list, and a writing sample.' },
+  { number: '02', title: 'Review', copy: 'Editors and expert readers assess novelty, feasibility, and fit.' },
+  { number: '03', title: 'Editing', copy: 'Substantive editing, language polishing, and citation checks.' },
+  { number: '04', title: 'Design', copy: 'Cover and layout prepared for print and digital editions.' },
+  { number: '05', title: 'Publication', copy: 'Distributed, archived, and introduced through Nordeo channels.' },
+];

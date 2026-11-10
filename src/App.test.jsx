@@ -279,7 +279,7 @@ test('NordeoNews brands the news microsite and filters stories by the new rubric
   const tabs = within(await screen.findByRole('group', { name: /filter rubrik/i }));
   expect(tabs.getAllByRole('button').map(node => node.textContent)).toEqual(['Semua', 'Berita', 'Pendidikan', 'Bisnis', 'Teknologi', 'Lifestyle', 'Opini']);
   expect(tabs.getByRole('button', { name: 'Semua' })).toHaveAttribute('aria-pressed', 'true');
-  expect(screen.getByRole('region', { name: /cerita pilihan/i })).toBeInTheDocument();
+  expect(screen.getByRole('region', { name: /cerita lainnya/i })).toBeInTheDocument();
   expect(screen.getByRole('heading', { level: 3, name: 'Terbaru' })).toBeInTheDocument();
   fireEvent.click(tabs.getByRole('button', { name: 'Opini' }));
   expect(screen.getByRole('status')).toHaveTextContent('2 cerita');

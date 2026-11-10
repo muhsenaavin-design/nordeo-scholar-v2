@@ -19,6 +19,19 @@ export function ProgramCard({ program, base }) {
   </Link>;
 }
 
+// Agenda by month: dated programmes first in date order, then "Tanggal menyusul" and cohort labels.
+function agenda(programs) {
+  const sorted = [...programs].sort((a, b) => (a.date ? 0 : 1) - (b.date ? 0 : 1) || String(a.date || '').localeCompare(String(b.date || '')));
+  const groups = [];
+  sorted.forEach(program => {
+    const label = program.dateLabel || 'Tanggal menyusul';
+    let group = groups.find(item => item.label === label);
+    if (!group) { group = { label, key: label.toLowerCase().replace(/\W+/g, '-'), items: [] }; groups.push(group); }
+    group.items.push(program);
+  });
+  return groups;
+}
+
 export default function TrainingHome() {
   useDocumentTitle('Nordeo Academy');
   const base = siteBase('training');
@@ -58,7 +71,10 @@ export default function TrainingHome() {
         </div>
         <p className="placeholder-note" role="note"><strong>Jadwal tentatif.</strong> Program di bawah adalah rencana kurikulum. Tanggal, fasilitator, dan biaya diumumkan setelah final — daftar minat untuk dikabari lebih dulu.</p>
         <p className="sr-only" role="status">{programs.length} program</p>
-        <div className="program-grid">{programs.map(program => <ProgramCard key={program.id} program={program} base={base} />)}</div>
+        <div className="agenda-columns">{agenda(programs).map(group => <section key={group.label} className="agenda-column" aria-labelledby={`agenda-${group.key}`}>
+          <h3 id={`agenda-${group.key}`} className="agenda-month"><span>{group.label}</span><small>{group.items.length} program</small></h3>
+          <div className="agenda-stack">{group.items.map(program => <ProgramCard key={program.id} program={program} base={base} />)}</div>
+        </section>)}</div>
       </div>
     </section>
 
