@@ -125,6 +125,10 @@ html[data-motion="reduced"] .pill-cta-icon .arrow { transition: none; }
 .journal-carousel .directory-card { width: 100%; }
 .journal-carousel .directory-card:hover { transform: none; }
 .journal-carousel .carousel-arrow { top: 50%; }
+/* Homepage simple rail: 4 journals, all visible on desktop; scrollable as portfolio grows. */
+.journal-carousel-simple { --slides: 4; margin-top: 10px; }
+@media (max-width: 1120px) { .journal-carousel-simple { --slides: 3; } }
+@media (max-width: 900px) { .journal-carousel-simple { --slides: 2; } }
 .directory-visit { margin-left: auto; font-weight: 600; }
 .journal-mark-jibdi { background: #065ee0; }
 .journal-mark-jibdi b { color: #fdd535; }

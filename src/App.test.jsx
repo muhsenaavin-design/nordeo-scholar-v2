@@ -115,14 +115,18 @@ test('keeps the homepage focused: no discovery logo wall, official social links 
   expect(screen.queryByRole('button', { name: /jeda animasi/i })).not.toBeInTheDocument();
 });
 
-test('homepage journal finder is a split index that switches the detail panel', () => {
+test('homepage journal finder shows four simple journal cards with visit links only', () => {
   render(<MemoryRouter><App /></MemoryRouter>);
   const finder = within(document.getElementById('jurnal'));
   expect(finder.queryByRole('searchbox')).not.toBeInTheDocument();
+  expect(finder.queryByRole('button', { name: /see articles/i })).not.toBeInTheDocument();
+  const visits = finder.getAllByRole('link', { name: /visit /i });
+  expect(visits).toHaveLength(4);
   expect(finder.getByRole('link', { name: /visit jetsi/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jetsi');
-  fireEvent.click(finder.getByRole('button', { name: /journal of integrated education and learning/i }));
   expect(finder.getByRole('link', { name: /visit jiel/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jiel');
-  expect(finder.queryByRole('link', { name: /visit jetsi/i })).not.toBeInTheDocument();
+  expect(finder.getByRole('link', { name: /visit jurnal pengmas/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/pengmas');
+  expect(finder.getByRole('link', { name: /visit jibdi/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jibdi');
+  expect(finder.getByRole('region', { name: /nordeo journals/i })).toBeInTheDocument();
 });
 
 test('homepage articles lead with a featured article and mark empty journals as soon', () => {

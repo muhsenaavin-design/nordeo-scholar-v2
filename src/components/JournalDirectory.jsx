@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { directoryJournals, journalCategories } from '../data/journal-directory';
 import { Arrow, CloseIcon, EmptyState, JournalMark, SearchIcon, SmartLink, StatusPill } from './parts';
+import Carousel from './Carousel';
 
 function categoryCount(id) {
   return id === 'all' ? directoryJournals.length : directoryJournals.filter(journal => journal.category === id).length;
@@ -34,61 +34,19 @@ function DirectoryCard({ journal, selected }) {
   </article>;
 }
 
-// Homepage "split index" (Redesign, Option A): the journal list on the left picks
-// which journal the large brand-coloured panel on the right describes. With only four
-// journals, this replaces the search + field chips, which each matched a single journal.
-function JournalSplitIndex({ journals }) {
-  const [activeId, setActiveId] = useState(journals[0]?.id);
-  const active = journals.find(journal => journal.id === activeId) || journals[0];
-  if (!active) return null;
-  const external = /^https?:/i.test(active.url);
-  const hasIssn = active.eissn && active.eissn !== '—';
-
-  return <section className="finder-split" aria-label="Nordeo journals">
-    <ol className="finder-split-list">
-      {journals.map((journal, index) => <li key={journal.id}>
-        <button
-          type="button"
-          className={`finder-split-item ${journal.id === active.id ? 'is-active' : ''}`}
-          aria-pressed={journal.id === active.id}
-          aria-controls="finder-split-panel"
-          onClick={() => setActiveId(journal.id)}
-        >
-          <span className="finder-split-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-          <JournalMark id={journal.id} label={journal.short} />
-          <span className="finder-split-copy">
-            <span className="finder-split-name">{journal.name}</span>
-            <span className="finder-split-sub">
-              <span>{journal.categoryLabel}</span>
-              <StatusPill tone={journal.statusTone}>{journal.status}</StatusPill>
-            </span>
-          </span>
-          <span className="finder-split-arrow" aria-hidden="true"><Arrow /></span>
-        </button>
-      </li>)}
-    </ol>
-
-    <article className={`finder-split-panel finder-split-panel-${active.id}`} id="finder-split-panel" aria-live="polite">
-      <span className="finder-split-watermark" aria-hidden="true">{active.short}</span>
-      <div className="finder-split-panel-top">
-        <JournalMark id={active.id} label={active.short} />
-        <span className="finder-split-field">{active.categoryLabel}</span>
-      </div>
-      <h3>{active.name}</h3>
-      <p className="finder-split-description">{active.description}</p>
-      <dl className="finder-split-facts">
-        <div><dt>E-ISSN</dt><dd>{hasIssn ? active.eissn : 'In process'}</dd></div>
-        <div><dt>Review</dt><dd>{active.review}</dd></div>
-        <div><dt>Articles</dt><dd>{active.articleCount > 0 ? active.articleCount : 'First issue soon'}</dd></div>
-      </dl>
-      <div className="finder-split-panel-bottom">
-        <p className="finder-split-indexing">{active.indexing.length > 0 ? active.indexing.join(' · ') : active.access}</p>
-        <SmartLink href={active.url} className="finder-split-visit" {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-          {visitLabel(active)} <Arrow />{external && <span className="sr-only"> (opens in a new tab)</span>}
-        </SmartLink>
-      </div>
-    </article>
-  </section>;
+// Homepage: 4 simple cards in a horizontal rail. Per Feedback 2 (Profil Perusahaan),
+// cards drive traffic to each journal site (Visit only — no guidelines/article links,
+// since journal-site visits count toward accreditation) and can slide sideways as the
+// journal portfolio grows.
+function JournalCardRail({ journals }) {
+  return <Carousel
+    className="journal-carousel journal-carousel-simple"
+    label="Nordeo journals"
+    items={journals}
+    prevLabel="Previous journals"
+    nextLabel="More journals"
+    renderItem={journal => <DirectoryCard journal={journal} />}
+  />;
 }
 
 function SearchBox({ query, onQueryChange, placeholder, label }) {
@@ -121,10 +79,10 @@ export default function JournalDirectory({
           <h2 id="journal-finder-heading">Find the journal that fits <em>your research field.</em></h2>
         </div>
         <div className="finder-head-aside">
-          <p>Pick a journal, compare its scope, then visit it to submit and read the full archive.</p>
+          <p>Four journals, each with its own scope and platform. Visit a journal to read, submit, and follow its guidelines.</p>
         </div>
       </div>
-      <JournalSplitIndex journals={directoryJournals} />
+      <JournalCardRail journals={directoryJournals} />
     </>;
   }
 
