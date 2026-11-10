@@ -98,3 +98,6 @@
   .adm-side, .adm-side.is-compact { min-height: 0; border-radius: 16px; background: var(--bg); }
   .adm-shell .adm-main { margin: 6px; padding: 16px; }
 }
+
+/* Module tabs share a class name with the old top-nav pill bar; drop that bar's pill. */
+.adm-tabs { padding: 0; border-radius: 0; background: transparent; overflow: visible; gap: 4px; }
