@@ -1,4 +1,5 @@
 import { directoryJournals, journalCategories } from '../data/journal-directory';
+import { SpotlightCard } from './effects';
 import { Arrow, CloseIcon, EmptyState, JournalMark, SearchIcon, SmartLink, StatusPill } from './parts';
 import Carousel from './Carousel';
 
@@ -15,27 +16,48 @@ function visitLabel(journal) {
 // accreditation — Nordeo, Feedback 2).
 function DirectoryCard({ journal, selected, onShowArticles }) {
   const external = /^https?:/i.test(journal.url);
-  return <article className={`directory-card ${selected ? 'is-selected' : ''}`} id={journal.id}>
-    <div className="directory-card-top">
-      <JournalMark id={journal.id} label={journal.short} />
-      <StatusPill tone={journal.statusTone}>{journal.status}</StatusPill>
+  return <SpotlightCard className={`directory-card directory-card-${journal.id} ${selected ? 'is-selected' : ''}`} id={journal.id}>
+    {journal.preview && <div className="directory-visual" aria-hidden="true">
+      <span className="directory-browser-bar"><i /><i /><i /><b>{journal.displayUrl || 'nordeoscholar.com'}</b></span>
+      <div className="directory-preview-wrap">
+        <img className="directory-preview-img" src={journal.preview} alt="" width="1200" height="750" loading="lazy" decoding="async" />
+        <div className="directory-visual-shade" />
+        {journal.cover && <img className="directory-cover-img" src={journal.cover} alt="" width="136" height="192" loading="lazy" decoding="async" />}
+      </div>
+    </div>}
+    <div className="directory-card-body">
+      <div className="directory-card-top">
+        <JournalMark id={journal.id} label={journal.short} />
+        <StatusPill tone={journal.statusTone}>{journal.status}</StatusPill>
+      </div>
+      <p className="directory-meta">
+        <span className="directory-meta-field">{journal.categoryLabel}</span>
+        {journal.eissn !== '—' && <span className="directory-meta-issn">E-ISSN {journal.eissn}</span>}
+        {journal.frequency && <span className="directory-meta-freq">{journal.frequency}</span>}
+      </p>
+      <h3>{journal.name}</h3>
+      <p className="directory-description">{journal.description}</p>
+      {Array.isArray(journal.topics) && journal.topics.length > 0 && <ul className="directory-topics" aria-label="Scope">
+        {journal.topics.slice(0, 3).map(topic => <li key={topic}>{topic}</li>)}
+        {journal.topics.length > 3 && <li className="is-more">+{journal.topics.length - 3}</li>}
+      </ul>}
+      <div className="directory-footer">
+        {onShowArticles && <button type="button" className="finder-text-button" aria-pressed={selected} onClick={() => onShowArticles(journal.id)}>
+          <span className="finder-button-dot" aria-hidden="true" />
+          {selected ? 'Articles shown below' : 'See articles'}
+        </button>}
+        <SmartLink href={journal.url} className="text-link directory-visit" {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+          {visitLabel(journal)} <Arrow />{external && <span className="sr-only"> (opens in a new tab)</span>}
+        </SmartLink>
+      </div>
+      {journal.indexing.length > 0 && <p className="directory-indexing"><span className="directory-indexing-dot" aria-hidden="true" />{journal.indexing.join(' · ')}</p>}
     </div>
-    <h3>{journal.name}</h3>
-    <p className="directory-meta"><span>{journal.categoryLabel}</span>{journal.eissn !== '—' && <span>E-ISSN {journal.eissn}</span>}</p>
-    <p className="directory-description">{journal.description}</p>
-    <div className="directory-footer">
-      {onShowArticles && <button type="button" className="finder-text-button" aria-pressed={selected} onClick={() => onShowArticles(journal.id)}>{selected ? 'Articles shown below' : 'See articles'}</button>}
-      <SmartLink href={journal.url} className="text-link directory-visit" {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-        {visitLabel(journal)} <Arrow />{external && <span className="sr-only"> (opens in a new tab)</span>}
-      </SmartLink>
-    </div>
-    {journal.indexing.length > 0 && <p className="directory-indexing">{journal.indexing.join(' · ')}</p>}
-  </article>;
+  </SpotlightCard>;
 }
 
 function FieldList({ category, onChooseCategory }) {
   return <div className="finder-fields" role="group" aria-label="Filter journals by field">
-    <span className="filter-label">Field</span>
+    <span className="filter-label">Research Field</span>
     {journalCategories.map(item => <button key={item.id} type="button" className={`finder-field ${category === item.id ? 'is-active' : ''}`} aria-pressed={category === item.id} onClick={() => onChooseCategory(item.id)}>
       <span>{item.label}</span><span className="filter-count">{categoryCount(item.id)}</span>
     </button>)}
@@ -83,23 +105,42 @@ export default function JournalDirectory({
   return <>
     <div className="finder-head" data-reveal>
       <div>
+        <p className="finder-kicker"><span className="finder-kicker-rule" aria-hidden="true" />Peer-Reviewed Portfolio</p>
         <h2 id="journal-finder-heading">Find the journal that fits <em>your research field.</em></h2>
       </div>
       <div className="finder-head-aside">
         <p>Choose a field, compare scopes, then visit the journal to submit and read its full archive.</p>
+        <div className="finder-head-stats" aria-hidden="true">
+          <span><strong>04</strong> Active &amp; Upcoming Titles</span>
+          <span><strong>100%</strong> Open Access</span>
+          <span><strong>10.68627</strong> Crossref Prefix</span>
+        </div>
       </div>
     </div>
 
     {side ? <div className="finder-layout">
       <aside className="finder-side" aria-label="Filter journals">
-        <SearchBox query={query} onQueryChange={onQueryChange} placeholder={searchPlaceholder} label={searchLabel} />
+        <div className="finder-side-top">
+          <div className="finder-side-header">
+            <span className="finder-side-title">Directory Index</span>
+            <p className="finder-result" role="status" aria-live="polite">{resultLabel}</p>
+          </div>
+          <SearchBox query={query} onQueryChange={onQueryChange} placeholder={searchPlaceholder} label={searchLabel} />
+        </div>
         <FieldList category={category} onChooseCategory={onChooseCategory} />
-        <p className="finder-result" role="status" aria-live="polite">{resultLabel}</p>
-        <ul className="finder-facts">
-          <li>Open access, free to read</li>
-          <li>Double-blind peer review</li>
-          <li>Crossref DOI · prefix 10.68627</li>
-        </ul>
+        <div className="finder-credentials">
+          <span className="finder-credentials-label">Publishing Standards</span>
+          <ul className="finder-facts">
+            <li>Open access, free to read</li>
+            <li>Double-blind peer review</li>
+            <li>Crossref DOI · prefix 10.68627</li>
+          </ul>
+          <div className="finder-platforms" aria-hidden="true">
+            <img src="/assets/platforms/garuda.png" alt="" width="68" height="20" loading="lazy" />
+            <img src="/assets/platforms/crossref.svg" alt="" width="72" height="20" loading="lazy" />
+            <img src="/assets/platforms/google-scholar.png" alt="" width="84" height="20" loading="lazy" />
+          </div>
+        </div>
       </aside>
       <div className="finder-main">
         {noResults
