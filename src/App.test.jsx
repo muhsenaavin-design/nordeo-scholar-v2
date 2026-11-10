@@ -76,7 +76,7 @@ test('homepage merges vision, overview, and founder note into one section before
   for (const name of [/^our vision$/i, /company overview/i, /core values/i]) expect(main.queryByRole('heading', { name })).not.toBeInTheDocument();
   expect(document.getElementById('founder')).toBeNull();
   expect(screen.queryByText(/articles published in jetsi/i)).not.toBeInTheDocument();
-  expect(screen.getByRole('heading', { level: 3, name: /popular stories/i })).toBeInTheDocument();
+  expect(screen.getByRole('list', { name: /popular stories/i })).toBeInTheDocument();
   expect(screen.getByRole('heading', { level: 2, name: /academy calendar/i })).toBeInTheDocument();
   expect(screen.getByRole('heading', { level: 2, name: /questions, answered/i })).toBeInTheDocument();
 });

@@ -135,34 +135,33 @@ export function NewsSpotlight() {
   const [lead, ...rest] = stories;
   const href = story => ecosystemHref('news', `/${story.slug}`);
   const meta = story => `${newsCategoryEn[story.category] || story.category} · ${formatDate(story.date, { day: 'numeric', month: 'short', year: 'numeric' }, 'en-GB')}`;
-  return <section className="nn-section section-space container" aria-labelledby="nn-heading">
-    <div className="section-heading" data-reveal>
-      <h2 id="nn-heading">What’s moving <em>across Nordeo.</em></h2>
-      <p>Popular stories from NordeoNews.</p>
+  // Mockup pick (Nov 2026): a plain lead story beside a numbered "most read" list, no boxes.
+  return <section className="nn-section nn-simple section-space container" aria-labelledby="nn-heading">
+    <div className="nn-simple-head" data-reveal>
+      <div>
+        <p className="nn-kicker"><span className="nn-brand">NordeoNews</span></p>
+        <h2 id="nn-heading">What’s moving <em>across Nordeo.</em></h2>
+      </div>
+      <div className="nn-simple-links">
+        <SmartLink href={ecosystemHref('news')} className="text-link">All stories <Arrow /></SmartLink>
+        <SmartLink href={ecosystemHref('news', '/kirim')} className="text-link">Submit your story <Arrow /></SmartLink>
+      </div>
     </div>
-    <div className="nn-grid">
-      <article className="nn-lead" data-reveal>
-        <SmartLink href={href(lead)} className="nn-lead-link">
-          <figure className="nn-lead-cover"><img src={lead.cover} alt={lead.coverAlt || ''} width="1600" height="1000" loading="lazy" decoding="async" /><span className="nn-rank-badge">01</span></figure>
+    <div className="nn-simple-grid">
+      <article className="nn-simple-lead" data-reveal>
+        <SmartLink href={href(lead)}>
+          <figure><img src={lead.cover} alt={lead.coverAlt || ''} width="1600" height="1000" loading="lazy" decoding="async" /></figure>
           <p className="nn-meta">{meta(lead)}</p>
           <h3>{lead.titleEn || lead.title}</h3>
           {lead.dekEn && <p className="nn-dek">{lead.dekEn}</p>}
         </SmartLink>
       </article>
-      <div className="nn-popular" data-reveal style={{ '--reveal-delay': '120ms' }}>
-        <div className="nn-popular-head">
-          <h3><span className="nn-brand">NordeoNews</span> Popular stories</h3>
-          <SmartLink href={ecosystemHref('news')} className="text-link">All stories <Arrow /></SmartLink>
-        </div>
-        <ol className="nn-list">
-          {rest.map((story, i) => <li key={story.id}><SmartLink href={href(story)}>
-            <span className="nn-rank">{pad(i + 2)}</span>
-            <span className="nn-item"><small>{meta(story)}</small><strong>{story.titleEn || story.title}</strong></span>
-            <Arrow />
-          </SmartLink></li>)}
-        </ol>
-        <SmartLink href={ecosystemHref('news', '/kirim')} className="button button-outline">Submit your story</SmartLink>
-      </div>
+      <ol className="nn-simple-list" aria-label="Popular stories" data-reveal style={{ '--reveal-delay': '120ms' }}>
+        {rest.map((story, i) => <li key={story.id}><SmartLink href={href(story)}>
+          <span className="nn-simple-rank" aria-hidden="true">{i + 2}</span>
+          <span className="nn-simple-item"><strong>{story.titleEn || story.title}</strong><small>{meta(story)}</small></span>
+        </SmartLink></li>)}
+      </ol>
     </div>
   </section>;
 }
