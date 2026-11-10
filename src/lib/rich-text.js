@@ -1,11 +1,15 @@
 // Rich text for the news submission editor. The editor writes HTML; everything that leaves
 // it (storage, the article page, pasted content) goes through sanitizeHtml(), which keeps a
-// short list of tags and drops every attribute except safe links and text alignment.
+// short list of tags (paragraphs, two heading levels, lists, quotes, bold, italic, underline,
+// strike, superscript, subscript, highlight, links) and drops every attribute except safe
+// links and text alignment.
 
 const BLOCKS = new Set(['P', 'H2', 'H3', 'UL', 'OL', 'LI', 'BLOCKQUOTE']);
-const INLINE = { STRONG: 'strong', B: 'strong', EM: 'em', I: 'em', U: 'u', S: 's', STRIKE: 's', DEL: 's', A: 'a', BR: 'br' };
+const INLINE = { STRONG: 'strong', B: 'strong', EM: 'em', I: 'em', U: 'u', S: 's', STRIKE: 's', DEL: 's', A: 'a', BR: 'br', SUP: 'sup', SUB: 'sub', MARK: 'mark' };
 const ALIGN = /text-align:\s*(left|center|right|justify)/i;
 const SAFE_URL = /^(https?:|mailto:)/i;
+// A background colour other than none or white, as written by highlight tools.
+const HIGHLIGHT = /background(-color)?:\s*(?!transparent|initial|inherit|none|white|#fff\b|#ffffff\b|rgba?\(255,\s*255,\s*255|rgba\(0,\s*0,\s*0,\s*0\))[#a-z(]/i;
 const DROP = new Set(['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'TEMPLATE', 'META', 'LINK', 'HEAD', 'TITLE', 'SVG', 'MATH', 'NOSCRIPT', 'XML']);
 
 function cleanNode(node, doc) {
@@ -23,6 +27,11 @@ function cleanNode(node, doc) {
       let wrapped = inner;
       if (/font-weight:\s*(bold|[6-9]00)/i.test(style)) { const el = doc.createElement('strong'); el.appendChild(wrapped); wrapped = el; }
       if (/font-style:\s*italic/i.test(style)) { const el = doc.createElement('em'); el.appendChild(wrapped); wrapped = el; }
+      if (/text-decoration[^;]*underline/i.test(style)) { const el = doc.createElement('u'); el.appendChild(wrapped); wrapped = el; }
+      if (/vertical-align:\s*super/i.test(style)) { const el = doc.createElement('sup'); el.appendChild(wrapped); wrapped = el; }
+      if (/vertical-align:\s*sub/i.test(style)) { const el = doc.createElement('sub'); el.appendChild(wrapped); wrapped = el; }
+      // The editor's highlight (and Word's) is a background colour; keep it as <mark>.
+      if (HIGHLIGHT.test(style)) { const el = doc.createElement('mark'); el.appendChild(wrapped); wrapped = el; }
       out.appendChild(wrapped);
       return;
     }
