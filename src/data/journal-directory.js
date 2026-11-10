@@ -64,7 +64,7 @@ export const directoryJournals = [
     description: 'Educational theory, learning practice, technology, and interdisciplinary perspectives on today’s challenges in education.',
     topics: ['Educational Theories', 'Learning Practices', 'Education Technology', 'Innovation in Education', 'Interdisciplinary Perspectives'],
     articleCount: 0,
-    indexing: ['Google Scholar'],
+    indexing: [],
     // The template link on the JIEL submissions page is truncated (ends at /document/d/), so it is not linked here.
     guidelinesUrl: 'https://nordeoscholar.com/journal/jiel/about/submissions',
     url: 'https://nordeoscholar.com/journal/jiel',
