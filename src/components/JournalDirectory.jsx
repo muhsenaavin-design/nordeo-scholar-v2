@@ -16,6 +16,7 @@ function visitLabel(journal) {
 // accreditation — Nordeo, Feedback 2).
 function DirectoryCard({ journal, selected, onShowArticles }) {
   const external = /^https?:/i.test(journal.url);
+  const hasIndexing = journal.indexing.length > 0;
   return <SpotlightCard className={`directory-card directory-card-${journal.id} ${selected ? 'is-selected' : ''}`} id={journal.id}>
     {journal.preview && <div className="directory-visual" aria-hidden="true">
       <span className="directory-browser-bar"><i /><i /><i /><b>{journal.displayUrl || 'nordeoscholar.com'}</b></span>
@@ -27,37 +28,39 @@ function DirectoryCard({ journal, selected, onShowArticles }) {
     </div>}
     <div className="directory-card-body">
       <div className="directory-card-top">
-        <JournalMark id={journal.id} label={journal.short} />
+        <JournalMark id={journal.id} label={journal.short} size="sm" />
         <StatusPill tone={journal.statusTone}>{journal.status}</StatusPill>
       </div>
       <p className="directory-meta">
         <span className="directory-meta-field">{journal.categoryLabel}</span>
-        {journal.eissn !== '—' && <span className="directory-meta-issn">E-ISSN {journal.eissn}</span>}
-        {journal.frequency && <span className="directory-meta-freq">{journal.frequency}</span>}
+        {journal.eissn !== '—' ? <span className="directory-meta-issn">E-ISSN {journal.eissn}</span> : <span className="directory-meta-issn is-muted">{journal.frequency}</span>}
       </p>
       <h3>{journal.name}</h3>
       <p className="directory-description">{journal.description}</p>
       {Array.isArray(journal.topics) && journal.topics.length > 0 && <ul className="directory-topics" aria-label="Scope">
-        {journal.topics.slice(0, 3).map(topic => <li key={topic}>{topic}</li>)}
-        {journal.topics.length > 3 && <li className="is-more">+{journal.topics.length - 3}</li>}
+        {journal.topics.slice(0, 2).map(topic => <li key={topic}>{topic}</li>)}
+        {journal.topics.length > 2 && <li className="is-more">+{journal.topics.length - 2}</li>}
       </ul>}
+      <p className={`directory-indexing ${hasIndexing ? '' : 'is-fallback'}`.trim()} {...(hasIndexing ? {} : { 'aria-hidden': 'true' })}>
+        <span className="directory-indexing-dot" aria-hidden="true" />
+        <span>{hasIndexing ? journal.indexing.join(' · ') : `${journal.access} · ${journal.review}`}</span>
+      </p>
       <div className="directory-footer">
         {onShowArticles && <button type="button" className="finder-text-button" aria-pressed={selected} onClick={() => onShowArticles(journal.id)}>
           <span className="finder-button-dot" aria-hidden="true" />
-          {selected ? 'Articles shown below' : 'See articles'}
+          {selected ? 'Articles below' : 'See articles'}
         </button>}
         <SmartLink href={journal.url} className="text-link directory-visit" {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
           {visitLabel(journal)} <Arrow />{external && <span className="sr-only"> (opens in a new tab)</span>}
         </SmartLink>
       </div>
-      {journal.indexing.length > 0 && <p className="directory-indexing"><span className="directory-indexing-dot" aria-hidden="true" />{journal.indexing.join(' · ')}</p>}
     </div>
   </SpotlightCard>;
 }
 
 function FieldList({ category, onChooseCategory }) {
   return <div className="finder-fields" role="group" aria-label="Filter journals by field">
-    <span className="filter-label">Research Field</span>
+    <span className="filter-label">Field</span>
     {journalCategories.map(item => <button key={item.id} type="button" className={`finder-field ${category === item.id ? 'is-active' : ''}`} aria-pressed={category === item.id} onClick={() => onChooseCategory(item.id)}>
       <span>{item.label}</span><span className="filter-count">{categoryCount(item.id)}</span>
     </button>)}
@@ -119,29 +122,27 @@ export default function JournalDirectory({
     </div>
 
     {side ? <div className="finder-layout">
-      <aside className="finder-side" aria-label="Filter journals">
-        <div className="finder-side-top">
-          <div className="finder-side-header">
-            <span className="finder-side-title">Directory Index</span>
+      <div className="finder-top-deck" aria-label="Filter journals">
+        <div className="finder-top-bar">
+          <FieldList category={category} onChooseCategory={onChooseCategory} />
+          <div className="finder-top-search">
+            <SearchBox query={query} onQueryChange={onQueryChange} placeholder={searchPlaceholder} label={searchLabel} />
             <p className="finder-result" role="status" aria-live="polite">{resultLabel}</p>
           </div>
-          <SearchBox query={query} onQueryChange={onQueryChange} placeholder={searchPlaceholder} label={searchLabel} />
         </div>
-        <FieldList category={category} onChooseCategory={onChooseCategory} />
-        <div className="finder-credentials">
-          <span className="finder-credentials-label">Publishing Standards</span>
+        <div className="finder-standards-strip">
           <ul className="finder-facts">
             <li>Open access, free to read</li>
             <li>Double-blind peer review</li>
             <li>Crossref DOI · prefix 10.68627</li>
           </ul>
           <div className="finder-platforms" aria-hidden="true">
-            <img src="/assets/platforms/garuda.png" alt="" width="68" height="20" loading="lazy" />
-            <img src="/assets/platforms/crossref.svg" alt="" width="72" height="20" loading="lazy" />
-            <img src="/assets/platforms/google-scholar.png" alt="" width="84" height="20" loading="lazy" />
+            <img src="/assets/platforms/garuda.png" alt="" width="64" height="18" loading="lazy" />
+            <img src="/assets/platforms/crossref.svg" alt="" width="68" height="18" loading="lazy" />
+            <img src="/assets/platforms/google-scholar.png" alt="" width="80" height="18" loading="lazy" />
           </div>
         </div>
-      </aside>
+      </div>
       <div className="finder-main">
         {noResults
           ? <EmptyState title="No results" copy="No journal or article matches your search. Try another keyword, or return to all fields and focus areas." action={<button className="button button-dark" type="button" onClick={onReset}>Reset search</button>} />
