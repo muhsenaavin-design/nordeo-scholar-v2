@@ -1,6 +1,7 @@
-import { directoryJournals, journalCategories } from '../data/journal-directory';
+import { directoryJournals, journalArticles, journalCategories } from '../data/journal-directory';
 import { Arrow, CloseIcon, EmptyState, JournalMark, SearchIcon, SmartLink, StatusPill } from './parts';
 import Carousel from './Carousel';
+import JournalCover from './JournalCover';
 
 function categoryCount(id) {
   return id === 'all' ? directoryJournals.length : directoryJournals.filter(journal => journal.category === id).length;
@@ -34,19 +35,52 @@ function DirectoryCard({ journal, selected }) {
   </article>;
 }
 
-// Homepage: 4 simple cards in a horizontal rail. Per Feedback 2 (Profil Perusahaan),
-// cards drive traffic to each journal site (Visit only — no guidelines/article links,
-// since journal-site visits count toward accreditation) and can slide sideways as the
-// journal portfolio grows.
+// Homepage "journal shelf" (Nov 2026, fourth pass): each journal leads with a cover in its own
+// colours, then the same fixed rows (status, name, scope, two facts, Visit) so the Visit buttons
+// line up across cards. Visit is still the only action, since journal-site visits count toward
+// accreditation (Feedback 2). The rail scrolls sideways as the portfolio grows.
+function ShelfCard({ journal }) {
+  const external = /^https?:/i.test(journal.url);
+  const eissn = journal.eissn === '—' ? 'Not yet assigned' : journal.eissn;
+  return <article className={`shelf-card shelf-card-${journal.id}`} id={journal.id}>
+    <JournalCover journal={journal} />
+    <div className="shelf-card-body">
+      <StatusPill tone={journal.statusTone}>{journal.status}</StatusPill>
+      <h3>{journal.name}</h3>
+      <p className="shelf-card-scope">{journal.description}</p>
+      <dl className="shelf-card-facts">
+        <div><dt>E-ISSN</dt><dd>{eissn}</dd></div>
+        <div><dt>Review</dt><dd>{journal.review.replace(' review', '')}</dd></div>
+      </dl>
+      <p className="shelf-card-index">{journal.indexing.length ? journal.indexing.join(' · ') : 'Open access · indexing after first issue'}</p>
+      <SmartLink href={journal.url} className="shelf-card-visit" {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+        {visitLabel(journal)} <Arrow />{external && <span className="sr-only"> (opens in a new tab)</span>}
+      </SmartLink>
+    </div>
+  </article>;
+}
+
 function JournalCardRail({ journals }) {
   return <Carousel
-    className="journal-carousel journal-carousel-simple"
+    className="journal-carousel journal-shelf"
     label="Nordeo journals"
     items={journals}
     prevLabel="Previous journals"
     nextLabel="More journals"
-    renderItem={journal => <DirectoryCard journal={journal} />}
+    renderItem={journal => <ShelfCard journal={journal} />}
   />;
+}
+
+function ShelfStats() {
+  const stats = [
+    [directoryJournals.length, 'peer-reviewed journals'],
+    [journalArticles.length, 'articles published so far'],
+    ['100%', 'open access, free to read'],
+    ['Double-blind', 'peer review on every manuscript'],
+  ];
+  return <dl className="shelf-stats" data-reveal>
+    {stats.map(([value, label]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+  </dl>;
 }
 
 function SearchBox({ query, onQueryChange, placeholder, label }) {
@@ -82,6 +116,7 @@ export default function JournalDirectory({
           <p>Four journals, each with its own scope and platform. Visit a journal to read, submit, and follow its guidelines.</p>
         </div>
       </div>
+      <ShelfStats />
       <JournalCardRail journals={directoryJournals} />
     </>;
   }

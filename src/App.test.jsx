@@ -129,12 +129,21 @@ test('homepage journal finder shows four simple journal cards with visit links o
   expect(finder.getByRole('region', { name: /nordeo journals/i })).toBeInTheDocument();
 });
 
-test('homepage articles lead with a featured article and mark empty journals as soon', () => {
+test('homepage articles are a searchable archive table across journals', () => {
   render(<MemoryRouter><App /></MemoryRouter>);
   const articles = within(document.getElementById('artikel'));
+  expect(articles.getByRole('table')).toBeInTheDocument();
   expect(articles.getByRole('link', { name: /shopee live among generation z/i })).toHaveAttribute('href', 'https://doi.org/10.68627/742989');
-  expect(articles.getByText('Showing 5 of 14 JETSI articles.')).toBeInTheDocument();
-  expect(articles.getByRole('button', { name: /^JIEL/ })).toBeDisabled();
+  expect(articles.getByText('Showing 1–8 of 14 articles')).toBeInTheDocument();
+  expect(articles.getByRole('option', { name: /^JIEL/ })).toBeDisabled();
+
+  fireEvent.change(articles.getByLabelText('Search'), { target: { value: 'open-pit' } });
+  expect(articles.getByText('Showing 1–2 of 2 articles')).toBeInTheDocument();
+  expect(articles.queryByRole('link', { name: /shopee live/i })).not.toBeInTheDocument();
+
+  fireEvent.change(articles.getByLabelText('Search'), { target: { value: '' } });
+  fireEvent.click(articles.getByRole('button', { name: 'Page 2' }));
+  expect(articles.getByText('Showing 9–14 of 14 articles')).toBeInTheDocument();
 });
 
 test('homepage keeps the journal finder and published articles as separate sections', () => {

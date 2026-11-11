@@ -19,8 +19,12 @@ const marks = {
   jibdi: ['JIB', 'DI'],
 };
 
+export function journalMarkParts(id, label) {
+  return marks[id] || [label || id, ''];
+}
+
 export function JournalMark({ id, label, size = 'md' }) {
-  const [lead, accent] = marks[id] || [label || id, ''];
+  const [lead, accent] = journalMarkParts(id, label);
   return <span className={`journal-mark journal-mark-${id} journal-mark-${size}`} aria-hidden="true"><span>{lead}</span><b>{accent}</b></span>;
 }
 

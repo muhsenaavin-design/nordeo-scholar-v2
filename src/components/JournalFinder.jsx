@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { articleTopics, directoryJournals, journalArticles } from '../data/journal-directory';
 import JournalDirectory from './JournalDirectory';
 import PublishedArticles from './PublishedArticles';
+import ArticleArchive from './ArticleArchive';
 
 const ALL_TOPICS = articleTopics[0];
 const normalize = value => String(value).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
@@ -27,11 +28,8 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, layou
   const [topic, setTopic] = useState(ALL_TOPICS);
   const articleRef = useRef(null);
   const search = useMemo(() => normalize(query.trim()), [query]);
-  // Split layout: the sidebar search belongs to the journal finder only, so the
-  // article list below keeps its own journal tabs and focus-area filters.
-  const articleSearch = split ? '' : search;
 
-  const searchPool = useMemo(() => journalArticles.filter(article => articleMatches(article, articleSearch)), [articleSearch]);
+  const searchPool = useMemo(() => journalArticles.filter(article => articleMatches(article, search)), [search]);
   const filteredJournals = useMemo(
     () => directoryJournals.filter(journal => (category === 'all' || journal.category === category) && journalMatches(journal, search)),
     [category, search],
@@ -50,7 +48,7 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, layou
     return counts;
   }, [searchJournalPool]);
 
-  const hasArticleFilters = Boolean(articleSearch) || topic !== ALL_TOPICS;
+  const hasArticleFilters = Boolean(search) || topic !== ALL_TOPICS;
 
   function chooseCategory(id) {
     setCategory(id);
@@ -79,17 +77,7 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, layou
     setTopic(ALL_TOPICS);
   }
 
-  function resetArticleFilters() {
-    if (split) {
-      setTopic(ALL_TOPICS);
-      return;
-    }
-    resetFilters();
-  }
-
   const articleBlock = <PublishedArticles
-    headingLevel={split ? 2 : 3}
-    showLead={split}
     journal={activeJournal}
     journals={directoryJournals}
     articles={articles}
@@ -102,10 +90,9 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, layou
     limit={limit}
     showArchiveLink={showArchiveLink}
     hasArticleFilters={hasArticleFilters}
-    onResetFilters={resetArticleFilters}
-    wrapperId={split ? undefined : 'artikel'}
-    wrapperRef={split ? undefined : articleRef}
-    featured={split}
+    onResetFilters={resetFilters}
+    wrapperId="artikel"
+    wrapperRef={articleRef}
   />;
 
   const directory = <JournalDirectory
@@ -128,8 +115,8 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, layou
       <section className="journal-finder is-sidebar" id="jurnal" aria-labelledby="journal-finder-heading">
         {directory}
       </section>
-      <section className="articles-section" id="artikel" aria-labelledby="published-articles-heading" ref={articleRef}>
-        {articleBlock}
+      <section className="articles-section" id="artikel" aria-labelledby="published-articles-heading">
+        <ArticleArchive />
       </section>
     </>;
   }
