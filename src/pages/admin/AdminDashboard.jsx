@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
+import { adminHref, adminSegment } from '../../lib/admin-path';
 import './admin.css';
 import './admin-modules.css';
 import './admin-shell.css';
 import './admin-redesign.css';
 import './admin-mockup.css';
+import './admin-brand.css';
 import { GROUPS, MODULES, ROLES, can, useAdminData } from './admin-store';
 import { MODULE_VIEWS, NoAccess, Overview, useRights } from './modules';
 import { Card, Icon, Toast } from './ui';
@@ -18,7 +20,8 @@ const JOURNALS = {
 };
 
 const THEMES = {
-  light: { bg: '#f3f1ea', panel: '#ffffff', card: '#ffffff', chip: '#f5f3ec', ink: '#0f3038', ink2: '#5a6b70', line: '#e4e1d6', hatch: 'rgba(30, 85, 102, 0.16)', dark: '#0f3038', onDark: '#ffffff' },
+  // Light theme uses the public site's tokens (src/styles.css): paper, warm, ink, deep teal, line.
+  light: { bg: '#fbf9f5', panel: '#ffffff', card: '#ffffff', chip: '#f5f2ea', ink: '#142a32', ink2: '#55676c', line: '#e5e1d6', hatch: 'rgba(0, 88, 111, 0.16)', dark: '#0f3038', onDark: '#ffffff' },
   dark: { bg: '#06191e', panel: '#0a242b', card: '#0f3038', chip: '#17414f', ink: '#f2f7f7', ink2: '#9db2b7', line: 'rgba(226, 236, 238, 0.14)', hatch: 'rgba(226, 236, 238, 0.16)', dark: '#f2f7f7', onDark: '#0f3038' },
 };
 
@@ -101,11 +104,11 @@ export default function AdminDashboard({ mode = 'demo', account = null, onSignOu
   const still = motion === 'off' || systemReduced;
   const data = useAdminData(role, mode, account);
 
-  const segment = location.pathname.replace(/^\/admin\/?/, '').split('/')[0] || 'dashboard';
+  const segment = adminSegment(location.pathname);
   const visible = MODULES.filter((m) => can(m.id, role, 'R'));
   const current = MODULES.find((m) => m.id === segment) || MODULES[0];
   const group = GROUPS.find((g) => g.id === current.group);
-  const go = useCallback((id) => { setMobileNav(false); navigate(id === 'dashboard' ? '/admin' : `/admin/${id}`); }, [navigate]);
+  const go = useCallback((id) => { setMobileNav(false); navigate(adminHref(id)); }, [navigate]);
   const toast = useCallback((m) => setToastMsg(m), []);
   const rights = useRights(current.id, role);
 
@@ -115,11 +118,7 @@ export default function AdminDashboard({ mode = 'demo', account = null, onSignOu
 
   useEffect(() => {
     const title = document.title;
-    const robots = document.createElement('meta');
-    robots.name = 'robots';
-    robots.content = 'noindex, nofollow';
-    document.head.appendChild(robots);
-    return () => { document.title = title; robots.remove(); };
+    return () => { document.title = title; };
   }, []);
   useEffect(() => { document.title = `${current.label} · Admin | Nordeo Scholar`; }, [current]);
 
@@ -146,7 +145,7 @@ export default function AdminDashboard({ mode = 'demo', account = null, onSignOu
     '--bg': t.bg, '--panel': t.panel, '--card': t.card, '--chip': t.chip, '--ink': t.ink, '--ink2': t.ink2, '--line': t.line,
     '--hatch': t.hatch, '--dark': t.dark, '--on-dark': t.onDark, '--accent': a.color, '--accent-ink': a.ink, '--accent-soft': a.soft,
     '--focus': isDark ? '#6fb3c4' : '#1e5566', '--gold-ink': isDark ? '#e3c76a' : '#7a5a0e', '--green-ink': isDark ? '#6fd39b' : '#1a7a45',
-    '--red-ink': isDark ? '#f3a29b' : '#b3261e', '--teal-ink': isDark ? '#8cc8d6' : '#1e5566',
+    '--red-ink': isDark ? '#f3a29b' : '#b3261e', '--teal-ink': isDark ? '#8cc8d6' : '#00586f',
   };
   const toneVars = (tone) => { const [ink, soft] = TONES[tone][isDark ? 'dark' : 'light']; return { '--tone': ink, '--tone-soft': soft }; };
 
@@ -234,7 +233,7 @@ export default function AdminDashboard({ mode = 'demo', account = null, onSignOu
     </div>
   </aside>;
 
-  return <div className={`adm${still ? ' is-still' : ''}`} style={vars}>
+  return <div className={`adm${still ? ' is-still' : ''}`} data-theme={theme} style={vars}>
     <div className={`adm-shell${compact ? ' is-compact' : ''}`}>
       {sidebar}
       {mobileNav && <button type="button" className="adm-side__scrim" aria-label="Tutup menu" onClick={() => setMobileNav(false)} />}

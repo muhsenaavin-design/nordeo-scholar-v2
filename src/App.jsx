@@ -4,6 +4,7 @@ import { MotionPreferenceProvider } from './components/motion-preference';
 import { PageFade, ScrollProgress, useSectionNavigation } from './components/effects';
 import { MainHeader, MicroHeader, SiteFooter } from './components/SiteChrome';
 import { hostSite, resolveSite } from './lib/site';
+import { isAdminPath } from './lib/admin-path';
 import { useReveal } from './lib/use-reveal';
 import Home from './pages/Home';
 import Journals from './pages/Journals';
@@ -80,7 +81,7 @@ function SiteRoutes() {
 
 export default function App() {
   const { pathname } = useLocation();
-  if (!hostSite() && (pathname === '/admin' || pathname.startsWith('/admin/'))) {
+  if (!hostSite() && isAdminPath(pathname)) {
     return <Suspense fallback={<div className="route-loading" aria-busy="true" />}><AdminDashboard /></Suspense>;
   }
   return <MotionPreferenceProvider><Layout><Suspense fallback={<div className="route-loading" aria-busy="true" />}><SiteRoutes /></Suspense></Layout></MotionPreferenceProvider>;
