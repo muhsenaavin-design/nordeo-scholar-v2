@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { supabase } from '../../lib/supabase';
 import { newsCategories } from '../../data/news';
 import { ecosystems as ecosystemData } from '../../data/ecosystems';
 import { htmlToText, sanitizeHtml } from '../../lib/rich-text';
@@ -700,6 +701,53 @@ export function MediaModule({ data, rights, toast }) {
 }
 
 // ---------------------------------------------------------------- Users and roles: interactive access matrix
+// Staff accounts exist only for invited emails (enforced by a database trigger); the Owner manages the invitations.
+function InviteCard({ remote, toast }) {
+  const [list, setList] = useState([]);
+  const [form, setForm] = useState({ email: '', role: 'admin' });
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (!remote) return;
+    supabase.from('staff_invites').select('*').order('created_at', { ascending: false }).then(({ data }) => setList(data || []));
+  }, [remote]);
+  const add = async (e) => {
+    e.preventDefault();
+    const email = form.email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Gunakan alamat email yang valid.'); return; }
+    if (list.some((x) => x.email === email)) { toast('Email ini sudah diundang.'); return; }
+    const row = { email, role: form.role || null };
+    if (remote) {
+      setBusy(true);
+      const { data: saved, error } = await supabase.from('staff_invites').insert(row).select().single();
+      setBusy(false);
+      if (error) { toast(error.code === '23505' ? 'Email ini sudah diundang.' : 'Undangan gagal disimpan.'); return; }
+      setList((l) => [saved, ...l]);
+    } else setList((l) => [{ ...row, created_at: new Date().toISOString(), used_at: null }, ...l]);
+    setForm({ email: '', role: 'admin' });
+    toast(`Undangan dibuat. ${email} bisa memilih "Aktifkan akun" di halaman masuk.`);
+  };
+  const remove = async (email) => {
+    if (remote) {
+      const { error } = await supabase.from('staff_invites').delete().eq('email', email);
+      if (error) { toast('Undangan gagal dihapus.'); return; }
+    }
+    setList((l) => l.filter((x) => x.email !== email));
+    toast('Undangan dihapus.');
+  };
+  const roleLabel = (id) => ROLES.find((r) => r.id === id)?.label || 'Tanpa peran';
+  return <Card title="Undang staf" className="c24" delay={70}>
+    <form className="adm-invite" onSubmit={add}>
+      <div className="adm-field"><label htmlFor="adm-invite-email">Email staf</label><input id="adm-invite-email" type="email" autoComplete="off" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} required /></div>
+      <div className="adm-field"><label htmlFor="adm-invite-role">Peran</label><select id="adm-invite-role" value={form.role} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}>{ROLES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}<option value="">Tanpa peran (Owner pilih nanti)</option></select></div>
+      <button type="submit" className="adm-b adm-b--primary adm-btn" disabled={busy}><Icon name="plus" size={16} width={2} />{busy ? 'Menyimpan…' : 'Undang'}</button>
+    </form>
+    {list.length === 0 ? <p className="adm-muted">Belum ada undangan.</p> : <ul className="adm-invite__list">{list.map((x) => <li key={x.email}>
+      <div><b>{x.email}</b><span className="adm-muted">{roleLabel(x.role)}</span></div>
+      {x.used_at ? <Pill tone="green">Sudah aktif</Pill> : <><Pill tone="gold">Menunggu aktivasi</Pill><IconBtn icon="trash" label={`Hapus undangan ${x.email}`} onClick={() => remove(x.email)} /></>}
+    </li>)}</ul>}
+  </Card>;
+}
+
 export function UsersModule({ data, role, rights, toast }) {
   const { users, commitUsers, activity: log } = data;
   const [focus, setFocus] = useState(role);
@@ -710,6 +758,7 @@ export function UsersModule({ data, role, rights, toast }) {
   const focusRole = ROLES.find((r) => r.id === focus) || ROLES[0];
   const rowModule = MODULES.find((m) => m.id === row);
   return <div className="adm-grid">
+    {role === 'owner' && <InviteCard remote={data.remote} toast={toast} />}
     {pending.length > 0 && <Card title={`${pending.length} akun menunggu peran`} className="c24 adm-alert" delay={60}>
       <ul className="adm-pending">{pending.map((u) => <li key={u.id}><div><b>{u.name}</b><span className="adm-muted">{u.email}</span></div>
         {rights.U ? <label><span className="adm-sr">Peran untuk {u.name}</span><select defaultValue="" onChange={(e) => { if (!e.target.value) return; commitUsers(users.map((x) => (x.id === u.id ? { ...x, role: e.target.value } : x)), 'memberi peran', u.name); toast(`${u.name} sekarang ${ROLES.find((r) => r.id === e.target.value)?.label}.`); }}><option value="">Pilih peran…</option>{ROLES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}</select></label> : <Pill tone="gold">Menunggu Owner</Pill>}
