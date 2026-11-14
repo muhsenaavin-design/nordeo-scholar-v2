@@ -1,0 +1,53 @@
+/* Staff sign-in (14 Nov 2026, mockup C "foto penuh"): the homepage library photo behind a dark scrim,
+   the brand line on the left, and a white card with the form on the right. */
+.adm-login { position: relative; isolation: isolate; min-height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #0f3038; color: #fff; font-family: 'General Sans', Inter, system-ui, sans-serif; }
+.adm-login__photo { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+.adm-login__scrim { position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(10, 34, 40, .93) 0%, rgba(10, 34, 40, .72) 45%, rgba(10, 34, 40, .38) 100%); }
+
+.adm-login__top, .adm-login__body { width: 100%; max-width: 1280px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 48px); box-sizing: border-box; }
+.adm-login__top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 28px; }
+.adm-login__logo { height: 40px; width: auto; }
+.adm-login__back { display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border: 1px solid rgba(255, 255, 255, .35); border-radius: 999px; color: #fff; font-size: 14px; font-weight: 600; text-decoration: none; }
+.adm-login__back:hover { background: rgba(255, 255, 255, .1); }
+
+.adm-login__body { flex: 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 40px; padding-block: 24px 48px; }
+.adm-login__intro { flex: 1 1 420px; min-width: 0; max-width: 560px; display: flex; flex-direction: column; gap: 20px; }
+.adm-login__eyebrow { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #ffd218; }
+.adm-login__intro h1 { margin: 0; font-size: clamp(38px, 4.4vw, 60px); line-height: 1.02; font-weight: 600; letter-spacing: -.035em; color: #fff; }
+.adm-login__intro h1 em { font-style: normal; color: #ffd218; }
+.adm-login__intro > p:last-child { margin: 0; max-width: 460px; font-size: 16px; line-height: 1.6; color: rgba(255, 255, 255, .84); }
+
+.adm-login__card { flex: 0 1 420px; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; padding: clamp(24px, 3vw, 36px); border-radius: 22px; background: #fff; color: #142a32; box-shadow: 0 30px 60px rgba(0, 0, 0, .25); }
+.adm-login__tabs { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #f5f2ea; }
+.adm-login__tabs button { flex: 1 1 0; height: 40px; border: 0; border-radius: 999px; background: transparent; color: #3e5156; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.adm-login__tabs button[aria-pressed='true'] { background: #0f3038; color: #fff; }
+.adm-login__head { display: flex; flex-direction: column; gap: 6px; }
+.adm-login__head h2 { margin: 0; font-size: 24px; line-height: 1.2; font-weight: 600; letter-spacing: -.02em; }
+.adm-login__head p { margin: 0; font-size: 14.5px; line-height: 1.55; color: #4f6268; }
+.adm-login form { display: flex; flex-direction: column; gap: 14px; }
+.adm-login label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: #142a32; }
+.adm-login input { width: 100%; box-sizing: border-box; height: 48px; padding: 0 14px; border: 1.5px solid #d9d3c4; border-radius: 12px; background: #fff; color: #142a32; font: inherit; font-size: 15px; font-weight: 400; }
+.adm-login input::placeholder { color: #8a9599; }
+.adm-login input:focus { outline: none; border-color: #00586f; box-shadow: 0 0 0 3px rgba(0, 88, 111, .18); }
+.adm-login__pw { position: relative; display: flex; }
+.adm-login__pw input { padding-right: 52px; }
+.adm-login__pw button { position: absolute; top: 2px; right: 2px; width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: #4f6268; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.adm-login__pw button:hover { color: #0f3038; }
+.adm-login__msg { margin: 0; padding: 12px 14px; border-radius: 12px; background: #f5f2ea; font-size: 14px; line-height: 1.5; color: #142a32; }
+.adm-login__msg.is-error { background: #fdecea; color: #8c1d18; }
+.adm-login .adm-login__submit { height: 50px; border: 0; border-radius: 999px; background: #ffd218; color: #142a32; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+.adm-login .adm-login__submit:hover { background: #f2c200; }
+.adm-login .adm-login__submit:disabled { background: #ede8da; color: #6a7b80; cursor: not-allowed; }
+.adm-login__links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; }
+.adm-login .adm-login__link { border: 0; background: none; padding: 6px 0; color: #0f3038; font: inherit; font-size: 14px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.adm-login .adm-login__link:hover { color: #00586f; }
+.adm-login :focus-visible { outline: 2px solid #ffd218; outline-offset: 2px; }
+.adm-login__card :focus-visible { outline-color: #00586f; }
+
+@media (max-width: 860px) {
+  .adm-login__scrim { background: linear-gradient(180deg, rgba(10, 34, 40, .7) 0%, rgba(10, 34, 40, .9) 100%); }
+  .adm-login__body { gap: 28px; padding-block: 8px 32px; }
+  .adm-login__intro { gap: 12px; }
+  .adm-login__intro > p:last-child { display: none; }
+  .adm-login__card { flex-basis: 100%; }
+}
