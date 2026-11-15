@@ -397,3 +397,11 @@
 @media (prefers-reduced-motion: reduce) {
   .shelf-card, .jcover-circuit, .shelf-card-visit .arrow, .archive-table tbody tr, .archive-title a { transition: none; }
 }
+
+/* Page texts edited in the dashboard (menu Halaman) */
+.page-richtext > :first-child { margin-top: 0; }
+.page-richtext p { margin: 0 0 1em; }
+.page-richtext h2 { margin: 1.4em 0 .4em; font-size: clamp(20px, 2vw, 24px); line-height: 1.25; }
+.page-richtext ul, .page-richtext ol { margin: 0 0 1em 1.2em; padding: 0; }
+.page-richtext a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.privacy-note a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }

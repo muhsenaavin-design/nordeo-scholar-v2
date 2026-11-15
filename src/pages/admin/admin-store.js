@@ -23,6 +23,8 @@ export const GROUPS = [
 export const MODULES = [
   { id: 'dashboard', group: 'home', label: 'Dashboard', icon: 'grid', fr: 'FR-10', hint: 'Tugas yang menunggu Anda dan aktivitas terbaru.' },
   { id: 'pages', group: 'site', label: 'Beranda', icon: 'layout', fr: 'FR-11, FR-12', hint: 'Judul hero dan susunan section halaman utama.' },
+  { id: 'pagetexts', group: 'site', label: 'Halaman', icon: 'edit', fr: 'FR-11, FR-12', hint: 'Teks panjang di Our Story, Founder, Panduan Penulis, Etika, Books, Pengmas, Privasi, dan Ketentuan.' },
+  { id: 'journals', group: 'site', label: 'Jurnal', icon: 'news', fr: 'FR-03, FR-22, FR-23, FR-29', hint: 'Daftar jurnal, indeksasi, dan link OJS; cek link yang rusak.' },
   { id: 'ecosystems', group: 'site', label: 'Ekosistem', icon: 'layers', fr: 'FR-02, FR-13', hint: 'Empat ekosistem Nordeo, status, dan link platformnya.' },
   { id: 'profile', group: 'site', label: 'Profil perusahaan', icon: 'building', fr: 'FR-18, FR-21', hint: 'Visi, misi, nilai, dan layanan di halaman Our Story.' },
   { id: 'contact', group: 'site', label: 'Kontak & lokasi', icon: 'pin', fr: 'FR-06, FR-15', hint: 'Alamat, email, WhatsApp, Instagram, dan peta.' },
@@ -31,7 +33,7 @@ export const MODULES = [
   { id: 'news', group: 'news', label: 'Artikel', icon: 'news', fr: 'FR-04, FR-16, FR-17, FR-24', hint: 'Tulis, tinjau, dan terbitkan artikel: Draft → In review → Published.' },
   { id: 'stories', group: 'news', label: 'Kiriman cerita', icon: 'inbox', fr: 'FR-09, FR-19', hint: 'Cerita dari pembaca lewat form “Kirim berita”.' },
   { id: 'comments', group: 'news', label: 'Komentar', icon: 'chat', fr: 'FR-16', hint: 'Setujui atau sembunyikan komentar pembaca.' },
-  { id: 'academy', group: 'academy', label: 'Program & kalender', icon: 'cap', fr: 'FR-07, FR-25', hint: 'Seminar, konferensi, dan modul yang tampil di kalender Academy.' },
+  { id: 'academy', group: 'academy', label: 'Program & kalender', icon: 'cap', fr: 'FR-07, FR-25', hint: 'Seminar, konferensi, dan modul; tampil setelah disetujui Owner.' },
   { id: 'registrations', group: 'academy', label: 'Peminat program', icon: 'ticket', fr: 'FR-19', hint: 'Orang yang mendaftarkan minat lewat form Academy.' },
   { id: 'promo', group: 'marketing', label: 'Review, mitra & FAQ', icon: 'star', fr: 'FR-26', hint: 'Review asli, logo mitra, dan pertanyaan umum di beranda.' },
   { id: 'partnership', group: 'marketing', label: 'Kemitraan', icon: 'handshake', fr: 'FR-05, FR-20', hint: 'Peluang kerja sama dan layanan untuk institusi.' },
@@ -44,6 +46,8 @@ export const MODULES = [
 export const ACCESS = {
   dashboard: { owner: 'R', admin: 'R', marketing: 'R' },
   pages: { owner: 'RU', admin: 'CRUD', marketing: '' },
+  pagetexts: { owner: 'RU', admin: 'RU', marketing: '' },
+  journals: { owner: 'R', admin: 'CRUD', marketing: '' },
   ecosystems: { owner: 'R', admin: 'CRUD', marketing: '' },
   profile: { owner: 'CRUD', admin: 'RU', marketing: '' },
   contact: { owner: 'R', admin: 'CRUD', marketing: 'R' },
@@ -52,7 +56,7 @@ export const ACCESS = {
   news: { owner: 'RA', admin: 'CRUD', marketing: '' },
   stories: { owner: 'R', admin: 'RU', marketing: 'R' },
   comments: { owner: 'R', admin: 'RUD', marketing: '' },
-  academy: { owner: 'R', admin: 'CRUD', marketing: 'CRUD' },
+  academy: { owner: 'RA', admin: 'CRUD', marketing: 'CRUD' },
   registrations: { owner: 'R', admin: 'RUE', marketing: 'RUE' },
   promo: { owner: 'R', admin: 'CRUD', marketing: 'CRUD' },
   partnership: { owner: 'R', admin: 'RU', marketing: 'CRUD' },
@@ -79,7 +83,7 @@ export const NEWS_STATUS = {
 };
 
 // Which content document each module writes (database table site_content).
-const CONTENT_KEYS = ['pages', 'ecosystems', 'profile', 'programs', 'partnerships', 'contact', 'navigation', 'media', 'promo', 'site'];
+const CONTENT_KEYS = ['pages', 'journals', 'ecosystems', 'profile', 'programs', 'partnerships', 'contact', 'navigation', 'media', 'promo', 'site'];
 
 const initials = (name) => name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('') || '?';
 

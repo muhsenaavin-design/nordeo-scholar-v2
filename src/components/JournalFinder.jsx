@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
-import { articleTopics, directoryJournals, journalArticles } from '../data/journal-directory';
+import { articleTopics, journalArticles } from '../data/journal-directory';
+import { journalsNow, useJournals } from '../lib/journals';
 import JournalDirectory from './JournalDirectory';
 import PublishedArticles from './PublishedArticles';
 import ArticleArchive from './ArticleArchive';
@@ -20,6 +21,7 @@ function journalMatches(journal, query) {
 }
 
 export default function JournalFinder({ limit = 6, showArchiveLink = true, layout = 'carousel' }) {
+  const journalList = useJournals();
   const split = layout === 'split';
   const side = split || layout === 'sidebar';
   const [query, setQuery] = useState('');
@@ -31,11 +33,11 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, layou
 
   const searchPool = useMemo(() => journalArticles.filter(article => articleMatches(article, search)), [search]);
   const filteredJournals = useMemo(
-    () => directoryJournals.filter(journal => (category === 'all' || journal.category === category) && journalMatches(journal, search)),
-    [category, search],
+    () => journalsNow().filter(journal => (category === 'all' || journal.category === category) && journalMatches(journal, search)),
+    [category, search, journalList],
   );
 
-  const activeJournal = directoryJournals.find(journal => journal.id === selectedJournal) || directoryJournals[0];
+  const activeJournal = journalsNow().find(journal => journal.id === selectedJournal) || journalsNow()[0];
   const searchJournalPool = useMemo(() => searchPool.filter(article => article.journal === selectedJournal), [searchPool, selectedJournal]);
   const articles = useMemo(
     () => searchJournalPool.filter(article => topic === ALL_TOPICS || article.topics.includes(topic)),
@@ -53,7 +55,7 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, layou
   function chooseCategory(id) {
     setCategory(id);
     if (!search && id !== 'all') {
-      const first = directoryJournals.find(journal => journal.category === id);
+      const first = journalsNow().find(journal => journal.category === id);
       if (first) {
         setSelectedJournal(first.id);
         setTopic(ALL_TOPICS);
@@ -79,7 +81,7 @@ export default function JournalFinder({ limit = 6, showArchiveLink = true, layou
 
   const articleBlock = <PublishedArticles
     journal={activeJournal}
-    journals={directoryJournals}
+    journals={journalsNow()}
     articles={articles}
     visibleArticles={visibleArticles}
     searchPool={searchPool}

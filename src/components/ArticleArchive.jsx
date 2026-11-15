@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
-import { articleTopics, directoryJournals, journalArticles } from '../data/journal-directory';
+import { articleTopics, journalArticles } from '../data/journal-directory';
+import { journalsNow, useJournals } from '../lib/journals';
 import { formatAuthors } from '../lib/store';
 import { Arrow, JournalMark, SearchIcon } from './parts';
 
@@ -19,6 +20,7 @@ function matches(article, query) {
 // Every article across the Nordeo journals in one archive table with search, journal,
 // focus-area, and issue filters, eight rows per page. Each row opens the article by its DOI.
 export default function ArticleArchive() {
+  useJournals(); // re-render when the dashboard copy of the journal list loads
   const [query, setQuery] = useState('');
   const [journal, setJournal] = useState(ALL);
   const [topic, setTopic] = useState(ALL);
@@ -64,7 +66,7 @@ export default function ArticleArchive() {
         <label htmlFor="archive-journal">Journal</label>
         <select id="archive-journal" value={journal} onChange={event => update(setJournal)(event.target.value)}>
           <option value={ALL}>All journals</option>
-          {directoryJournals.map(item => {
+          {journalsNow().map(item => {
             const count = journalArticles.filter(article => article.journal === item.id).length;
             return <option key={item.id} value={item.id} disabled={count === 0}>{item.short}{count === 0 ? ' (soon)' : ''}</option>;
           })}
@@ -95,7 +97,7 @@ export default function ArticleArchive() {
           </thead>
           <tbody>
             {rows.map(article => {
-              const source = directoryJournals.find(item => item.id === article.journal);
+              const source = journalsNow().find(item => item.id === article.journal);
               return <tr key={article.id}>
                 <td className="archive-title">
                   <a href={article.url} target="_blank" rel="noopener noreferrer">{article.title}<span className="sr-only"> (opens in a new tab)</span></a>

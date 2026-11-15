@@ -194,6 +194,7 @@ function WordForm({ form, set, field, errors, onSubmit }) {
       <Field id="credit" label="Kredit foto" hint="Contoh: Public Relations, atau Dok. LPPM Universitas X." optional><input type="text" {...field('credit', { hint: true })} /></Field>
 
       <h3 className="form-subhead">Kontak pengirim</h3>
+      <p className="field-hint privacy-note">Nama, institusi, email, dan WhatsApp hanya dipakai redaksi untuk menghubungi Anda tentang kiriman ini dan tidak dipublikasikan, kecuali nama penulis yang Anda tulis untuk berita. Baca <a href="/privacy-policy">Kebijakan Privasi</a>.</p>
       <div className="field-pair">
         <Field id="name" label="Nama lengkap" error={errors.name}><input type="text" autoComplete="name" {...field('name')} /></Field>
         <Field id="role" label="Peran"><select {...field('role')}>{ROLES.map(role => <option key={role}>{role}</option>)}</select></Field>
@@ -522,6 +523,7 @@ export default function NewsSubmit() {
               <Field id="embargoReason" label="Ditetapkan oleh" hint="Nama jurnal atau acara." error={errors.embargoReason}><input type="text" {...field('embargoReason', { hint: true })} /></Field>
             </div>}
             <h3 className="form-subhead">Kontak pengirim</h3>
+            <p className="field-hint privacy-note">Nama, institusi, email, dan WhatsApp hanya dipakai redaksi untuk menghubungi Anda tentang kiriman ini dan tidak dipublikasikan, kecuali nama penulis yang Anda tulis untuk berita. Baca <a href="/privacy-policy">Kebijakan Privasi</a>.</p>
             <div className="field-pair">
               <Field id="name" label="Nama lengkap" error={errors.name}><input type="text" autoComplete="name" {...field('name')} /></Field>
               <Field id="role" label="Peran"><select {...field('role')}>{ROLES.map(role => <option key={role}>{role}</option>)}</select></Field>

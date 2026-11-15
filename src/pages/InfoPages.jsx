@@ -1,5 +1,8 @@
 import { Link, useLocation } from 'react-router';
 import { pages } from '../data/pages';
+import EditableText from '../components/EditableText';
+
+const LEGAL_TEXT = { '/privacy-policy': 'privacy', '/terms-of-use': 'terms' };
 import { contact, officialSocial } from '../config/links';
 import { ecosystems } from '../data/ecosystems';
 import { bookProcessEn, bookServicesEn } from '../data/books';
@@ -36,13 +39,13 @@ export function AuthorGuidePage() {
   return <section className="container inner-page reading-page" data-reveal>
     <BackLink />
     <h1>Panduan<br /> Penulis.</h1>
-    <p className="page-intro">Siapkan langkah pertama publikasi Anda. Ketentuan lengkap mengikuti panduan pada masing-masing platform jurnal.</p>
+    <EditableText id="authorGuide" className="guide-richtext"><><p className="page-intro">Siapkan langkah pertama publikasi Anda. Ketentuan lengkap mengikuti panduan pada masing-masing platform jurnal.</p>
     <ol className="guide-list">
       <li><h2>1. Pilih jurnal sesuai bidang</h2><p>Baca profil dan ruang lingkup JETSI dan JIEL. Pastikan topik serta jenis naskah Anda sesuai sebelum melanjutkan.</p><Link to="/journals" className="text-link">Temukan Jurnal <Arrow /></Link></li>
       <li><h2>2. Periksa panduan dan kebijakan</h2><p>Di platform jurnal tujuan, baca author guidelines, template naskah, etika publikasi, serta informasi biaya bila berlaku.</p><a className="text-link" href="https://docs.google.com/document/d/1UPPXBL6HIGpcgK_1i0EYkz9k15ycuM_-/export?format=docx">Template artikel JETSI <Arrow /></a></li>
       <li><h2>3. Siapkan gambar dan metadata</h2><p>Pastikan tabel, gambar, dan sitasi terbaca. Gunakan DOI atau tautan sumber yang stabil agar naskah mudah diverifikasi.</p></li>
       <li><h2>4. Ikuti alur pada platform jurnal</h2><p>Pendaftaran akun dan pengiriman naskah mengikuti sistem jurnal terkait. Website ini membantu Anda menemukan platform yang tepat.</p><Link to="/journals" className="button button-dark">Buka Platform Jurnal</Link></li>
-    </ol>
+    </ol></></EditableText>
     <div className="information-panel">
       <h2>Butuh pendampingan?</h2>
       <p>Program Academic Training menyediakan seminar dan modul untuk membantu menyiapkan naskah, memahami review, dan memilih jurnal yang tepat.</p>
@@ -56,13 +59,13 @@ export function PublicationEthicsPage() {
   return <section className="container inner-page reading-page" data-reveal>
     <BackLink />
     <h1>Etika publikasi,<br /> bukan formalitas.</h1>
-    <p className="page-intro">Persyaratan etika, kepenulisan, penelaahan, dan pengiriman naskah mengikuti kebijakan masing-masing jurnal. Halaman ini membantu Anda menemukan sumber kebijakan; bukan pengganti dokumen kebijakan jurnal.</p>
+    <EditableText id="ethics" className="guide-richtext"><><p className="page-intro">Persyaratan etika, kepenulisan, penelaahan, dan pengiriman naskah mengikuti kebijakan masing-masing jurnal. Halaman ini membantu Anda menemukan sumber kebijakan; bukan pengganti dokumen kebijakan jurnal.</p>
     <div className="ethics-grid">
       <article><h2>Kepenulisan</h2><p>Penulis yang tercantum harus berkontribusi pada konsep, pelaksanaan, atau interpretasi riset. Kontribusi teknis yang tidak substantif dicantumkan sebagai ucapan terima kasih.</p></article>
       <article><h2>Data & sitasi</h2><p>Data mentah harus tersedia bila diminta. Sitasi memakai sumber primer yang dapat diverifikasi; penggunaan alat bantu AI dijelaskan sesuai kebijakan jurnal.</p></article>
       <article><h2>Konflik kepentingan</h2><p>Afiliasi, pendanaan, dan kepentingan komersial diungkapkan di bagian yang sesuai. Reviewer menolak menilai naskah yang menimbulkan konflik.</p></article>
       <article><h2>Koreksi & retraksi</h2><p>Kesalahan yang memengaruhi temuan dikoreksi secara terbuka. Retraksi dilakukan bila integritas publikasi tidak dapat dipertahankan.</p></article>
-    </div>
+    </div></></EditableText>
     <div className="information-panel">
       <h2>Kebijakan lengkap per jurnal</h2>
       <p>Dokumen etika, misconduct, koreksi, dan retraksi tersedia di platform tiap jurnal. Baca sebelum mengirim naskah.</p>
@@ -79,7 +82,7 @@ export function PengmasPage() {
   return <section className="container inner-page reading-page" data-reveal>
     <BackLink />
     <h1>Jurnal Pengmas</h1>
-    <p className="page-intro">Ruang publikasi Nordeo Scholar untuk pengabdian masyarakat, solusi lokal, dan kontribusi ilmu bagi komunitas.</p>
+    <EditableText id="pengmas" className="page-intro"><p className="page-intro">Ruang publikasi Nordeo Scholar untuk pengabdian masyarakat, solusi lokal, dan kontribusi ilmu bagi komunitas.</p></EditableText>
     <div className="information-panel">
       <div className="panel-kicker"><span className="status status-preview">Dalam pengembangan</span><span>E-ISSN —</span><span>P-ISSN —</span></div>
       <h2>Profil & panggilan naskah</h2>
@@ -102,7 +105,7 @@ export function LegalPage() {
   return <section className="container inner-page reading-page" data-reveal>
     <BackLink />
     <h1>{title}</h1>
-    <p className="page-intro">{copy}</p>
+    <EditableText id={LEGAL_TEXT[pathname] || 'none'} className="page-intro"><p className="page-intro">{copy}</p></EditableText>
     {isNotFound && <div className="information-panel"><h2>Mungkin Anda mencari ini</h2><div className="not-found-links"><Link to="/journals">Journals <Arrow /></Link><SmartLink href={ecosystemHref('news')}>NordeoNews <Arrow /></SmartLink><SmartLink href={ecosystemHref('training')}>Academy <Arrow /></SmartLink><Link to="/contact">Contact <Arrow /></Link></div></div>}
   </section>;
 }
@@ -115,7 +118,7 @@ export function BooksPage() {
     <div className="page-lead">
       <div className="page-lead-copy">
         <h1>Ideas, <em>in depth.</em></h1>
-        <p className="page-intro">{books.description}</p>
+        <EditableText id="books" className="page-intro"><p className="page-intro">{books.description}</p></EditableText>
         <StatusPill tone={books.tone}>{books.status}</StatusPill>
       </div>
       <figure className="page-art"><img src={books.image} alt={books.alt} width="1600" height="1195" decoding="async" /></figure>

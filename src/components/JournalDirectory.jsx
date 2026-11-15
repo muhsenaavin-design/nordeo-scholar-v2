@@ -1,10 +1,11 @@
-import { directoryJournals, journalArticles, journalCategories } from '../data/journal-directory';
+import { journalArticles, journalCategories } from '../data/journal-directory';
+import { journalsNow, useJournals } from '../lib/journals';
 import { Arrow, CloseIcon, EmptyState, JournalMark, SearchIcon, SmartLink, StatusPill } from './parts';
 import Carousel from './Carousel';
 import JournalCover from './JournalCover';
 
 function categoryCount(id) {
-  return id === 'all' ? directoryJournals.length : directoryJournals.filter(journal => journal.category === id).length;
+  return id === 'all' ? journalsNow().length : journalsNow().filter(journal => journal.category === id).length;
 }
 
 function visitLabel(journal) {
@@ -73,7 +74,7 @@ function JournalCardRail({ journals }) {
 
 function ShelfStats() {
   const stats = [
-    [directoryJournals.length, 'peer-reviewed journals'],
+    [journalsNow().length, 'peer-reviewed journals'],
     [journalArticles.length, 'articles published so far'],
     ['100%', 'open access, free to read'],
     ['Double-blind', 'peer review on every manuscript'],
@@ -106,6 +107,7 @@ export default function JournalDirectory({
   split = false,
   children,
 }) {
+  useJournals(); // re-render when the dashboard copy of the journal list loads
   if (split) {
     return <>
       <div className="finder-head" data-reveal>
@@ -117,7 +119,7 @@ export default function JournalDirectory({
         </div>
       </div>
       <ShelfStats />
-      <JournalCardRail journals={directoryJournals} />
+      <JournalCardRail journals={journalsNow()} />
     </>;
   }
 

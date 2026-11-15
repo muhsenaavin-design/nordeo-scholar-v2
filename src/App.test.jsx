@@ -20,9 +20,9 @@ test('links JIEL to its own journal platform', () => {
   expect(screen.getByRole('link', { name: /visit jiel/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jiel');
 });
 
-test('links Jurnal Pengmas and JIBDI to their journal paths (Feedback 2)', () => {
+test('links JIBDI to OJS and Jurnal Pengmas, not yet on OJS, to its profile page', () => {
   render(<MemoryRouter initialEntries={['/journals']}><App /></MemoryRouter>);
-  expect(screen.getAllByRole('link', { name: /visit jurnal pengmas/i }).at(-1)).toHaveAttribute('href', 'https://nordeoscholar.com/journal/pengmas');
+  expect(screen.getAllByRole('link', { name: /visit jurnal pengmas/i }).at(-1)).toHaveAttribute('href', '/journals/jurnalpengmas');
   expect(screen.getAllByRole('link', { name: /visit jibdi/i }).at(-1)).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jibdi');
 });
 
@@ -124,7 +124,7 @@ test('homepage journal finder shows four simple journal cards with visit links o
   expect(visits).toHaveLength(4);
   expect(finder.getByRole('link', { name: /visit jetsi/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jetsi');
   expect(finder.getByRole('link', { name: /visit jiel/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jiel');
-  expect(finder.getByRole('link', { name: /visit jurnal pengmas/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/pengmas');
+  expect(finder.getByRole('link', { name: /visit jurnal pengmas/i })).toHaveAttribute('href', '/journals/jurnalpengmas');
   expect(finder.getByRole('link', { name: /visit jibdi/i })).toHaveAttribute('href', 'https://nordeoscholar.com/journal/jibdi');
   expect(finder.getByRole('region', { name: /nordeo journals/i })).toBeInTheDocument();
 });
