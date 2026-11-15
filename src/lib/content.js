@@ -57,6 +57,11 @@ export function useContent(key, fallback) {
   return content[key] ?? fallback;
 }
 
+/** One content module as last loaded from the database, or undefined. */
+export function cachedContent(key) {
+  return state.content[key];
+}
+
 /** Published articles from the database, or null while they are not available. */
 export function cachedNews() {
   return state.news;
@@ -75,7 +80,7 @@ const PROGRAM_DEFAULTS = {
 export function mergePrograms(records) {
   if (!Array.isArray(records)) return trainingPrograms;
   return records
-    .filter((record) => record.status !== 'draft')
+    .filter((record) => !record.status || record.status === 'published') // drafts and programmes waiting for the Owner stay hidden
     .map((record) => upgradeEditorialPhoto({ ...PROGRAM_DEFAULTS, ...(trainingPrograms.find((program) => program.id === record.id) || {}), ...record }));
 }
 

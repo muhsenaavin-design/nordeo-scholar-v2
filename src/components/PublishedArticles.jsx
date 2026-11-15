@@ -1,12 +1,13 @@
 import { Link } from 'react-router';
-import { articleTopics, directoryJournals } from '../data/journal-directory';
+import { articleTopics } from '../data/journal-directory';
+import { journalsNow, useJournals } from '../lib/journals';
 import { formatAuthors } from '../lib/store';
 import { Arrow, JournalMark, SmartLink } from './parts';
 
 const ALL_TOPICS = articleTopics[0];
 
 function ArticleCard({ article, titleLevel }) {
-  const journal = directoryJournals.find(item => item.id === article.journal);
+  const journal = journalsNow().find(item => item.id === article.journal);
   const Title = `h${titleLevel}`;
   return <a className="article-card" href={article.url} target="_blank" rel="noopener noreferrer">
     <div className="article-meta">
@@ -42,6 +43,7 @@ export default function PublishedArticles({
   wrapperId,
   wrapperRef,
 }) {
+  useJournals(); // re-render when the dashboard copy of the journal list loads
   const Heading = `h${headingLevel}`;
   const titleLevel = headingLevel + 1;
   const EmptyTitle = `h${titleLevel}`;

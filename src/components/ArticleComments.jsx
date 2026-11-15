@@ -90,7 +90,7 @@ export default function ArticleComments({ storyId, slug }) {
         <h3 id="comment-form-heading">{replyTo ? <>Balas {replyTo.name}</> : 'Tinggalkan balasan'}</h3>
         {replyTo && <button type="button" className="text-link finder-text-button" onClick={() => setReplyTo(null)}>Batalkan balasan</button>}
       </div>
-      <p className="field-hint">Alamat email Anda tidak akan dipublikasikan. Kolom bertanda <span aria-hidden="true">*</span><span className="sr-only">wajib</span> wajib diisi.</p>
+      <p className="field-hint">Nama ditampilkan bersama komentar. Email hanya dipakai redaksi untuk menghubungi Anda bila komentar perlu diklarifikasi, dan tidak dipublikasikan. Baca <a href="/privacy-policy">Kebijakan Privasi</a>. Kolom bertanda <span aria-hidden="true">*</span><span className="sr-only">wajib</span> wajib diisi.</p>
       <Field id="comment" label="Komentar *" error={errors.comment} counter={`${form.comment.length}/${MAX}`}>
         <textarea rows={5} maxLength={MAX} {...field('comment')} />
       </Field>

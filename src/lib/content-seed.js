@@ -5,6 +5,7 @@ import { contact, externalLinks, office, officialSocial } from '../config/links'
 import { coreValues, faqs, mission, partners, testimonials } from '../data/company';
 import { ecosystems, vision } from '../data/ecosystems';
 import { trainingPrograms } from '../data/training';
+import { journalSeed } from './journals';
 
 export const HOME_SECTIONS = [
   { id: 'hero', label: 'Hero (slideshow)' },
@@ -28,6 +29,7 @@ export function seedContent(reviewed = '2026-11-10') {
       sections: HOME_SECTIONS.map((section) => ({ ...section, visible: true })),
       updatedAt: reviewed, reviewedAt: reviewed,
     },
+    journals: journalSeed(),
     ecosystems: ecosystems.map((e) => ({
       id: e.id, title: e.title, short: e.short, description: e.description, cta: e.cta,
       link: e.ctaHref || `/${e.id === 'training' ? 'training' : e.id}`, platform: ecosystemPlatform[e.id] || '',

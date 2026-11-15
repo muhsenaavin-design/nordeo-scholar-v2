@@ -4,6 +4,9 @@ import { newsCategories } from '../../data/news';
 import { ecosystems as ecosystemData } from '../../data/ecosystems';
 import { htmlToText, sanitizeHtml } from '../../lib/rich-text';
 import { formatDate, formatDateTime, makeId, readImage, slugify } from '../../lib/store';
+import { JOURNAL_CATEGORIES } from '../../lib/journals';
+import { PAGE_TEXTS } from '../../lib/page-texts';
+import RichTextEditor from '../../components/RichTextEditor';
 import { ACCESS, MODULES, NEWS_STATUS, ROLES, can } from './admin-store';
 import { FormCard, ListEditor, Reader, RecordList, SortableList, Tabs, exportCsv, lines, moveItem, reviewText, reviewTone } from './kit';
 import { Btn, Card, Editor, Empty, Icon, IconBtn, Pill } from './ui';
@@ -149,6 +152,115 @@ export function EcosystemsModule({ data, rights, toast }) {
   </div>;
 }
 
+// ---------------------------------------------------------------- Halaman: long page texts with the Word-style editor
+export function PageTextsModule({ data, rights, toast }) {
+  const { cms, update } = data;
+  const texts = cms.pages?.texts || {};
+  const [editing, setEditing] = useState(null);
+  const [draft, setDraft] = useState('');
+  const open = (t) => { setEditing(t); setDraft(texts[t.id] || t.defaultHtml); requestAnimationFrame(() => document.getElementById(`pagetext-${t.id}`)?.closest('.adm-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' })); };
+  const save = () => {
+    update('pages', { ...cms.pages, texts: { ...texts, [editing.id]: sanitizeHtml(draft) }, updatedAt: data.today() }, 'mengubah teks halaman', editing.label);
+    toast('Teks halaman disimpan dan tampil di website.');
+    setEditing(null);
+  };
+  const reset = (t) => {
+    const next = { ...texts };
+    delete next[t.id];
+    update('pages', { ...cms.pages, texts: next, updatedAt: data.today() }, 'mengembalikan teks bawaan', t.label);
+    toast('Teks bawaan dipakai lagi.');
+  };
+  return <div className="adm-grid">
+    <Card title="Teks halaman" className="c24" delay={80}>
+      <p className="adm-muted">Ubah teks panjang tanpa kode. Teks bawaan tetap tersimpan dan bisa dipakai lagi kapan saja.</p>
+      <div className="adm-table-wrap"><table className="adm-table">
+        <thead><tr><th scope="col">Bagian</th><th scope="col">Halaman</th><th scope="col">Status</th><th scope="col"><span className="adm-sr">Aksi</span></th></tr></thead>
+        <tbody>{PAGE_TEXTS.map((t) => <tr key={t.id}>
+          <td><b>{t.label}</b></td>
+          <td><a href={t.route} target="_blank" rel="noreferrer">{t.route}</a></td>
+          <td>{texts[t.id] ? <Pill tone="green">Sudah diubah</Pill> : <Pill tone="muted">Teks bawaan</Pill>}</td>
+          <td><span className="adm-actions">
+            {rights.U && <IconBtn icon="edit" label={`Ubah ${t.label}`} onClick={() => open(t)} />}
+            {rights.U && texts[t.id] && <IconBtn icon="undo" label={`Kembalikan teks bawaan ${t.label}`} onClick={() => reset(t)} />}
+          </span></td>
+        </tr>)}</tbody>
+      </table></div>
+    </Card>
+    {editing && <Card title={`Ubah: ${editing.label}`} className="c24" delay={0}
+      action={<span className="adm-actions"><Btn onClick={() => setEditing(null)}>Batal</Btn><Btn kind="primary" icon="check" onClick={save}>Simpan</Btn></span>}>
+      <p className="adm-muted" id="pagetext-label">Format seperti di Word: judul, tebal, miring, daftar, dan tautan.</p>
+      <RichTextEditor id={`pagetext-${editing.id}`} labelId="pagetext-label" value={draft} onChange={({ html }) => setDraft(html)} />
+    </Card>}
+  </div>;
+}
+
+// ---------------------------------------------------------------- Journals: list, indexing, OJS links, link check
+const JOURNAL_TONE = { live: ['green', 'Terbit'], open: ['gold', 'Call for papers'], preview: ['muted', 'Dalam persiapan'] };
+const toList = (v) => (Array.isArray(v) ? v : String(v || '').split(/[,\n]/)).map((x) => String(x).trim()).filter(Boolean);
+
+export function JournalsModule({ data, rights, toast }) {
+  const { cms, update } = data;
+  const journals = cms.journals || [];
+  const [checks, setChecks] = useState({});
+  const [checking, setChecking] = useState(false);
+  const save = (next, action, target) => {
+    update('journals', next.map((j) => ({ ...j, id: /^jurnal-/.test(j.id) ? slugify(j.short || j.name) || j.id : j.id, indexing: toList(j.indexing), topics: toList(j.topics), visible: j.visible !== false })), action, target);
+    toast('Daftar jurnal disimpan.');
+  };
+  const checkLinks = async () => {
+    const urls = [...new Set(journals.filter((j) => j.visible !== false && j.onOjs !== false).flatMap((j) => [j.url, j.guidelinesUrl]).filter((u) => /^https?:\/\//.test(u || '')))];
+    setChecking(true);
+    try {
+      const res = await fetch('/api/check-links', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ urls }) });
+      if (!res.ok) throw new Error(String(res.status));
+      const { results } = await res.json();
+      setChecks(Object.fromEntries(results.map((r) => [r.url, r])));
+      const broken = results.filter((r) => !r.ok).length;
+      toast(broken ? `${broken} link bermasalah.` : `Semua ${results.length} link berfungsi.`);
+    } catch {
+      toast('Cek link hanya bisa dijalankan di website yang sudah online.');
+    }
+    setChecking(false);
+  };
+  const linkPill = (url) => {
+    const r = checks[url];
+    if (!r) return null;
+    return <Pill tone={r.ok ? 'green' : 'red'}>{r.ok ? 'Link OK' : `Link rusak (${r.status || 'tidak terjangkau'})`}</Pill>;
+  };
+  return <div className="adm-grid">
+    <RecordList title="Daftar jurnal" label="jurnal" delay={80} rights={rights} items={journals} onChange={save}
+      toolbar={<Btn icon="refresh" onClick={checkLinks} disabled={checking}>{checking ? 'Mengecek…' : 'Cek link'}</Btn>}
+      blank={{ short: '', name: '', category: 'engineering', description: '', status: 'Call for papers', statusTone: 'open', frequency: '', latestIssue: '', eissn: 'In process', indexing: '', topics: '', url: 'https://nordeoscholar.com/journal/', guidelinesUrl: '', cover: '', visible: true, onOjs: true }}
+      card={(j) => <>
+        {j.cover ? <img className="adm-rcard__img" src={j.cover} alt="" loading="lazy" /> : <span className="adm-rcard__img is-blank" aria-hidden="true"><Icon name="news" size={28} /></span>}
+        <div className="adm-rcard__body">
+          <span className="adm-rcard__top"><b>{j.short}</b>{j.visible === false ? <Pill tone="muted">Disembunyikan</Pill> : <Pill tone={JOURNAL_TONE[j.statusTone]?.[0]}>{j.status || JOURNAL_TONE[j.statusTone]?.[1]}</Pill>}</span>
+          <span className="adm-muted">{j.name}</span>
+          {toList(j.indexing).length > 0 && <p className="adm-rcard__text">Indeksasi: {toList(j.indexing).join(', ')}</p>}
+          <span className="adm-rcard__meta">{j.onOjs === false ? <span className="adm-muted">Belum ada di OJS; tautan ke halaman profil</span> : <a href={j.url} target="_blank" rel="noreferrer">Buka di OJS</a>}{j.onOjs !== false && linkPill(j.url)}</span>
+        </div>
+      </>}
+      fields={[
+        { key: 'short', label: 'Singkatan', required: true, hint: 'Mis. JETSI' },
+        { key: 'name', label: 'Nama lengkap', required: true },
+        { key: 'category', label: 'Bidang', type: 'select', options: JOURNAL_CATEGORIES.map((c) => ({ value: c.id, label: c.label })) },
+        { key: 'description', label: 'Deskripsi singkat', type: 'textarea' },
+        { key: 'topics', label: 'Fokus dan ruang lingkup', type: 'textarea', hint: 'Pisahkan dengan koma.' },
+        { key: 'indexing', label: 'Indeksasi', hint: 'Pisahkan dengan koma, mis. Terindeks GARUDA, DOI Crossref.' },
+        { key: 'status', label: 'Status (teks)', hint: 'Mis. Open for submissions, Call for papers.' },
+        { key: 'statusTone', label: 'Warna status', type: 'select', options: [{ value: 'live', label: 'Terbit' }, { value: 'open', label: 'Call for papers' }, { value: 'preview', label: 'Dalam persiapan' }] },
+        { key: 'eissn', label: 'e-ISSN' },
+        { key: 'frequency', label: 'Frekuensi terbit' },
+        { key: 'latestIssue', label: 'Edisi terbaru' },
+        { key: 'onOjs', label: 'Sudah ada di OJS', type: 'toggle' },
+        { key: 'url', label: 'Link jurnal di OJS', type: 'url' },
+        { key: 'guidelinesUrl', label: 'Link panduan submission', type: 'url' },
+        { key: 'cover', label: 'Gambar sampul (alamat dari menu Media)', type: 'url' },
+        { key: 'visible', label: 'Tampilkan di website', type: 'toggle' },
+      ]} />
+  </div>;
+}
+
 // ---------------------------------------------------------------- 4. NordeoNews: board by status
 const BOARD = ['draft', 'review', 'published', 'archived'];
 
@@ -246,6 +358,8 @@ function firstMonth(programs) {
   return dated.find((m) => m >= now) || dated[dated.length - 1] || now;
 }
 
+const PROGRAM_STATUS = { published: ['green', 'Tampil'], review: ['gold', 'Menunggu Owner'], draft: ['neutral', 'Draft'] };
+
 export function AcademyModule({ data, rights, toast }) {
   const { cms, update, registrations } = data;
   const programs = cms.programs;
@@ -274,22 +388,37 @@ export function AcademyModule({ data, rights, toast }) {
     { key: 'mode', label: 'Mode', type: 'select', options: ['Online', 'On-site', 'Hybrid'] },
     { key: 'facilitator', label: 'Fasilitator' },
     { key: 'summary', label: 'Ringkasan', type: 'textarea', rows: 3 },
-    { key: 'status', label: 'Status', type: 'select', options: [{ value: 'published', label: 'Tampil di website' }, { value: 'draft', label: 'Draft' }] },
+    { key: 'status', label: 'Status', type: 'select', options: rights.A ? [{ value: 'published', label: 'Tampil di website' }, { value: 'review', label: 'Menunggu Owner' }, { value: 'draft', label: 'Draft' }] : [{ value: 'review', label: 'Ajukan ke Owner' }, { value: 'draft', label: 'Draft' }], hint: rights.A ? undefined : 'Program tampil di website setelah disetujui Owner.' },
   ];
+  // Draft -> In review -> Published; only the Owner (rights.A) publishes. A published programme that
+  // someone else changes goes back to the Owner. The database applies the same rule.
   const save = (rec) => {
-    const exists = programs.some((x) => x.id === rec.id);
-    update('programs', exists ? programs.map((x) => (x.id === rec.id ? rec : x)) : [...programs, rec], exists ? 'mengubah' : 'menambah', rec.title);
-    setEditing(null); toast('Program disimpan dan tampil di kalender.');
+    const before = programs.find((x) => x.id === rec.id);
+    const { readOnly, ...clean } = rec;
+    const next = !rights.A && clean.status === 'published' ? { ...clean, status: 'review' } : clean;
+    update('programs', before ? programs.map((x) => (x.id === rec.id ? next : x)) : [...programs, next], before ? 'mengubah' : 'menambah', rec.title);
+    setEditing(null);
+    toast(next.status === 'published' ? 'Program disimpan dan tampil di website.' : next.status === 'review' ? 'Program diajukan ke Owner untuk disetujui.' : 'Program disimpan sebagai draft.');
   };
+  const decide = (p, status) => {
+    update('programs', programs.map((x) => (x.id === p.id ? { ...x, status } : x)), status === 'published' ? 'menyetujui program' : 'mengembalikan program ke draft', p.title);
+    toast(status === 'published' ? `${p.title} disetujui dan tampil di website.` : `${p.title} dikembalikan ke draft.`);
+  };
+  const waiting = programs.filter((p) => p.status === 'review');
   const open = (p) => setEditing(rights.U ? p : { ...p, readOnly: true });
   const chip = (p) => <button key={p.id} type="button" className={`adm-cal__event is-${(p.type || '').split(' ')[0].toLowerCase()}${p.status === 'published' ? '' : ' is-draft'}`} onClick={() => open(p)} title={`${p.title} · ${p.mode}`}>{p.title}</button>;
   return <div className="adm-grid">
+    {waiting.length > 0 && <Card title={`${waiting.length} program menunggu persetujuan Owner`} className="c24 adm-alert" delay={60}>
+      <ul className="adm-pending">{waiting.map((p) => <li key={p.id}><div><b>{p.title}</b><span className="adm-muted">{p.type} · {p.date ? shortDate(p.date) : p.dateLabel || 'Tanggal menyusul'} · {p.mode}</span></div>
+        {rights.A ? <span className="adm-actions"><Btn onClick={() => decide(p, 'draft')}>Kembalikan</Btn><Btn kind="primary" icon="check" onClick={() => decide(p, 'published')}>Setujui</Btn></span> : <Pill tone="gold">Menunggu Owner</Pill>}
+      </li>)}</ul>
+    </Card>}
     <Card title={`${MONTHS[mon - 1]} ${year}`} className="c17 adm-nolift" delay={80}
       action={<span className="adm-actions">
         <IconBtn icon="left" label="Bulan sebelumnya" onClick={() => shift(-1)} />
         <Btn onClick={() => setMonth(monthKey(new Date()))}>Bulan ini</Btn>
         <IconBtn icon="right" label="Bulan berikutnya" onClick={() => shift(1)} />
-        {rights.C && <Btn kind="primary" icon="plus" onClick={() => setEditing({ id: makeId('program'), title: '', titleEn: '', type: 'Seminar', date: '', dateLabel: 'Tanggal menyusul', mode: 'Online', facilitator: '', summary: '', status: 'draft' })}>Tambah program</Btn>}
+        {rights.C && <Btn kind="primary" icon="plus" onClick={() => setEditing({ id: makeId('program'), title: '', titleEn: '', type: 'Seminar', date: '', dateLabel: 'Tanggal menyusul', mode: 'Online', facilitator: '', summary: '', status: rights.A ? 'draft' : 'review' })}>Tambah program</Btn>}
       </span>}>
       <div className="adm-cal" role="grid" aria-label={`Kalender ${MONTHS[mon - 1]} ${year}`}>
         {DAYS.map((d) => <span key={d} className="adm-cal__dow" role="columnheader">{d}</span>)}
@@ -313,9 +442,10 @@ export function AcademyModule({ data, rights, toast }) {
           <td>{p.type}</td>
           <td>{p.date ? shortDate(p.date) : 'Tanggal menyusul'}<div className="adm-muted">{p.mode}</div></td>
           <td><Pill tone={countFor(p.id) ? 'teal' : 'neutral'}>{countFor(p.id)} peminat</Pill></td>
-          <td><Pill tone={p.status === 'published' ? 'green' : 'neutral'}>{p.status === 'published' ? 'Tampil' : 'Draft'}</Pill></td>
+          <td><Pill tone={PROGRAM_STATUS[p.status || 'published'][0]}>{PROGRAM_STATUS[p.status || 'published'][1]}</Pill></td>
           <td className="adm-actions">
             <IconBtn icon={rights.U ? 'edit' : 'eye'} label={`${rights.U ? 'Ubah' : 'Lihat'} ${p.title}`} onClick={() => open(p)} />
+            {rights.A && p.status === 'review' && <IconBtn icon="check" label={`Setujui ${p.title}`} onClick={() => decide(p, 'published')} />}
             {rights.D && <IconBtn icon="trash" label={`Hapus ${p.title}`} onClick={() => { update('programs', programs.filter((x) => x.id !== p.id), 'menghapus', p.title); toast('Program dihapus.'); }} />}
           </td>
         </tr>)}</tbody>
@@ -838,7 +968,7 @@ export function NoAccess({ module, role }) {
 }
 
 export const MODULE_VIEWS = {
-  pages: PagesModule, ecosystems: EcosystemsModule, news: NewsModule, stories: StoriesModule, comments: CommentsModule,
+  pages: PagesModule, pagetexts: PageTextsModule, journals: JournalsModule, ecosystems: EcosystemsModule, news: NewsModule, stories: StoriesModule, comments: CommentsModule,
   academy: AcademyModule, registrations: RegistrationsModule, promo: PromoModule, subscribers: SubscribersModule,
   profile: ProfileModule, partnership: PartnershipModule, contact: ContactModule, navigation: NavigationModule,
   media: MediaModule, users: UsersModule, site: SiteModule,

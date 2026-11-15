@@ -156,6 +156,7 @@ export default function AdminDashboard({ mode = 'demo', account = null, onSignOu
     stories: data.submissions.filter((s) => (s.status || 'baru') === 'baru').length,
     comments: data.comments.filter((c) => c.status === 'pending').length,
     registrations: data.registrations.filter((r) => (r.status || 'baru') === 'baru').length,
+    academy: role === 'owner' ? (data.cms.programs || []).filter((p) => p.status === 'review').length : 0,
   };
   const waiting = Object.entries(counts).filter(([id]) => can(id, role, 'R')).reduce((sum, [, n]) => sum + n, 0);
 
