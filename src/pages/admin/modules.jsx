@@ -208,7 +208,7 @@ export function JournalsModule({ data, rights, toast }) {
     toast('Daftar jurnal disimpan.');
   };
   const checkLinks = async () => {
-    const urls = [...new Set(journals.filter((j) => j.visible !== false && j.onOjs !== false).flatMap((j) => [j.url, j.guidelinesUrl]).filter((u) => /^https?:\/\//.test(u || '')))];
+    const urls = [...new Set(journals.filter((j) => j.visible !== false && j.onOjs !== false).flatMap((j) => [j.url, j.guidelinesUrl, j.apcUrl]).filter((u) => /^https?:\/\//.test(u || '')))];
     setChecking(true);
     try {
       const res = await fetch('/api/check-links', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ urls }) });
@@ -230,7 +230,7 @@ export function JournalsModule({ data, rights, toast }) {
   return <div className="adm-grid">
     <RecordList title="Daftar jurnal" label="jurnal" delay={80} rights={rights} items={journals} onChange={save}
       toolbar={<Btn icon="refresh" onClick={checkLinks} disabled={checking}>{checking ? 'Mengecek…' : 'Cek link'}</Btn>}
-      blank={{ short: '', name: '', category: 'engineering', description: '', status: 'Call for papers', statusTone: 'open', frequency: '', latestIssue: '', eissn: 'In process', indexing: '', topics: '', url: 'https://nordeoscholar.com/journal/', guidelinesUrl: '', cover: '', visible: true, onOjs: true }}
+      blank={{ short: '', name: '', category: 'engineering', description: '', status: 'Call for papers', statusTone: 'open', frequency: '', latestIssue: '', eissn: 'In process', indexing: '', topics: '', url: 'https://nordeoscholar.com/journal/', guidelinesUrl: '', apc: '', apcUrl: '', cover: '', visible: true, onOjs: true }}
       card={(j) => <>
         {j.cover ? <img className="adm-rcard__img" src={j.cover} alt="" loading="lazy" /> : <span className="adm-rcard__img is-blank" aria-hidden="true"><Icon name="news" size={28} /></span>}
         <div className="adm-rcard__body">
@@ -255,6 +255,8 @@ export function JournalsModule({ data, rights, toast }) {
         { key: 'onOjs', label: 'Sudah ada di OJS', type: 'toggle' },
         { key: 'url', label: 'Link jurnal di OJS', type: 'url' },
         { key: 'guidelinesUrl', label: 'Link panduan submission', type: 'url' },
+        { key: 'apc', label: 'Biaya publikasi (APC)', hint: 'Mis. Rp150.000. Kosongkan bila belum ada.' },
+        { key: 'apcUrl', label: 'Link halaman APC', type: 'url' },
         { key: 'cover', label: 'Gambar sampul (alamat dari menu Media)', type: 'url' },
         { key: 'visible', label: 'Tampilkan di website', type: 'toggle' },
       ]} />

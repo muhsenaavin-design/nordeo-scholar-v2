@@ -15,6 +15,17 @@ function visitLabel(journal) {
 // Cards carry only "Visit <journal>": guidelines, templates, and articles live on each
 // journal's own site, so visitors go there directly (journal traffic counts toward
 // accreditation — Nordeo, Feedback 2).
+// Fee and guideline links: both pages live on the journal's own site, so they still send
+// visitors there (the APC and guidelines are what visitors ask for first; visitor interviews).
+function JournalFees({ journal }) {
+  const ext = { target: '_blank', rel: 'noopener noreferrer' };
+  if (!journal.apc && !journal.guidelinesUrl) return null;
+  return <p className="directory-fees">
+    {journal.apc && <span>APC {journal.apc} after acceptance{journal.apcUrl && <> · <a href={journal.apcUrl} {...ext}>Fee details<span className="sr-only"> (opens in a new tab)</span></a></>}</span>}
+    {journal.guidelinesUrl && journal.onOjs !== false && <a href={journal.guidelinesUrl} {...ext}>Submission guidelines<span className="sr-only"> (opens in a new tab)</span></a>}
+  </p>;
+}
+
 function DirectoryCard({ journal, selected }) {
   const external = /^https?:/i.test(journal.url);
   return <article className={`directory-card ${selected ? 'is-selected' : ''}`} id={journal.id}>
@@ -27,6 +38,7 @@ function DirectoryCard({ journal, selected }) {
     <p className="directory-description">{journal.description}</p>
     <div className="directory-card-bottom">
       {journal.indexing.length > 0 && <p className="directory-indexing">{journal.indexing.join(' · ')}</p>}
+      <JournalFees journal={journal} />
       <div className="directory-footer">
         <SmartLink href={journal.url} className="text-link directory-visit" {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
           {visitLabel(journal)} <Arrow />{external && <span className="sr-only"> (opens in a new tab)</span>}
@@ -51,7 +63,9 @@ function ShelfCard({ journal }) {
       <p className="shelf-card-scope">{journal.description}</p>
       <dl className="shelf-card-facts">
         <div><dt>E-ISSN</dt><dd>{eissn}</dd></div>
-        <div><dt>Review</dt><dd>{journal.review.replace(' review', '')}</dd></div>
+        <div><dt>APC</dt><dd>{journal.apc && journal.apcUrl
+          ? <a href={journal.apcUrl} target="_blank" rel="noopener noreferrer">{journal.apc}<span className="sr-only"> (opens in a new tab)</span></a>
+          : 'See journal site'}</dd></div>
       </dl>
       <p className="shelf-card-index">{journal.indexing.length ? journal.indexing.join(' · ') : 'Open access · indexing after first issue'}</p>
       <SmartLink href={journal.url} className="shelf-card-visit" {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>

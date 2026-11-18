@@ -39,6 +39,9 @@ export const directoryJournals = [
     indexing: ['Terindeks GARUDA', 'DOI Crossref', 'Google Scholar'],
     templateUrl: 'https://docs.google.com/document/d/1UPPXBL6HIGpcgK_1i0EYkz9k15ycuM_-/export?format=docx',
     guidelinesUrl: 'https://nordeoscholar.com/journal/jetsi/about/submissions',
+    // Fees as published on the journal's APC page (checked 18 Nov 2026): no submission fee, APC after acceptance.
+    apc: 'Rp150.000',
+    apcUrl: 'https://nordeoscholar.com/journal/jetsi/apc',
     articleTypes: ['Research Article', 'Review Article', 'Case Study', 'Technical Note'],
     url: 'https://nordeoscholar.com/journal/jetsi',
     displayUrl: 'nordeoscholar.com/journal/jetsi',
@@ -67,6 +70,9 @@ export const directoryJournals = [
     indexing: [],
     // The template link on the JIEL submissions page is truncated (ends at /document/d/), so it is not linked here.
     guidelinesUrl: 'https://nordeoscholar.com/journal/jiel/about/submissions',
+    // Fees as published on the journal's APC page (checked 18 Nov 2026): no submission fee, APC after acceptance.
+    apc: 'Rp150.000',
+    apcUrl: 'https://nordeoscholar.com/journal/jiel/apc',
     url: 'https://nordeoscholar.com/journal/jiel',
     displayUrl: 'nordeoscholar.com/journal/jiel',
     preview: '/assets/journal-jiel-preview.webp',
