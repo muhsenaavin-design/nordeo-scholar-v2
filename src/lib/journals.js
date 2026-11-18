@@ -41,7 +41,7 @@ export function journalSeed() {
   return directoryJournals.map((j) => ({
     id: j.id, short: j.short, name: j.name, category: j.category, description: j.description,
     status: j.status, statusTone: j.statusTone, frequency: j.frequency, latestIssue: j.latestIssue, eissn: j.eissn,
-    indexing: j.indexing, topics: j.topics, url: j.url, guidelinesUrl: j.guidelinesUrl || '', cover: j.cover || '',
+    indexing: j.indexing, topics: j.topics, url: j.url, guidelinesUrl: j.guidelinesUrl || '', apc: j.apc || '', apcUrl: j.apcUrl || '', cover: j.cover || '',
     visible: true, onOjs: !NOT_ON_OJS.has(j.id),
   }));
 }
