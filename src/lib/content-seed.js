@@ -20,12 +20,15 @@ export const HOME_SECTIONS = [
 
 const ecosystemPlatform = { journals: 'OJS · JETSI, JIEL, JIBDI', news: 'NordeoNews', training: 'Nordeo Academy', books: 'Belum ada platform' };
 
+export const HERO_IMAGE = '/assets/generated/hero-library-v2.webp';
+
 export function seedContent(reviewed = '2026-11-10') {
   return {
     pages: {
       heroLine1: 'Advancing Knowledge.',
       heroLine2: 'Creating Global Impact.',
       heroCta: 'Discover the ecosystem',
+      heroImage: HERO_IMAGE,
       sections: HOME_SECTIONS.map((section) => ({ ...section, visible: true })),
       updatedAt: reviewed, reviewedAt: reviewed,
     },

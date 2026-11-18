@@ -60,3 +60,12 @@ test('site settings preview the Google result as the title is typed', async () =
   fireEvent.change(title, { target: { value: 'Nordeo Scholar | Uji pratinjau' } });
   expect(screen.getByText('Nordeo Scholar | Uji pratinjau', { selector: '.adm-serp__title' })).toBeInTheDocument();
 });
+
+test('the hero image is chosen from the Media gallery and previewed before saving', async () => {
+  open('/admin/pages');
+  const picker = await screen.findByLabelText('Gambar hero');
+  fireEvent.change(picker, { target: { value: '/assets/ecosystem-books.webp' } });
+  expect(document.querySelector('.adm-hero-preview img')).toHaveAttribute('src', '/assets/ecosystem-books.webp');
+  fireEvent.click(screen.getAllByRole('button', { name: 'Simpan perubahan' })[0]);
+  expect(await screen.findByText('Konten beranda disimpan.')).toBeInTheDocument();
+});

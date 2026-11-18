@@ -37,7 +37,7 @@ export function HeroSlideshow({ notice = null }) {
   const { reduced } = useAnimationPreference();
   // The first slide's headline and button come from the dashboard (Halaman > Konten beranda).
   const pages = useContent('pages', null);
-  const slides = useMemo(() => heroSlides.map(slide => (slide.id === 'nordeo' && pages ? { ...slide, lead: pages.heroLine1 || slide.lead, accent: pages.heroLine2 || slide.accent, cta: pages.heroCta || slide.cta } : slide)), [pages]);
+  const slides = useMemo(() => heroSlides.map(slide => (slide.id === 'nordeo' && pages ? { ...slide, lead: pages.heroLine1 || slide.lead, accent: pages.heroLine2 || slide.accent, cta: pages.heroCta || slide.cta, src: pages.heroImage || slide.src } : slide)), [pages]);
   const [index, setIndex] = useState(0);
   const [held, setHeld] = useState(false);
   const [hidden, setHidden] = useState(false);
