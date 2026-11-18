@@ -6,6 +6,7 @@ import { htmlToText, sanitizeHtml } from '../../lib/rich-text';
 import { formatDate, formatDateTime, makeId, readImage, slugify } from '../../lib/store';
 import { JOURNAL_CATEGORIES } from '../../lib/journals';
 import { PAGE_TEXTS } from '../../lib/page-texts';
+import { HERO_IMAGE } from '../../lib/content-seed';
 import RichTextEditor from '../../components/RichTextEditor';
 import { ACCESS, MODULES, NEWS_STATUS, ROLES, can } from './admin-store';
 import { FormCard, ListEditor, Reader, RecordList, SortableList, Tabs, exportCsv, lines, moveItem, reviewText, reviewTone } from './kit';
@@ -81,9 +82,15 @@ export function Overview({ data, role, go, a, journalCard }) {
 // ---------------------------------------------------------------- 2. Beranda: sections by drag and drop
 export function PagesModule({ data, rights, toast }) {
   const { cms, update } = data;
-  const p = cms.pages;
-  const save = (draft) => { update('pages', { ...p, ...draft, updatedAt: data.today() }, 'mengubah', 'konten beranda'); toast('Konten beranda disimpan.'); };
+  const p = { ...cms.pages, heroImage: cms.pages.heroImage || HERO_IMAGE };
+  const [draft, setDraft] = useState(p);
+  const hero = { ...p, ...draft };
+  const save = (d) => { update('pages', { ...p, ...d, updatedAt: data.today() }, 'mengubah', 'konten beranda'); toast('Konten beranda disimpan.'); };
   const sections = p.sections;
+  // Hero image choices: the built-in hero plus every image in the Media gallery.
+  const heroImages = [{ value: HERO_IMAGE, label: 'Bawaan · perpustakaan (hero-library-v2)' },
+    ...(cms.media || []).filter((m) => m.src && m.src !== HERO_IMAGE).map((m) => ({ value: m.src, label: `${m.name}${m.alt ? ` · ${m.alt}` : ''}` }))];
+  if (!heroImages.some((o) => o.value === p.heroImage)) heroImages.push({ value: p.heroImage, label: 'Gambar saat ini' });
   const setSections = (next, action, target) => update('pages', { ...p, sections: next, updatedAt: data.today() }, action, target);
   return <div className="adm-grid">
     <Card title="Susunan section beranda" className="c24" delay={80} action={rights.U && <span className="adm-muted">Seret pegangan, atau pakai tombol naik/turun</span>}>
@@ -102,17 +109,18 @@ export function PagesModule({ data, rights, toast }) {
         </div>
       </div>
     </Card>
-    <FormCard title="Teks hero" className="c14" delay={140} value={p} rights={rights} onSave={save}
+    <FormCard title="Teks & gambar hero" className="c14" delay={140} value={p} rights={rights} onSave={save} onDraft={setDraft}
       extra={<Pill tone={reviewTone(p.reviewedAt)}>{reviewText(p.reviewedAt)}</Pill>}
       fields={[
         { key: 'heroLine1', label: 'Judul hero, baris 1', required: true },
         { key: 'heroLine2', label: 'Judul hero, baris 2 (tampil kuning #FFD218)' },
         { key: 'heroCta', label: 'Tombol hero', hint: 'Hanya satu tombol: “Discover the ecosystem”.' },
+        { key: 'heroImage', label: 'Gambar hero', type: 'select', options: heroImages, hint: 'Pilih dari menu Media. Unggah gambar baru di Media dulu bila belum ada.' },
       ]} />
     <Card title="Pratinjau hero" className="c10" delay={200}>
       <div className="adm-hero-preview">
-        <img src="/assets/generated/hero-library-v2.webp" alt="" />
-        <div><p className="l1">{p.heroLine1}</p><p className="l2">{p.heroLine2}</p><span className="adm-hero-preview__cta">{p.heroCta}</span></div>
+        <img src={hero.heroImage || HERO_IMAGE} alt="" />
+        <div><p className="l1">{hero.heroLine1}</p><p className="l2">{hero.heroLine2}</p><span className="adm-hero-preview__cta">{hero.heroCta}</span></div>
       </div>
       <p className="adm-muted" style={{ marginTop: 12 }}>Tampil sebagai slide pertama di beranda. Visi dan misi diubah di menu Profil perusahaan.</p>
       {rights.U && <Btn icon="check" onClick={() => { update('pages', { ...p, reviewedAt: data.today() }, 'menandai sudah ditinjau', 'konten beranda'); toast('Ditandai sudah ditinjau.'); }}>Tandai sudah ditinjau</Btn>}
